@@ -2,7 +2,7 @@ import React from 'react'
 
 function TravelInsurance() {
   return (
-    <div>TravelInsurance</div>
+    <div>TravelInsurance </div>
   )
 }
 
