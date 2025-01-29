@@ -1,14 +1,13 @@
 // Blogs.jsx
 import React, { useState } from 'react';
-import useUser  from '../context/UserContext.jsx';
+import { useUser } from "../context/UserContext.jsx";
 
 
 const BlogsPage = () => {
   const [blogPosts, setBlogPosts] = useState([]);
   const { user } = useUser();
-  const User = () => {
-    const { userid } = useParams(); 
-  }
+
+  // console.log(user.firstname  )
   
 
   const handleCreateBlogPost = (event) => {
@@ -20,7 +19,7 @@ const BlogsPage = () => {
       id: Date.now(),
       title,
       content,
-      author: user.name, // Get author's name from the user context
+      author: user.firstname, // Get author's name from the user context
     };
 
     setBlogPosts([...blogPosts, newPost]);
@@ -33,7 +32,7 @@ const BlogsPage = () => {
 
       {user ? (
         <div>
-          <p>Welcome, {user.name}! Start creating your blog posts.</p> 
+          <p>Welcome, {user.firstname} {user.lastname}! Start creating your blog posts.</p> 
 
           <form onSubmit={handleCreateBlogPost}>
             <div>

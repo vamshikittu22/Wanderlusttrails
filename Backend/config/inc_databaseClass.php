@@ -1,52 +1,70 @@
-<!DOCTYPE html>
 <?php
+// inc_databaseClass.php
+
 /********
- * DATABASE CONNECTION CLASS FOR WANDERLUST
+ * DATABASE CONNECTION CLASS FOR WANDERLUSTTRAILS
  *********/
 
- class DatabaseClass {
-    static $connection; //This is  a property
+class DatabaseClass {
+    private static $connection;
 
-    /************* Connect Function  **********/
-    public function connect() { //this is a method in the DatabaseClass
-    // Try and connect to the database
-        if (! isset ( self::$connection )){ //if not connection set already
-            include ("inc_dbConfig.php");
-            self::$connection = new mysqli ($host, $username, $password, $dbname);
+    public function connect() {
+        if (!isset(self::$connection)) {
+            include(__DIR__ . '/../db/inc_dbconfig.php');
+            self::$connection = new mysqli($host, $username, $password, $dbname);
         }
 
-        // If connection was not successful, handle the error
-        if (self::$connection === false){
-            // Handle error - notify admin, log to a file, show an error screen, etc.,
-            return false;
+        if (self::$connection->connect_error) {
+            die("Connection failed: " . self::$connection->connect_error);
         }
+
         return self::$connection;
-    }// end function connect
-
-    /* ************ Query Function *********/
-    public function Select ($query) {
-        // Connect to the database
-        $connection = $this->connect ();
-
-        //Query the database
-        $result = $connection->query ( $query );
-        //close the connection
-        $this->CloseConnection();
-        if (! $result){
-            return $connection->error;
-        } else {
-            return $result;//returns the result.
-        }
-    }// end function select()
-
-    public function error() {
-        //gets the last error from the database
-        $connection = $this->connect();
-        return $connection->error;
-    } // end function error
-
-    public function CLoseConnection(){
-        self::$connection-> close();
     }
- } // end class
- ?>
+
+        // Execute a query (INSERT, UPDATE, DELETE)
+    public function executeQuery($query, $types, ...$params) {
+        $connection = $this->connect();
+        $stmt = $connection->prepare($query);
+
+        if ($stmt === false) {
+            return ["success" => false, "message" => "Prepare failed: " . $connection->error];
+        }
+
+            // Bind parameters dynamically based on $types
+        $stmt->bind_param($types, ...$params);
+
+        if ($stmt->execute()) {
+            return ["success" => true, "message" => "Query executed successfully"];
+        } else {
+            return ["success" => false, "message" => "Execute failed: " . $stmt->error];
+        }
+    }
+
+    // Fetch query results (SELECT)
+    public function fetchQuery($query, $types, ...$params) {
+        $connection = $this->connect();
+        $stmt = $connection->prepare($query);
+
+        if ($stmt === false) {
+            return ["success" => false, "message" => "Prepare failed: " . $connection->error];
+        }
+
+        // Bind parameters dynamically based on $types
+        //  $stmt->bind_param($types, ...$params);
+        
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            return $result->fetch_all(MYSQLI_ASSOC); // Returns associative array
+        }
+        return [];
+    }
+
+    public function closeConnection() {
+        if (self::$connection) {
+            self::$connection->close();
+            self::$connection = null;
+        }
+    }
+}
+
+?>

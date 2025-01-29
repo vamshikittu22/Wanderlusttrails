@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import background from '../assets/Images/travel1.jpg'
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 function Signup() {
 
@@ -69,14 +72,28 @@ function Signup() {
     if (!validate()) return;
 
     try {
-      const response = await axios.post('http://localhost/WanderlustTrails/backend/auth.php', formData);
-      setMessage(response.data.message || 'Signup successful! you can login to your account now.');
+      const response = await axios.post('http://localhost/WanderlustTrails/backend/config/auth/signupUser.php', formData);
+      toast.success(response.data.message || 'Signup successful! You can log in to your account now.', {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+    });
       setFormData({
         firstName: '', lastName: '', email: '', password: '', confirmPassword: '', dob: '', gender: '', nationality: '', phone: '', address: '',
       });
       setErrors({});
     } catch (error) {
-      setMessage('Error during signup: ' + (error.response?.data?.error || error.message));
+      toast.error('Error during signup: ' + (error.response?.data?.error || error.message), {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+    });
     }
   };
 
@@ -92,16 +109,7 @@ return (
             <h2 className="text-2xl font-bold text-center mb-6">Create an Account</h2>
 
             {/* Error Summary */}
-            {Object.keys(errors).length > 0 && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                <strong className="font-bold">Please fill the full details to create an account:</strong>
-                <ul className="mt-2 list-disc list-inside">
-                  {Object.values(errors).map((error, index) => (
-                    <li key={index}>{error}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+           
 
             {message && <p className="text-green-500 text-center mb-4">{message}</p>}
 
@@ -119,7 +127,7 @@ return (
                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         required
                         />
-                        {errors.firstName && <p className="text-red-500 text-xs italic">{errors.firstName}</p>}
+                        {errors.firstName && <p className="text-red-500 text-xs italic font-bold">{errors.firstName}</p>}
                     </div>
                     <div className="w-1/2 ">
                         <label htmlFor="lastName" className="block text-sky-300 font-bold mb-2">Last Name:</label>
@@ -133,7 +141,7 @@ return (
                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         required
                         />
-                        {errors.lastName && <p className="text-red-500 text-xs italic">{errors.lastName}</p>}
+                        {errors.lastName && <p className="text-red-500 text-xs italic font-bold">{errors.lastName}</p>}
                     </div>
                 </div>
                 
@@ -150,7 +158,7 @@ return (
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                     />
-                    {errors.email && <p className="text-red-500 text-xs italic">{errors.email}</p>}
+                    {errors.email && <p className="text-red-500 text-xs italic font-bold">{errors.email}</p>}
                 </div>
                 <div className="w-1/2 ">
                     <label htmlFor="phone" className="block text-sky-300 font-bold mb-2">Phone:</label>
@@ -164,7 +172,7 @@ return (
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                     />
-                    {errors.phone && <p className="text-red-500 text-xs italic">{errors.phone}</p>}
+                    {errors.phone && <p className="text-red-500 text-xs italic font-bold">{errors.phone}</p>}
                 </div>
                 </div>
 
@@ -181,7 +189,7 @@ return (
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                     />
-                    {errors.password && <p className="text-red-500 text-xs italic">{errors.password}</p>}
+                    {errors.password && <p className="text-red-500 text-xs italic font-bold">{errors.password}</p>}
                 </div>
                 <div className="w-1/2 ">
                     <label htmlFor="confirmPassword" className="block text-sky-300 font-bold mb-2">Confirm Password:</label>
@@ -195,7 +203,7 @@ return (
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                     />
-                    {errors.confirmPassword && <p className="text-red-500 text-xs italic">{errors.confirmPassword}</p>}
+                    {errors.confirmPassword && <p className="text-red-500 text-xs italic font-bold">{errors.confirmPassword}</p>}
                 </div>
                 </div>
 
@@ -212,7 +220,7 @@ return (
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                     />
-                    {errors.dob && <p className="text-red-500 text-xs italic">{errors.dob}</p>}
+                    {errors.dob && <p className="text-red-500 text-xs italic font-bold">{errors.dob}</p>}
                 </div>
                 <div className="w-1/2">
                     <label htmlFor="gender" className="block text-sky-300 font-bold mb-2">Gender:</label>
@@ -229,7 +237,7 @@ return (
                     <option value="female">Female</option>
                     <option value="other">Other</option>
                     </select>
-                    {errors.gender && <p className="text-red-500 text-xs italic">{errors.gender}</p>}
+                    {errors.gender && <p className="text-red-500 text-xs italic font-bold">{errors.gender}</p>}
                 </div>
                 </div>
               
@@ -251,7 +259,7 @@ return (
                         </option>
                         ))}
                     </select>
-                    {errors.nationality && <p className="text-red-500 text-xs italic">{errors.nationality}</p>}
+                    {errors.nationality && <p className="text-red-500 text-xs italic font-bold">{errors.nationality}</p>}
                 </div>
               
                 <div className="flex flex-col mb-4"> 
@@ -302,7 +310,7 @@ return (
                     required
                     />
                 </div>
-                {errors.address && <p className="text-red-500 text-xs italic">{errors.address}</p>}
+                {errors.address && <p className="text-red-500 text-xs italic font-bold  ">{errors.address}</p>}
                 </div>
 
                 <div className="text-center">
@@ -343,3 +351,4 @@ return (
 }
 
 export default Signup
+

@@ -78,8 +78,8 @@ export default function Footer() {
               </div>
               <hr className="my-3 border-gray-200 sm:mx-auto lg:my-4" />
               <div className="sm:flex sm:items-center sm:justify-between">
-                  <span className="text-sm text-gray-500 sm:text-center">
-                  <a href="#" className="hover:underline hover:text-orange-700">
+                  <span className="text-sm font-bold text-gray-400 sm:text-center">
+                  <a href="#" className="hover:underline hover:text-orange-600">
                        { title}
                     </a>
                   {' '}&copy; {currentYear} 
