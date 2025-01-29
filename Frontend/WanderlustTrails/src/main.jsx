@@ -40,9 +40,11 @@ import Unauthorized from './pages/Unauthorised.jsx';
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
-      <Route path="" element={<Home />} />
-      <Route path="Home" element={<Home />} />
-      <Route path="About" element={<About />} />
+
+    <Route index element={<Home />} />
+    <Route path="About" element={<About />} />
+
+     
       <Route path="Blogs" element={<Blogs />} />
       <Route path="Help" element={<Help />} />
       <Route path="Login" element={<Login />} />
@@ -74,6 +76,7 @@ const router = createBrowserRouter(
 
       <Route path="*" element={<ErrorNotFound />} />
     </Route>
+    
   )
 );
 
