@@ -9,7 +9,7 @@ export function useUser() {
 export function UserProvider({ children }) {
     const [user, setUser] = useState(() => {
         const storedUser = localStorage.getItem('user');
-        return storedUser ? JSON.parse(storedUser) : { firstname: null, lastname: null, role: null };
+        return storedUser ? JSON.parse(storedUser) : { firstname: null, lastname: null, role: null, id: null };
     });
 
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -39,7 +39,7 @@ export function UserProvider({ children }) {
     const logout = () => {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
-        setUser({ firstname: null, lastname: null, role: null });
+        setUser({ firstname: null, lastname: null, role: null, id: null });
         setToken(null);
         setIsAuthenticated(false);
     };

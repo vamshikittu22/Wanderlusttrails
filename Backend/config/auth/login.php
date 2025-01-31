@@ -45,7 +45,7 @@
             $token = generateJWT($row);  // Assuming generateJWT is a function to create a JWT
 
         
-            echo json_encode(["success" => true, "message" => "Login successful!", "firstname" => $row['firstName'],"lastname" => $row['lastName'],"role" => $row['role'], 'token' => $token]);
+            echo json_encode(["success" => true, "message" => "Login successful!", "firstname" => $row['firstName'],"lastname" => $row['lastName'],"role" => $row['role'],"id" => $row['id'], 'token' => $token]);
         } else {
             echo json_encode(["success" => false, "message" => "Incorrect password."]);
         }

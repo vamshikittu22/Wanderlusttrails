@@ -48,8 +48,12 @@ function Login() {
         setLoginData({ identifier: '', password: '' });
         
         // Update context with user data and token
-        const { token, role, firstname, lastname } = response.data;
-        login({ firstname, lastname, role }, token);
+        const { token, role, firstname, lastname, id } = response.data;
+        login({ firstname, lastname, role, id }, token);
+
+        localStorage.setItem("userId", id);  // Store in local storage
+        console.log("User ID stored:", id);
+    
         
         // Show the success toast with user's name
         toast.success(`Welcome, ${firstname} ${lastname}!`, {
@@ -59,7 +63,7 @@ function Login() {
 
         // Redirect based on user role
         //navigate(role === 'admin' ? '/AdminDashboard' : '/UserDashboard');
-        navigate('/home');
+        navigate('/');
       } else {
         setMessage(response.data.message || 'Login failed.');
         toast.error(response.data.message || 'Login failed. Please check your credentials.', {

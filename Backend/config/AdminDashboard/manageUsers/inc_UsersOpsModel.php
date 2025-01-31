@@ -2,7 +2,7 @@
 // inc_UserOpsModel.php
 
 // Include the database class
-include("../inc_databaseClass.php");
+include("../../inc_databaseClass.php");
 
 class UserOpsModel {
     private $db;

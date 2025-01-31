@@ -8,7 +8,8 @@ import './index.css';
 import { createBrowserRouter, 
         createRoutesFromElements, 
         Route, 
-        RouterProvider } from 'react-router-dom';
+        RouterProvider,
+        Navigate } from 'react-router-dom';
 import Layout from './Layout.jsx';
 import Home from './pages/Home.jsx';
 import About from './pages/About.jsx';
@@ -40,42 +41,92 @@ import Unauthorized from './pages/Unauthorised.jsx';
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
+   
+      {/* If user is not logged in, only allow access to Login & Signup */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/forgotpassword" element={<ForgotPassword />} />
 
-    <Route index element={<Home />} />
-    <Route path="About" element={<About />} />
+      {/* Redirect any unauthorized user to Login */}
+      {/* <Route path="*" element={<Navigate to="/login" />} /> */}
+
+      {/* Protected Routes - Requires Authentication */}
+      <Route element={<ProtectedRoute />}>
+        <Route index element={<Home />} />
+        <Route path="about" element={<About />} />
+        <Route path="blogs" element={<Blogs />} />
+        <Route path="help" element={<Help />} />
+        <Route path="review" element={<Review />} />
+        <Route path="needassist" element={<NeedAssist />} />
+        <Route path="todolist" element={<Todolist />} />
+        <Route path="currencyconverter" element={<CurrencyConverter />} />
+        <Route path="destination" element={<Destination />} />
+        <Route path="flightandhotel" element={<FlightAndHotel />} />
+        <Route path="travelinsurance" element={<TravelInsurance />} />
+        <Route path="travelpackages" element={<TravelPackages />} />
+        <Route path="bookingdetails" element={<BookingDetails />} />
+        <Route path="contactus" element={<ContactUs />} />
+        <Route path="unauthorized" element={<Unauthorized />} />
+      </Route>
+
+       {/* Role-Based Protected Routes */}
+       <Route element={<ProtectedRoute requiredRole="admin" />}>
+          <Route path="/AdminDashboard" element={<AdminDashboard />} />
+        </Route>
+
+        <Route element={<ProtectedRoute requiredRole="user" />}>
+          <Route path="/UserDashboard" element={<UserDashboard />} />
+        </Route>
+
+        {/* Catch-All Route */}
+           <Route path="*" element={<ErrorNotFound />} />
+
+  </Route>
+
+
+//  {/* Protected Routes - Only Check Authentication */}
+//  <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+//       <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
+//       <Route path="/blogs" element={<ProtectedRoute><Blogs /></ProtectedRoute>} />
+//       <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+
+      
+//       {/* Protected Routes - Check Authentication and Role */}
+//       <Route path="/AdminDashboard" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
+//       <Route path="/UserDashboard" element={<ProtectedRoute requiredRole="user"><UserDashboard /></ProtectedRoute>} />
 
      
-      <Route path="Blogs" element={<Blogs />} />
-      <Route path="Help" element={<Help />} />
-      <Route path="Login" element={<Login />} />
-      <Route path="Signup" element={<Signup />} />
-      <Route path="ForgotPassword" element={<ForgotPassword />} />
-      <Route path="Review" element={<Review />} />
-      <Route path="NeedAssist" element={<NeedAssist />} />
-      <Route path="Todolist" element={<Todolist />} />
-      <Route path="CurrencyConverter" element={<CurrencyConverter />} />
-      <Route path="Destination" element={<Destination />} />
-      <Route path="FlightAndHotel" element={<FlightAndHotel />} />
-      <Route path="TravelInsurance" element={<TravelInsurance />} />
-      <Route path="TravelPackages" element={<TravelPackages />} />
-      <Route path="BookingDetails" element={<BookingDetails />} />
-      <Route path="ContactUs" element={<ContactUs />} />
-      <Route path="Test" element={<Test />} />
-      <Route path="Unauthorized" element={<Unauthorized />} />
+//       <Route path="Blogs" element={<Blogs />} />
+//       <Route path="Help" element={<Help />} />
+//       <Route path="Login" element={<Login />} />
+//       <Route path="Signup" element={<Signup />} />
+//       <Route path="ForgotPassword" element={<ForgotPassword />} />
+//       <Route path="Review" element={<Review />} />
+//       <Route path="NeedAssist" element={<NeedAssist />} />
+//       <Route path="Todolist" element={<Todolist />} />
+//       <Route path="CurrencyConverter" element={<CurrencyConverter />} />
+//       <Route path="Destination" element={<Destination />} />
+//       <Route path="FlightAndHotel" element={<FlightAndHotel />} />
+//       <Route path="TravelInsurance" element={<TravelInsurance />} />
+//       <Route path="TravelPackages" element={<TravelPackages />} />
+//       <Route path="BookingDetails" element={<BookingDetails />} />
+//       <Route path="ContactUs" element={<ContactUs />} />
+//       <Route path="Test" element={<Test />} />
+//       <Route path="Unauthorized" element={<Unauthorized />} />
 
-      Protected Routes
-      <Route path="/AdminDashboard" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/UserDashboard" element={<ProtectedRoute requiredRole="user"><UserDashboard /></ProtectedRoute>} />
+//       Protected Routes
+//       <Route path="/AdminDashboard" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
+//       <Route path="/UserDashboard" element={<ProtectedRoute requiredRole="user"><UserDashboard /></ProtectedRoute>} />
 
-      <Route path="admin/" element={<Admin />}>
-      </Route>
+//       <Route path="admin/" element={<Admin />}>
+//       </Route>
 
-      <Route path="user/" element={<User />}>
-        <Route path=":userid" element={<User />} />
-      </Route>
+//       <Route path="user/" element={<User />}>
+//         <Route path=":userid" element={<User />} />
+//       </Route>
 
-      <Route path="*" element={<ErrorNotFound />} />
-    </Route>
+//       <Route path="*" element={<ErrorNotFound />} />
+//     </Route>
     
   )
 );

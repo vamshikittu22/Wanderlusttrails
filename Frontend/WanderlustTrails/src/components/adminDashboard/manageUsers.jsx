@@ -12,7 +12,7 @@ const ManageUsers = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("http://localhost/WanderlustTrails/backend/config/manageUsers/getUsers.php");
+        const response = await axios.get("http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageUsers/getUsers.php");
         if (Array.isArray(response.data)) {
           setUsers(response.data);
         } else {
@@ -31,7 +31,7 @@ const ManageUsers = () => {
       return;
     }
     try {
-      const response = await axios.post("http://localhost/WanderlustTrails/backend/config/manageUsers/updateUserRole.php", {
+      const response = await axios.post("http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageUsers/updateUserRole.php", {
         id: userId,
         role: newRole,
       });
@@ -50,7 +50,7 @@ const ManageUsers = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
-      const response = await axios.post("http://localhost/WanderlustTrails/backend/config/manageUsers/deleteUser.php", {
+      const response = await axios.post("http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageUsers/deleteUser.php", {
         user_id: userId,
       });
       if (response.data.success) {

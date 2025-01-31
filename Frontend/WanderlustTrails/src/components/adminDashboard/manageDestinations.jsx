@@ -24,7 +24,7 @@ const ManageDestinations = () => {
 
     const fetchPackages = async () => {
         try {
-            const response = await axios.get("http://localhost/WanderlustTrails/backend/config/manageDestinations/viewPackage.php");
+            const response = await axios.get("http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageDestinations/viewPackage.php");
             if (Array.isArray(response.data)) {
                 setPackages(response.data);
             } else {
@@ -82,8 +82,8 @@ const ManageDestinations = () => {
 
 
         const url = isEditing
-            ? `http://localhost/WanderlustTrails/backend/config/manageDestinations/editPackage.php?id=${currentEditId}`
-            : "http://localhost/WanderlustTrails/backend/config/manageDestinations/insertPackage.php";
+            ? `http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageDestinations/editPackage.php?id=${currentEditId}`
+            : "http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageDestinations/insertPackage.php";
 
         try {
            const response = await axios.post(url, data, { headers: { "Content-Type": "multipart/form-data" } });

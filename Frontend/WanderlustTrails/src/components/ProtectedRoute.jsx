@@ -1,8 +1,8 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useUser } from '../context/UserContext.jsx';
 import { toast } from 'react-toastify';
 
-const ProtectedRoute = ({ children, requiredRole }) => {
+const ProtectedRoute = ({  children, requiredRole }) => {
     const { user, isAuthenticated } = useUser();
 
     if (!isAuthenticated) {
@@ -17,7 +17,9 @@ const ProtectedRoute = ({ children, requiredRole }) => {
         return <Navigate to="/login" />;
     }
 
-    return children;
+    
+    return <Outlet/>;
+
 };
 
 export default ProtectedRoute;
