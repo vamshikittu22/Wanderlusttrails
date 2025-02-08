@@ -44,7 +44,7 @@ function CurrencyConverter() {
           }}>
 
             <div className='w-full mb-1 text-gray-700'>
-              <InputBox className='font-bold'
+              <InputBox className=' bg-slate-200 font-bold'
               label="from"
               amount={amount}
               currencyOptions={options}

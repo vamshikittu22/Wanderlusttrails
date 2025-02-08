@@ -3,13 +3,18 @@ import axios from "axios";
 
 const testUser = () => {
     const [formData, setFormData] = useState({
-        id: "",
-        firstname: "",
-        lastname: "",
+        id : "",
+        firstName: "",
+        lastName: "",
         email: "",
         phone: "",
-        nationality: "",
+        dob: "",
         gender: "",
+        nationality: "",
+        street: "",
+        city: "",
+        state: "",
+        zip: ""
     });
    
     const userID = localStorage.getItem("userId"); // Retrieve user ID
@@ -45,8 +50,13 @@ console.log(userID);
         if (!formData.lastname) newErrors.lastname = "Last name is required.";
         if (!formData.email) newErrors.email = "Email is required.";
         if (!formData.phone) newErrors.phone = "Phone number is required.";
-        if (!formData.nationality) newErrors.nationality = "Nationality is required.";
+        if (!formData.dob) newErrors.dob = "Date of birth is required.";
         if (!formData.gender) newErrors.gender = "Gender is required.";
+        if (!formData.nationality) newErrors.nationality = "Nationality is required.";
+        if (!formData.street) newErrors.street = "Street address is required.";
+        if (!formData.city) newErrors.city = "City is required.";
+        if (!formData.state) newErrors.state = "State is required.";    
+        if (!formData.zip) newErrors.zip = "Zip code is required.";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -81,12 +91,18 @@ console.log(userID);
 
     const resetForm = () => {
         setFormData({
-            firstname: "",
-            lastname: "",
+            id : "",
+            firstName: "",
+            lastName: "",
             email: "",
             phone: "",
-            nationality: "",
+            dob: "",
             gender: "",
+            nationality: "",
+            street: "",
+            city: "",
+            state: "",
+            zip: ""
         });
         setErrors({});
         setIsEditing(false);
@@ -97,12 +113,19 @@ console.log(userID);
         const userToEdit = users.find((user) => user.id === userId);
         if (userToEdit) {
             setFormData({
+                id: userToEdit.id,
                 firstname: userToEdit.firstname,
                 lastname: userToEdit.lastname,
                 email: userToEdit.email,
                 phone: userToEdit.phone,
-                nationality: userToEdit.nationality,
+                dob: userToEdit.dob,
                 gender: userToEdit.gender,
+                nationality: userToEdit.nationality,
+                street: userToEdit.street,
+                city: userToEdit.city,
+                state: userToEdit.state,
+                zip: userToEdit.zip               
+                
             });
             setIsEditing(true);
             setCurrentEditId(userId);

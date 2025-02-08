@@ -12,6 +12,7 @@ const ManageUsers = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        
         const response = await axios.get("http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageUsers/getUsers.php");
         if (Array.isArray(response.data)) {
           setUsers(response.data);
@@ -41,9 +42,11 @@ const ManageUsers = () => {
         );
         setRoleChangeVisible(false);
       } else {
+        
         console.error("Failed to update role:", response.data.message);
       }
     } catch (error) {
+      
       console.error("Error updating role:", error);
     }
   };

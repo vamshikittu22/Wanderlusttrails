@@ -20,7 +20,7 @@ function InputBox({
             <input 
             id={id}
             type="number"
-            className='outline-none text-left text-green-600 w-full bg-blue-200 py-1.5'
+            className='border-2 border-gray-300 outline outline-double outline-blue-500 text-left text-green-600 w-full py-1.5'
             placeholder='Amount'    
             disabled={amountDisabled}
             value={amount}

@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $firstName = $data['firstName'] ?? '';
     $lastName = $data['lastName'] ?? '';
     $email = filter_var($data['email'] ?? '', FILTER_SANITIZE_EMAIL);
-    $password = $data['password'] ?? '';
+    $password = password_hash($data['password'], PASSWORD_BCRYPT); // Encrypt password
     $dob = $data['dob'] ?? '';
     $gender = $data['gender'] ?? '';
     $nationality = $data['nationality'] ?? '';

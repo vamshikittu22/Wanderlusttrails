@@ -59,6 +59,7 @@ const TravelPackages = () => {
 
     const handleBooking = (pkg) => {
         sessionStorage.setItem('selectedPackage', JSON.stringify(pkg));
+        console.log('Selected Package:', pkg);
         window.location.href = `/BookingDetails`;
     };
 

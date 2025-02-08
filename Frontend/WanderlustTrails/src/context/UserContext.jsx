@@ -7,12 +7,30 @@ export function useUser() {
 }
 
 export function UserProvider({ children }) {
+
+    // Default empty user object
+    const defaultUser = {
+        firstname: null,
+        lastname: null,
+        role: null,
+        id: null,
+        email: null,
+        phone: null,
+        dob: null,
+        gender: null,
+        nationality: null,
+        street: null,
+        city: null,
+        state: null,
+        zip: null,
+    };
+
     const [user, setUser] = useState(() => {
         const storedUser = localStorage.getItem('user');
-        return storedUser ? JSON.parse(storedUser) : { firstname: null, lastname: null, role: null, id: null };
+        return storedUser ? JSON.parse(storedUser) : defaultUser ;
     });
 
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('token'));
     const [token, setToken] = useState(() => localStorage.getItem('token') || null);
 
     useEffect(() => {
@@ -29,17 +47,21 @@ export function UserProvider({ children }) {
     }, []);
 
     const login = (userData, userToken) => {
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('token', userToken);
-        setUser(userData);
-        setToken(userToken);
-        setIsAuthenticated(true);
+        try {
+            localStorage.setItem('user', JSON.stringify(userData));
+            localStorage.setItem('token', userToken);
+            setUser(userData);
+            setToken(userToken);
+            setIsAuthenticated(true);
+        } catch (error) {
+            console.error("Error storing user data in localStorage:", error);
+        }
     };
 
     const logout = () => {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
-        setUser({ firstname: null, lastname: null, role: null, id: null });
+        setUser(defaultUser);
         setToken(null);
         setIsAuthenticated(false);
     };

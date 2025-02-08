@@ -12,12 +12,12 @@ class UserProfileModel {
     }
 
     // Fetch user profile details
-    public function getUserProfile($userId) {
+    public function viewProfile($userId) {
         if (empty($userId)) {
             return ["success" => false, "message" => "User ID is required"];
         }
 
-        $query = "SELECT id, firstname, lastname, email, phone FROM users WHERE id = ?";
+        $query = "SELECT id, firstName, lastName, email, dob, gender, nationality, phone, street, city, state, zip FROM users WHERE id = ?";
         $types = "i";
         $user = $this->db->fetchQuery($query, $types, $userId);
 
@@ -29,14 +29,14 @@ class UserProfileModel {
     }
 
     // Update user profile
-    public function updateUserProfile($userId, $firstname, $lastname, $email, $phone) {
-        if (empty($userId) || empty($firstname) || empty($lastname) || empty($email) || empty($phone)) {
+    public function updateProfile($userId, $firstName, $lastName, $email, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip) {
+        if (empty($userId) || empty($firstName) || empty($lastName) || empty($email) || empty($dob) || empty($gender) || empty($phone) || empty($nationality) || empty($street) || empty($city) || empty($state) || empty($zip)) {
             return ["success" => false, "message" => "All fields are required"];
         }
 
-        $query = "UPDATE users SET firstname = ?, lastname = ?, email = ?, phone = ?, address = ? WHERE id = ?";
-        $types = "sssssi";
-        $result = $this->db->executeQuery($query, $types, $firstname, $lastname, $email, $phone, $userId);
+        $query = "UPDATE users SET firstName = ?, lastName = ?, email = ?, dob = ?, gender = ?, nationality = ?, phone = ?, street = ?, city = ?, state = ?, zip = ? WHERE id = ?";
+        $types = "sssissssssi";
+        $result = $this->db->executeQuery($query, $types, $firstName, $lastName, $email, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip, $userId);
 
         if ($result) {
             return ["success" => true, "message" => "Profile updated successfully"];

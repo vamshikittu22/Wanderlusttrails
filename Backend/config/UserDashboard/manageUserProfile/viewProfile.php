@@ -9,14 +9,14 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 include("inc_UserProfileModel.php");
 
 // Check if user ID is provided via GET
-if (isset($_GET['userId'])) {
-    $userId = $_GET['userId'];
+if (isset($_GET['userID'])) {
+    $userId = $_GET['userID'];
     
     // Initialize the UserProfileModel
     $userProfileModel = new UserProfileModel();
     
     // Fetch the user profile based on user ID
-    $result = $userProfileModel->getUserProfile($userId);
+    $result = $userProfileModel->viewProfile($userId);
     
     if ($result['success']) {
         // Return the user profile data as a JSON response

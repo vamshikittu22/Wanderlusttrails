@@ -16,7 +16,7 @@ include("./inc_UserOpsModel.php");
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Validate incoming data from $_POST
-    $userId = $_POST['user_id'] ?? '';
+    $userId = $_POST['id'] ?? '';
     $role = $_POST['role'] ?? '';
 
     if (empty($userId) || empty($role)) {

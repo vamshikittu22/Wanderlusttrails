@@ -47,6 +47,7 @@ const router = createBrowserRouter(
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgotpassword" element={<ForgotPassword />} />
 
+
       {/* Redirect any unauthorized user to Login */}
       {/* <Route path="*" element={<Navigate to="/login" />} /> */}
 
@@ -64,8 +65,9 @@ const router = createBrowserRouter(
         <Route path="flightandhotel" element={<FlightAndHotel />} />
         <Route path="travelinsurance" element={<TravelInsurance />} />
         <Route path="travelpackages" element={<TravelPackages />} />
-        <Route path="bookingdetails" element={<BookingDetails />} />
+        <Route path="Bookingdetails" element={<BookingDetails />} />
         <Route path="contactus" element={<ContactUs />} />
+        <Route path="test" element={<Test />} />
         <Route path="unauthorized" element={<Unauthorized />} />
       </Route>
 

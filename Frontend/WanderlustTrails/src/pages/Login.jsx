@@ -48,11 +48,12 @@ function Login() {
         setLoginData({ identifier: '', password: '' });
         
         // Update context with user data and token
-        const { token, role, firstname, lastname, id } = response.data;
-        login({ firstname, lastname, role, id }, token);
+        const { token, role, firstname, lastname, id, email, phone, dob, gender, nationality, street, city, state, zip} = response.data;
+        login({ firstname, lastname, role, id, email, phone, dob, gender, nationality, street, city, state, zip}, token);
 
         localStorage.setItem("userId", id);  // Store in local storage
         console.log("User ID stored:", id);
+        console.log("details",)
     
         
         // Show the success toast with user's name
