@@ -37,6 +37,9 @@ import AdminDashboard from './pages/Dashboard/AdminDashboard.jsx';
 import UserDashboard from './pages/Dashboard/UserDashboard.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Unauthorized from './pages/Unauthorised.jsx';
+import Payment from './pages/Payment.jsx';
+import Test2 from './pages/test2.jsx';
+
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -67,7 +70,10 @@ const router = createBrowserRouter(
         <Route path="travelpackages" element={<TravelPackages />} />
         <Route path="Bookingdetails" element={<BookingDetails />} />
         <Route path="contactus" element={<ContactUs />} />
+        <Route path="Payment" element={<Payment />} />
         <Route path="test" element={<Test />} />
+        <Route path="test2" element={<Test2 />} />
+
         <Route path="unauthorized" element={<Unauthorized />} />
       </Route>
 

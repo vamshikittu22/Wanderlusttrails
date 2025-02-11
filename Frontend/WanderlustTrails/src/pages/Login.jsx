@@ -42,7 +42,8 @@ function Login() {
         { headers: { 'Content-Type': 'application/json' } }
       );
 
-      console.log(response.data)
+      console.log("details", response.data) //log the user details
+
       if (response.data.success) {
         setMessage(response.data.message || 'Login successful!');
         setLoginData({ identifier: '', password: '' });
@@ -52,8 +53,7 @@ function Login() {
         login({ firstname, lastname, role, id, email, phone, dob, gender, nationality, street, city, state, zip}, token);
 
         localStorage.setItem("userId", id);  // Store in local storage
-        console.log("User ID stored:", id);
-        console.log("details",)
+        console.log("User ID stored:", id); //log the user id
     
         
         // Show the success toast with user's name
