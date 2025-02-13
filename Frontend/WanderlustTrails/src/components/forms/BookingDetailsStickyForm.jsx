@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useUser } from '../../context/UserContext';
+import { toast } from 'react-toastify';
 
 
 function BookingDetailsStickyForm() {
@@ -20,9 +21,7 @@ function BookingDetailsStickyForm() {
           setPackageName(storedPackage.name);
           setPackageLocation(storedPackage.location);
           setPackagePrice(parseFloat(storedPackage.price));
-          import(`../assets/Images/packages/${storedPackage.imageUrl}.jpg`)
-            .then(image => setImageSrc(image.default))
-            .catch(err => console.error('Error loading image:', err));
+          
         }
         
       }, []);
@@ -71,7 +70,7 @@ function BookingDetailsStickyForm() {
 
   return (
     <>
-    <div className=" bg-white shadow-lg rounded-lg p-6 w-full max-w-lg sticky top-4">
+    <div className=" bg-white shadow-lg rounded-lg p-6 w-full max-w-lg top-4">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Booking Form</h2>
 
         {/* Persons Input */}
@@ -105,7 +104,12 @@ function BookingDetailsStickyForm() {
 
         {/* Proceed Button */}
         <a href="/Payment"
+            type="submit"
             className="block text-white bg-indigo-600 hover:bg-indigo-700 font-medium py-3 px-6 rounded-md mt-4 text-center"
+            onClick= {() => toast.success('Almost there! make Payment and enjoy your trip!', {
+              position: "top-center",
+              autoClose: 1000,
+            })}
         >
             Proceed to Payment
         </a>

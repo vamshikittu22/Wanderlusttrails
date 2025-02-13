@@ -25,6 +25,7 @@ const UserDetails = ({ user }) => {
                     <p><strong>Gender:</strong> {user.gender}</p>
                     <p><strong>Nationality:</strong> {user.nationality}</p>
                     <p><strong>Address:</strong> {user.street}, {user.city}, {user.state}, {user.zip}</p>
+                    <p> The booking will be made using the details above, verify them correctly. To make any changes please visit user dashboard.</p>
                 </div>
             </div>
             

@@ -45,19 +45,10 @@ function BookingDetails() {
           <div className="border-b pb-4 mb-4 p-6 w-full h-64 md:w-2/3" style={{ backgroundImage: `url(${imageSrc})`, backgroundSize: 'cover' }}></div>
 
             <BookingDetailsStickyForm />
-          
-          {/* <a href="/Payment"
-            type="submit"
-            className="block text-white text-lg bg-indigo-600 hover:bg-indigo-700 font-medium py-3 px-6 rounded-md shadow-md"
-            onClick={() => toast.success('Almost there! make Payment and enjoy your trip!')}
-          >
-            Confirm your Booking
-          </a> */}
-        
         </div>
 
         {/* User Details */}
-        {/* <UserDetails user={user} /> */}
+        <UserDetails user={user} />
       </div>
     </>
   );
