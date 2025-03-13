@@ -1,4 +1,5 @@
 
+//manageDestinations.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 // import { ToastContainer, toast } from "react-toastify";
@@ -11,12 +12,15 @@ const ManageDestinations = () => {
         location: "",
         price: "",
         image: null,
+        image_url: "",
     });
     const [errors, setErrors] = useState({});
     const [showForm, setShowForm] = useState(false);
     const [packages, setPackages] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [currentEditId, setCurrentEditId] = useState(null);
+    const [deletePopupVisible, setDeletePopupVisible] = useState(false);
+    const [packageToDelete, setPackageToDelete] = useState(null);
 
     useEffect(() => {
         fetchPackages();
@@ -25,8 +29,11 @@ const ManageDestinations = () => {
     const fetchPackages = async () => {
         try {
             const response = await axios.get("http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageDestinations/viewPackage.php");
-            if (Array.isArray(response.data)) {
-                setPackages(response.data);
+            console.log("Fetched packages:", response.data); // Debug log
+             if (Array.isArray(response.data)) {
+                setPackages(response.data.map((pkg) => ({ ...pkg,
+                     id: Number(pkg.id)
+                    })));
             } else {
                 console.error("Unexpected response format:", response.data);
             }
@@ -41,7 +48,7 @@ const ManageDestinations = () => {
         if (!formData.description) newErrors.description = "Description is required.";
         if (!formData.location) newErrors.location = "Location is required.";
         if (!formData.price || formData.price <= 0) newErrors.price = "Price must be a positive number.";
-        if (!formData.image && !isEditing) newErrors.image = "Image is required.";
+        if (!formData.image && !isEditing && !formData.image_url) newErrors.image = "Image is required.";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -58,6 +65,7 @@ const ManageDestinations = () => {
         setFormData((prevData) => ({
             ...prevData,
             image: e.target.files[0],
+            image_url: null,
         }));
     };
 
@@ -75,7 +83,11 @@ const ManageDestinations = () => {
         data.append("description", formData.description);
         data.append("location", formData.location);
         data.append("price", formData.price);
-        if (formData.image) data.append("image", formData.image);
+        if (formData.image) {
+            data.append("image", formData.image);
+        } else if (formData.image_url) {
+            data.append("image_url", formData.image_url);
+        }
         
 
         console.log("Submitting data:", [...data.entries()]); // Debugging log
@@ -108,6 +120,7 @@ const ManageDestinations = () => {
             location: "",
             price: "",
             image: null,
+            image_url: "",
         });
         setErrors({});
         setShowForm(false);
@@ -116,7 +129,10 @@ const ManageDestinations = () => {
     };
 
     const handleEdit = (packageId) => {
+        const id =Number(packageId);
+        console.log("Editing package ID:", packageId); // Debug log
         const packageToEdit = packages.find((pkg) => pkg.id === packageId);
+        console.log("Found package:", packageToEdit); // Debug log
         if (packageToEdit) {
             setFormData({
                 name: packageToEdit.name,
@@ -124,10 +140,30 @@ const ManageDestinations = () => {
                 location: packageToEdit.location,
                 price: packageToEdit.price,
                 image: null,
+                image_url: packageToEdit.image_url,
             });
             setIsEditing(true);
             setCurrentEditId(packageId);
             setShowForm(true);
+        }
+    };
+
+    const handleDelete = async (packageId) => {
+        try {
+            const response = await axios.post(
+                "http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageDestinations/deletePackage.php",
+                { id: packageId },
+                { headers: { "Content-Type": "application/json" } }
+            );
+            if (response.data.success) {
+                setPackages((prevPackages) => prevPackages.filter((pkg) => pkg.id !== packageId));
+                setDeletePopupVisible(false);
+            } else {
+                alert("Failed to delete package: " + response.data.message);
+            }
+        } catch (error) {
+            console.error("Error deleting package:", error);
+            alert("Error deleting package.");
         }
     };
 
@@ -146,6 +182,7 @@ const ManageDestinations = () => {
                             location: "",
                             price: "",
                             image: null,
+                            image_url: "",
                         });
                         setIsEditing(false); // Ensure editing state is reset
                     }
@@ -228,16 +265,27 @@ const ManageDestinations = () => {
                             {errors.price && <p className="text-red-500 text-sm">{errors.price}</p>}
                         </div>
                         <div className="w-1/2">
-                        <label className="block text-sm font-medium mb-1" htmlFor="packageImage">
+                        <label className="block text-sm font-medium mb-1" htmlFor="Image">
                             Package Image
                         </label>
+                        {isEditing && formData.image_url && !formData.image && (
+                            <div className="mb-2">
+                                <p>Current Image</p>
+                                <img 
+                                    src={`http://localhost/WanderlustTrails/Assets/Images/packages/${formData.image_url}`}
+                                    alt="Current Package"
+                                    className="w-1/2 object-cover rounded-lg"
+                                />
+                            </div>
+                        )}
+
                         <input
                             type="file"
                             name="image"
                             id="image"
                             onChange={handleImageChange}
                             className="w-full border text-red-500 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500"
-                            required
+                            required={!isEditing && !formData.image_url} //required only if adding a new package
                         />
                         {errors.image && <p className="text-red-500 text-sm">{errors.image}</p>}
                     </div>
@@ -260,12 +308,48 @@ const ManageDestinations = () => {
                 {packages.map((pkg) => (
                     <div key={pkg.id} className="flex justify-between mb-2">
                         <p>{pkg.name}</p>
-                        <button
-                            onClick={() => handleEdit(pkg.id)}
-                            className="text-blue-500 hover:underline"
-                        >
-                            Edit
-                        </button>
+                        
+                        <div className="flex space-x-4 center align-middle justify-evenly">
+
+                            <button
+                                onClick={() => handleEdit(pkg.id)}
+                                className="text-blue-500 hover:underline"
+                            >
+                                Edit
+                            </button> <br />
+                            <button
+                                onClick={() => {
+                                    setPackageToDelete(pkg.id);
+                                    setDeletePopupVisible(true);
+                                }}
+                                className="text-red-500 hover:underline"
+                            >
+                                Delete
+                            </button>
+                                {deletePopupVisible && (
+                                    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+                                        <div className="bg-white p-6 rounded-lg shadow-lg">
+                                            <h2 className="text-lg font-semibold mb-4">Delete Confirmation</h2>
+                                            <p>Are you sure you want to delete this package?</p>
+                                            <div className="mt-4">
+                                                <button
+                                                    onClick={() => handleDelete(packageToDelete)}
+                                                    className="bg-red-500 text-white px-4 py-2 rounded mr-2"
+                                                >
+                                                    Yes, Delete
+                                                </button>
+                                                <button
+                                                    onClick={() => setDeletePopupVisible(false)}
+                                                    className="bg-gray-500 text-white px-4 py-2 rounded"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                        </div>
+
                     </div>
                 ))}
             </div>

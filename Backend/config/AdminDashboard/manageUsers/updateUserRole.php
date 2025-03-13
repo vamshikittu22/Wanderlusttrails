@@ -12,12 +12,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-include("./inc_UserOpsModel.php");
+include("./inc_UsersOpsModel.php");
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Validate incoming data from $_POST
-    $userId = $_POST['id'] ?? '';
-    $role = $_POST['role'] ?? '';
+    $data = json_decode(file_get_contents("php://input"), true);
+    $userId = $data['id'] ?? '';
+    $role = $data['role'] ?? '';
+
 
     if (empty($userId) || empty($role)) {
         echo json_encode(["success" => false, "message" => "User ID and role are required."]);

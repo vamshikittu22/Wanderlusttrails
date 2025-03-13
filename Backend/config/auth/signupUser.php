@@ -6,7 +6,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-include("inc_UserModel.php");
+include("inc_userModel.php");
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $data = json_decode(file_get_contents("php://input"), true);
@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $firstName = $data['firstName'] ?? '';
     $lastName = $data['lastName'] ?? '';
     $email = filter_var($data['email'] ?? '', FILTER_SANITIZE_EMAIL);
-    $password = password_hash($data['password'], PASSWORD_BCRYPT); // Encrypt password
+    $password = $data['password'] ;// Encrypt password
     $dob = $data['dob'] ?? '';
     $gender = $data['gender'] ?? '';
     $nationality = $data['nationality'] ?? '';

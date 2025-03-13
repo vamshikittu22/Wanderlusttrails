@@ -71,5 +71,22 @@ class PackageModel {
             return ["success" => false, "message" => "Failed to update package"];
         }
     }
+
+    // Delete a package (Delete Package)
+    public function deletePackage($packageId) {
+        if (empty($packageId)) {
+            return ["success" => false, "message" => "Package ID is required"];
+        }
+    
+        $query = "DELETE FROM packages WHERE id = ?";
+        $types = "i";
+        $result = $this->db->executeQuery($query, $types, $packageId);
+    
+        if ($result['success']) {
+            return ["success" => true, "message" => "Package deleted successfully"];
+        } else {
+            return ["success" => false, "message" => "Failed to delete package"];
+        }
+    }
 }
 ?>

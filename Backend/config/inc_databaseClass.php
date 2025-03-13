@@ -30,13 +30,17 @@ class DatabaseClass {
             return ["success" => false, "message" => "Prepare failed: " . $connection->error];
         }
 
-            // Bind parameters dynamically based on $types
-        $stmt->bind_param($types, ...$params);
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
 
         if ($stmt->execute()) {
+            $stmt->close();
             return ["success" => true, "message" => "Query executed successfully"];
         } else {
-            return ["success" => false, "message" => "Execute failed: " . $stmt->error];
+            $error = $stmt->error;
+            $stmt->close();
+            return ["success" => false, "message" => "Execute failed: " . $error];
         }
     }
 
@@ -49,13 +53,17 @@ class DatabaseClass {
             return ["success" => false, "message" => "Prepare failed: " . $connection->error];
         }
 
-        // Bind parameters dynamically based on $types
-        //  $stmt->bind_param($types, ...$params);
+        if (!empty($types) && !empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
         
         if ($stmt->execute()) {
             $result = $stmt->get_result();
             return $result->fetch_all(MYSQLI_ASSOC); // Returns associative array
+            $stmt->close();
+            return $data;
         }
+        $stmt->close();
         return [];
     }
 

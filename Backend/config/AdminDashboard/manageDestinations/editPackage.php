@@ -22,18 +22,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
+
+    $imageUrl = null; // Default to null, will fetch existing if no new image is uploaded
     // Check if the image was uploaded successfully
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $image = $_FILES['image'];
         
         // Define upload directory and file path
-        $uploadDir = 'packages/';
+        $uploadDir = '../../../../Assets/Images/packages/';
+
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true); // Create the directory if it doesn't exist
         }
 
         $imageTempPath = $image['tmp_name'];
-        $imageName = basename($image['name']); // Add timestamp for unique file name
+        $imageName = time().'_'.basename($image['name']); // Add timestamp for unique file name
         $uploadPath = $uploadDir . $imageName;
 
         // Move the uploaded file to the server
@@ -54,10 +57,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             echo json_encode(["success" => false, "message" => "Failed to upload image."]);
         }
     } else {
+
+
         // If no image was uploaded, we can either skip the update of the image or keep the existing one.
         // If no image is uploaded, we assume imageUrl remains unchanged.
         
-        $imageUrl = null; // You can fetch the existing image URL from the database here if needed.
+        // Fetch existing image_url if no new image is uploaded
+        $query = "SELECT image_url FROM packages WHERE id = ?";
+        $currentImage = $packageModel->db->fetchQuery($query, "i", $id);
+        $imageUrl = $currentImage ? $currentImage[0]['image_url'] : null;
+
 
         // Update package details without the image
         $packageModel = new PackageModel();

@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $price = $_POST['price'] ?? '';
 
     // Validate required fields
-    if (empty($packageName) || empty($description) || empty($location) || empty($price)) {
+    if (empty($packageName) || empty($description) || empty($location) || empty($price)) { 
         echo json_encode(["success" => false, "message" => "All fields are required."]);
         exit;
     }
@@ -26,13 +26,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $image = $_FILES['image'];
         
         // Define upload directory and file path
-        $uploadDir = 'packages/';
+        $uploadDir = '../../../../Assets/Images/packages/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true); // Create the directory if it doesn't exist
         }
 
         $imageTempPath = $image['tmp_name'];
-        $imageName = basename($image['name']); // Add timestamp for unique file name
+        $imageName = time().'_'.basename($image['name']); // Add timestamp for unique file name
         $uploadPath = $uploadDir . $imageName;
 
         // Move the uploaded file to the server

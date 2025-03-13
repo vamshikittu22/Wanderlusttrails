@@ -22,7 +22,7 @@ const TravelPackages = () => {
     const sortOptions = [
         { value: 'none', label: 'No Sorting' },
         { value: 'price_asc', label: 'Price (Low to High)' },
-        { value: 'price_desc', label: 'Price (High to Low)' },
+        { value: 'price_desc', label: 'Price (High to Low)' },      
         { value: 'name_asc', label: 'Name (A-Z)' },
         { value: 'name_desc', label: 'Name (Z-A)' },
     ];
@@ -51,11 +51,11 @@ const TravelPackages = () => {
 
     const handleSortChange = (selectedSortBy) => setSortBy(selectedSortBy);
 
-    const handleFlip = (pkg) => {
-        setPackages(packages.map((p) =>
-            p.id === pkg.id ? { ...p, isFlipped: !p.isFlipped } : p,
-        ));
-    };
+    // const handleFlip = (pkg) => {
+    //     setPackages(packages.map((p) =>
+    //         p.id === pkg.id ? { ...p, isFlipped: !p.isFlipped } : p,
+    //     ));
+    // };
 
     const handleBooking = (pkg) => {
         sessionStorage.setItem('selectedPackage', JSON.stringify(pkg));
@@ -70,16 +70,27 @@ const TravelPackages = () => {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    const loadImage = async (imageName) => {
-        try {
-            const importedImage = await import(`../assets/Images/packages/${imageName}.jpg`);
-            return importedImage.default;
-        } catch (error) {
-            console.error(`Error loading image ${imageName}:`, error);
-            const defaultImage = await import(`../assets/Images/packages/default.jpg`);
-            return defaultImage.default;
-        }
+    // const loadImage = async (imageName) => {
+    //     try {
+    //         const importedImage = await import(`../../../../Assets/Images/packages/${imageName}`);
+    //         return importedImage.default;
+    //     } catch (error) {
+    //         console.error(`Error loading image ${imageName}:`, error);
+    //         const defaultImage = await import(`../../../../assets/Images/packages/default.jpg`);
+    //         return defaultImage.default;
+    //     }
+    // };
+
+    
+
+    const loadImage = (imageName) => {
+        const baseUrl = 'http://localhost/WanderlustTrails/Assets/Images/packages/';
+        return `${baseUrl}${imageName}`;
     };
+    
+    const defaultImage = 'http://localhost/WanderlustTrails/Assets/Images/packages/default.jpg';
+    
+    
     
 
     return (
@@ -114,7 +125,7 @@ const TravelPackages = () => {
                             key={pkg.id}
                             pkg={pkg}
                             loadImage={loadImage}
-                            handleFlip={handleFlip}
+                            // handleFlip={handleFlip}
                             handleBooking={handleBooking}
                         />
                     ))}
@@ -132,21 +143,33 @@ const TravelPackages = () => {
     );
 };
 
-const DynamicPackageCard = ({ pkg, loadImage, handleFlip, handleBooking }) => {
+const DynamicPackageCard = ({ pkg, loadImage, handleBooking }) => {
     const [imageSrc, setImageSrc] = useState(null);
+    const [isFlipped, setIsFlipped] = useState(false); // Individual flip state
+         
+
+    // useEffect(() => {
+    //     (async () => {
+    //         const imagePath = await loadImage(pkg.imageUrl);
+    //         setImageSrc(imagePath);
+    //     })();
+    // }, [pkg.imageUrl, loadImage]);
+
 
     useEffect(() => {
-        (async () => {
-            const imagePath = await loadImage(pkg.imageUrl);
-            setImageSrc(imagePath);
-        })();
-    }, [pkg.imageUrl, loadImage]);
+        const imagePath = loadImage(pkg.imageUrl) || defaultImage;
+        setImageSrc(imagePath);
+    }, [pkg.imageUrl]);
+    
+    const handleFlip = () => {
+        setIsFlipped(!isFlipped); // Toggle only this card’s state
+    };
 
     return (
         <div className="bg-orange-100 backdrop:blur-5 rounded-lg shadow-md overflow-hidden">
-            <ReactCardFlip isFlipped={pkg.isFlipped} flipDirection="horizontal">
+            <ReactCardFlip isFlipped={isFlipped} flipDirection="horizontal">
                 {/* Front Side */}
-                <div key="front" onClick={() => handleFlip(pkg)} className="cursor-pointer">
+                <div key="front" onClick={handleFlip} className="cursor-pointer">
                     <img src={imageSrc} 
 
                     alt={pkg.name} className="w-full h-40" />
@@ -159,7 +182,7 @@ const DynamicPackageCard = ({ pkg, loadImage, handleFlip, handleBooking }) => {
                 </div>
 
                 {/* Back Side */}
-                <div key="back" onClick={() => handleFlip(pkg)} className="cursor-pointer">
+                <div key="back" onClick={handleFlip} className="cursor-pointer">
                     <div className="p-6 bg-cover backdrop:blur-5 bg-center w-auto h-80" style={{ backgroundImage: `url(${imageSrc})`, backgroundSize: 'cover' }}>
                         <h3 className="text-xl font-bold text-fuchsia-900 shadow-inner mb-2">{pkg.name}</h3>
                         <p className="text-red-600 font-semibold shadow-inner text-sm mb-4">{pkg.description}</p>
@@ -168,7 +191,9 @@ const DynamicPackageCard = ({ pkg, loadImage, handleFlip, handleBooking }) => {
                         </span>
                         <button
                             className='text-gray-300 bg-gray-500 font-serif font-bold'
-                            onClick={() => handleBooking(pkg)}
+                            onClick={(e) => {
+                                e.stopPropagation(); // Prevent flip when clicking button
+                                handleBooking(pkg)}}
                         >
                             Book now
                         </button>

@@ -1,32 +1,16 @@
 <?php
-// viewProfile.php
-header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Origin: http://localhost:5173"); // Match your frontend port
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+header("Access-Control-Allow-Methods: GET");
 
-// Include the necessary files
-include("inc_UserProfileModel.php");
+include("./inc_UserProfileModel.php");
 
-// Check if user ID is provided via GET
 if (isset($_GET['userID'])) {
     $userId = $_GET['userID'];
-    
-    // Initialize the UserProfileModel
     $userProfileModel = new UserProfileModel();
-    
-    // Fetch the user profile based on user ID
     $result = $userProfileModel->viewProfile($userId);
-    
-    if ($result['success']) {
-        // Return the user profile data as a JSON response
-        echo json_encode($result['data']);
-    } else {
-        // Return an error message if the profile is not found
-        echo json_encode(["success" => false, "message" => $result['message']]);
-    }
+    echo json_encode($result); // Consistent response
 } else {
-    // Return an error if user ID is not provided
     echo json_encode(["success" => false, "message" => "User ID is required"]);
 }
 ?>

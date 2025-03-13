@@ -44,7 +44,7 @@ class UserOpsModel {
         if ($result['success']) {
             return ["success" => true, "message" => "User role updated successfully"];
         } else {
-            return ["success" => false, "message" => "Failed to update user role"];
+            return ["success" => false, "message" => $result['message'] ?? "Failed to update user role"];
         }
     }
 
@@ -65,7 +65,7 @@ class UserOpsModel {
         if ($result['success']) {
             return ["success" => true, "message" => "User deleted successfully"];
         } else {
-            return ["success" => false, "message" => "Failed to delete user"];
+            return ["success" => false, "message" => $result['message'] ?? "Failed to delete user"];
         }
     }
 }

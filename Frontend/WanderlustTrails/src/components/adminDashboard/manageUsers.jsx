@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+//manageUsers.jsx 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -32,38 +32,47 @@ const ManageUsers = () => {
       return;
     }
     try {
-      const response = await axios.post("http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageUsers/updateUserRole.php", {
-        id: userId,
-        role: newRole,
-      });
+      const response = await axios.post(
+        "http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageUsers/updateUserRole.php", 
+        { id: userId, role: newRole },
+        { headers: { "Content-Type": "application/json" } }
+      );
       if (response.data.success) {
-        setUsers((prevUsers) =>
-          prevUsers.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
-        );
-        setRoleChangeVisible(false);
+          setUsers((prevUsers) =>
+            prevUsers.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
+          );
+          setRoleChangeVisible(false);
+          setNewRole("");
+          setSelectedUserId(null);
       } else {
-        
-        console.error("Failed to update role:", response.data.message);
+          console.error("Failed to update role:", response.data);
+          alert("Failed to update role: " + (response.data.message || "Unknown error"))
       }
     } catch (error) {
-      
-      console.error("Error updating role:", error);
+        console.error("Error updating role:", error.response?.data || error);
+        alert("Error updating role: " + (error.response?.data?.message || "Server error"));
     }
   };
 
   const handleDeleteUser = async (userId) => {
     try {
-      const response = await axios.post("http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageUsers/deleteUser.php", {
-        user_id: userId,
-      });
+      const response = await axios.post(
+        "http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageUsers/deleteUser.php",
+        { user_id: userId },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      
       if (response.data.success) {
         setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
         setDeletePopupVisible(false);
+        setUserToDelete(null);
       } else {
-        console.error("Failed to delete user:", response.data.message);
+        console.error("Failed to delete user:", response.data);
+        alert("Failed to delete user: " + (response.data.message || "Unknown  error"));
       }
     } catch (error) {
-      console.error("Error deleting user:", error);
+      console.error("Error deleting user:", error.response?.data || error);
+      alert("Error deleting user: " + (error.response?.data?.message || "Server error"));
     }
   };
 
@@ -159,26 +168,28 @@ const ManageUsers = () => {
         </div>
       )}
 
-      {deletePopupVisible && (
-        <div className="mt-4 p-4 bg-red-300 rounded">
-          <h2 className="text-lg font-semibold mb-2">Delete Confirmation</h2>
-          <p>Are you sure you want to delete this user?</p>
-          <div className="mt-4">
-            <button
-              onClick={() => handleDeleteUser(userToDelete)}
-              className="bg-red-500 text-white px-4 py-2 rounded mr-2"
-            >
-              Yes, Delete
-            </button>
-            <button
-              onClick={() => setDeletePopupVisible(false)}
-              className="bg-gray-500 text-white px-4 py-2 rounded"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
+          {deletePopupVisible && (
+              <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+                  <div className="bg-white p-4 rounded-lg shadow-lg">
+                      <h2 className="text-lg font-semibold mb-2 text-gray-800">Delete Confirmation</h2>
+                      <p className="text-gray-600">Are you sure you want to delete this user?</p>
+                      <div className="mt-4">
+                          <button
+                              onClick={() => handleDeleteUser(userToDelete)}
+                              className="bg-red-500 text-white px-4 py-2 rounded mr-2 hover:bg-red-600"
+                          >
+                              Yes, Delete
+                          </button>
+                          <button
+                              onClick={() => setDeletePopupVisible(false)}
+                              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                          >
+                              Cancel
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          )}
     </div>
   );
 };

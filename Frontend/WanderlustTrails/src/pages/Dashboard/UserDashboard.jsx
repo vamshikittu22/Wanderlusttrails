@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import TestUser from "../../components/userDashboard/testuser.jsx";
+import UserProfile from "../../components/userDashboard/UserProfile.jsx";
 
 const UserDashboard = () => {
     const [activeSection, setActiveSection] = useState("profile");
@@ -19,7 +20,7 @@ const UserDashboard = () => {
             </aside>
 
             <main className="flex-1 backdrop-blur p-8 overflow-y-auto">
-                {activeSection === "profile" && <TestUser />}
+                {activeSection === "profile" && <UserProfile />}
             </main>
         </div>
     );
