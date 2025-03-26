@@ -51,12 +51,6 @@ const TravelPackages = () => {
 
     const handleSortChange = (selectedSortBy) => setSortBy(selectedSortBy);
 
-    // const handleFlip = (pkg) => {
-    //     setPackages(packages.map((p) =>
-    //         p.id === pkg.id ? { ...p, isFlipped: !p.isFlipped } : p,
-    //     ));
-    // };
-
     const handleBooking = (pkg) => {
         sessionStorage.setItem('selectedPackage', JSON.stringify(pkg));
         console.log('Selected Package:', pkg);

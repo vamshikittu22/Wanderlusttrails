@@ -1,12 +1,25 @@
 import React, { useState } from "react";
-import TestUser from "../../components/userDashboard/testuser.jsx";
 import UserProfile from "../../components/userDashboard/UserProfile.jsx";
+import UserViewBookings from "../../components/userDashboard/userViewBookings.jsx";
 
 const UserDashboard = () => {
     const [activeSection, setActiveSection] = useState("profile");
 
+     // Function to render content based on active section
+     const renderContent = () => {
+        switch (activeSection) {
+            case "profile":
+                return <UserProfile />;
+            case "bookings":
+                return <UserViewBookings />;
+            default:
+                return <UserProfile /> ;
+        }
+     }
+
     return (
         <div className="flex h-screen font-sans">
+            {/* Sidebar */}
             <aside className="w-64 bg-gray-800 text-white flex flex-col p-6">
                 <h2 className="text-2xl font-bold mb-6">User Dashboard</h2>
                 <nav className="flex flex-col space-y-4">
@@ -16,11 +29,18 @@ const UserDashboard = () => {
                     >
                         Profile
                     </button>
+                    <button 
+                        onClick={() => setActiveSection("bookings")}
+                        className={`py-2 px-4 rounded-lg ${activeSection === "bookings" ? "bg-gray-700" : "hover:bg-gray-700"}`}
+                    >
+                        Bookings    
+                    </button>
                 </nav>
             </aside>
 
             <main className="flex-1 backdrop-blur p-8 overflow-y-auto">
-                {activeSection === "profile" && <UserProfile />}
+              
+                {renderContent()}
             </main>
         </div>
     );

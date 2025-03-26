@@ -34,9 +34,18 @@ class DatabaseClass {
             $stmt->bind_param($types, ...$params);
         }
 
+        // if ($stmt->execute()) {
+        //     $stmt->close();
+        //     return ["success" => true, "message" => "Query executed successfully"];
+
         if ($stmt->execute()) {
+            $affectedRows = $stmt->affected_rows; // Capture affected rows
             $stmt->close();
-            return ["success" => true, "message" => "Query executed successfully"];
+            return [
+                "success" => true,
+                "message" => "Query executed successfully",
+                "affected_rows" => $affectedRows // Add this to the response
+            ];
         } else {
             $error = $stmt->error;
             $stmt->close();
