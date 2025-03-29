@@ -9539,3 +9539,2291 @@ BookingModel::createBooking Result: Array
     [affected_rows] => 1
 )
 
+createBooking API Started - Method: OPTIONS at 2025-03-29 02:44:24
+Handling OPTIONS
+createBooking API Started - Method: POST at 2025-03-29 02:44:24
+POST Data: Array
+(
+    [user_id] => 1
+    [booking_type] => flight_hotel
+    [flight_details] => Array
+        (
+            [from] => hyderabad
+            [to] => america
+            [passengers] => 1
+        )
+
+    [hotel_details] => Array
+        (
+            [destination] => hyd
+        )
+
+    [start_date] => 2025-03-28
+    [end_date] => 2025-04-04
+    [persons] => 1
+    [total_price] => 500
+)
+
+createBooking API Started - Method: POST at 2025-03-29 02:44:29
+POST Data: Array
+(
+    [user_id] => 1
+    [booking_type] => flight_hotel
+    [flight_details] => Array
+        (
+            [from] => hyderabad
+            [to] => america
+            [passengers] => 1
+        )
+
+    [hotel_details] => Array
+        (
+            [destination] => hyd
+        )
+
+    [start_date] => 2025-03-29
+    [end_date] => 2025-04-05
+    [persons] => 1
+    [total_price] => 500
+)
+
+createBooking API Started - Method: OPTIONS at 2025-03-29 02:44:30
+Handling OPTIONS
+createBooking API Started - Method: POST at 2025-03-29 02:44:30
+POST Data: Array
+(
+    [user_id] => 1
+    [booking_type] => flight_hotel
+    [flight_details] => Array
+        (
+            [from] => hyderabad
+            [to] => america
+            [passengers] => 1
+        )
+
+    [hotel_details] => Array
+        (
+            [destination] => hyd
+        )
+
+    [start_date] => 2025-03-29
+    [end_date] => 2025-04-05
+    [persons] => 1
+    [total_price] => 500
+)
+
+createBooking API Started - Method: POST at 2025-03-29 02:44:35
+POST Data: Array
+(
+    [user_id] => 1
+    [booking_type] => flight_hotel
+    [flight_details] => Array
+        (
+            [from] => hyderabad
+            [to] => america
+            [passengers] => 1
+        )
+
+    [hotel_details] => Array
+        (
+            [destination] => hyd
+        )
+
+    [start_date] => 2025-03-29
+    [end_date] => 2025-04-05
+    [persons] => 1
+    [total_price] => 500
+)
+
+createBooking API Started - Method: OPTIONS at 2025-03-29 02:45:49
+Handling OPTIONS
+createBooking API Started - Method: POST at 2025-03-29 02:45:49
+POST Data: Array
+(
+    [user_id] => 2
+    [booking_type] => flight_hotel
+    [flight_details] => Array
+        (
+            [from] => hyderabad
+            [to] => america
+            [passengers] => 1
+        )
+
+    [hotel_details] => Array
+        (
+            [destination] => hyd
+        )
+
+    [start_date] => 2025-03-28
+    [end_date] => 2025-04-04
+    [persons] => 1
+    [total_price] => 500
+)
+
+BookingModel::createBooking Result: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getAllBookings API Started - Method: GET at 2025-03-29 02:50:19
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+)
+
+getAllBookings API Started - Method: GET at 2025-03-29 02:50:19
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+)
+
+updateBookingStatus API Started - Method: OPTIONS at 2025-03-29 02:50:24
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-03-29 02:50:24
+Raw input: {"booking_id":1,"status":"confirmed"}
+Updating status for booking_id: 1 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 1 to confirmed: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getUserBooking API Started - Method: GET at 2025-03-29 02:50:35
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+)
+
+getUserBooking API Started - Method: GET at 2025-03-29 02:50:35
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+)
+
+createBooking API Started - Method: OPTIONS at 2025-03-29 02:50:48
+Handling OPTIONS
+createBooking API Started - Method: POST at 2025-03-29 02:50:48
+POST Data: Array
+(
+    [user_id] => 2
+    [booking_type] => package
+    [start_date] => 2025-03-29
+    [end_date] => 2025-04-05
+    [persons] => 2
+    [total_price] => 1920
+)
+
+BookingModel::createBooking Result: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getUserBooking API Started - Method: GET at 2025-03-29 02:50:53
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-05
+            [persons] => 2
+            [total_price] => 1920.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+)
+
+getUserBooking API Started - Method: GET at 2025-03-29 02:50:53
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-05
+            [persons] => 2
+            [total_price] => 1920.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+)
+
+getUserBooking API Started - Method: GET at 2025-03-29 02:58:05
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-05
+            [persons] => 2
+            [total_price] => 1920.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+)
+
+getUserBooking API Started - Method: GET at 2025-03-29 02:58:05
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-05
+            [persons] => 2
+            [total_price] => 1920.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+)
+
+getUserBooking API Started - Method: GET at 2025-03-29 02:59:13
+Fetching bookings for user_id: 1
+BookingModel::getUserBookings: Array
+(
+)
+
+getUserBooking API Started - Method: GET at 2025-03-29 02:59:13
+Fetching bookings for user_id: 1
+BookingModel::getUserBookings: Array
+(
+)
+
+getAllBookings API Started - Method: GET at 2025-03-29 02:59:20
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-05
+            [persons] => 2
+            [total_price] => 1920.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+)
+
+getAllBookings API Started - Method: GET at 2025-03-29 02:59:20
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-05
+            [persons] => 2
+            [total_price] => 1920.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+)
+
+getUserBooking API Started - Method: GET at 2025-03-29 03:02:14
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-05
+            [persons] => 2
+            [total_price] => 1920.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+)
+
+getUserBooking API Started - Method: GET at 2025-03-29 03:02:14
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-05
+            [persons] => 2
+            [total_price] => 1920.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+)
+
+getAllBookings API Started - Method: GET at 2025-03-29 03:02:18
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-05
+            [persons] => 2
+            [total_price] => 1920.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+)
+
+getAllBookings API Started - Method: GET at 2025-03-29 03:02:18
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-05
+            [persons] => 2
+            [total_price] => 1920.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+)
+
+updateBookingStatus API Started - Method: OPTIONS at 2025-03-29 03:02:21
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-03-29 03:02:21
+Raw input: {"booking_id":2,"status":"confirmed"}
+Updating status for booking_id: 2 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 2 to confirmed: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getUserBooking API Started - Method: GET at 2025-03-29 03:02:27
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-05
+            [persons] => 2
+            [total_price] => 1920.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+)
+
+getUserBooking API Started - Method: GET at 2025-03-29 03:02:27
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-05
+            [persons] => 2
+            [total_price] => 1920.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+)
+
+getAllBookings API Started - Method: GET at 2025-03-29 03:37:32
+getAllBookings API Started - Method: GET at 2025-03-29 03:37:33
+getAllBookings API Started - Method: GET at 2025-03-29 03:37:50
+getAllBookings API Started - Method: GET at 2025-03-29 03:37:50
+getAllBookings API Started - Method: GET at 2025-03-29 03:50:58
+getAllBookings API Started - Method: GET at 2025-03-29 03:50:58
+getUserBooking API Started - Method: GET at 2025-03-29 04:48:16
+Fetching bookings for user_id: 2
+getUserBooking API Started - Method: GET at 2025-03-29 04:48:21
+Fetching bookings for user_id: 2
+getUserBooking API Started - Method: GET at 2025-03-29 04:48:21
+Fetching bookings for user_id: 2
+getUserBooking API Started - Method: GET at 2025-03-29 04:48:24
+Fetching bookings for user_id: 2
+getUserBooking API Started - Method: GET at 2025-03-29 04:48:24
+Fetching bookings for user_id: 2
+getUserBooking API Started - Method: GET at 2025-03-29 04:48:35
+Fetching bookings for user_id: 2
+getUserBooking API Started - Method: GET at 2025-03-29 04:48:35
+Fetching bookings for user_id: 2
+getUserBooking API Started - Method: GET at 2025-03-29 04:48:41
+Fetching bookings for user_id: 2
+getUserBooking API Started - Method: GET at 2025-03-29 04:49:46
+Fetching bookings for user_id: 2
+getUserBooking API Started - Method: GET at 2025-03-29 04:49:46
+Fetching bookings for user_id: 2
+getUserBooking API Started - Method: GET at 2025-03-29 04:49:49
+Fetching bookings for user_id: 2
+getUserBooking API Started - Method: GET at 2025-03-29 04:49:49
+Fetching bookings for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 04:52:04
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 04:52:04
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 04:52:13
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 04:52:13
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 04:56:21
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 04:56:27
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 04:56:27
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 04:59:51
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 04:59:51
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 05:04:32
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 05:04:32
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 05:08:44
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 05:08:44
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 05:16:02
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 05:16:02
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+cancelBooking API Started - Method: OPTIONS at 2025-03-29 05:16:04
+Handling OPTIONS request for cancelBooking
+cancelBooking API Started - Method: POST at 2025-03-29 05:16:04
+BookingModel::cancelBooking Result for booking_id 1: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Cancel result for booking_id 1: {"success":true,"message":"Booking canceled successfully"}
+getUserBookings API Started - Method: GET at 2025-03-29 05:16:18
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 05:16:18
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+editBooking API Started - Method: OPTIONS at 2025-03-29 05:16:34
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 05:16:34
+BookingModel::editBooking Result for booking_id 2: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Edit result for booking_id 2: {"success":true,"message":"Edit request submitted and awaiting admin confirmation"}
+getAllBookings API Started - Method: GET at 2025-03-29 05:17:07
+getAllBookings API Started - Method: GET at 2025-03-29 05:17:07
+updateBookingStatus API Started - Method: OPTIONS at 2025-03-29 05:17:17
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-03-29 05:17:17
+Raw input: {"booking_id":2,"status":"confirmed"}
+Updating status for booking_id: 2 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 2: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+updateBookingStatus API Started - Method: POST at 2025-03-29 05:17:20
+Raw input: {"booking_id":2,"status":"pending"}
+Updating status for booking_id: 2 to pending
+BookingModel::updateBookingStatus Result for booking_id 2: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+updateBookingStatus API Started - Method: OPTIONS at 2025-03-29 05:17:23
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-03-29 05:17:23
+Raw input: {"booking_id":2,"status":"confirmed"}
+Updating status for booking_id: 2 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 2: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getUserBookings API Started - Method: GET at 2025-03-29 05:18:06
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 05:18:06
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getAllBookings API Started - Method: GET at 2025-03-29 05:18:21
+getAllBookings API Started - Method: GET at 2025-03-29 05:18:21
+updateBookingStatus API Started - Method: OPTIONS at 2025-03-29 05:19:05
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-03-29 05:19:05
+Raw input: {"booking_id":1,"status":"confirmed"}
+Updating status for booking_id: 1 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 1: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getUserBookings API Started - Method: GET at 2025-03-29 05:19:11
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 05:19:11
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+editBooking API Started - Method: OPTIONS at 2025-03-29 05:19:18
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 05:19:18
+BookingModel::editBooking Result for booking_id 1: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Edit result for booking_id 1: {"success":true,"message":"Edit request submitted and awaiting admin confirmation"}
+getAllBookings API Started - Method: GET at 2025-03-29 05:19:27
+getAllBookings API Started - Method: GET at 2025-03-29 05:19:27
+getAllBookings API Started - Method: GET at 2025-03-29 05:23:05
+getAllBookings API Started - Method: GET at 2025-03-29 05:23:05
+getUserBookings API Started - Method: GET at 2025-03-29 05:23:16
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 05:23:16
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getAllBookings API Started - Method: GET at 2025-03-29 05:30:23
+getAllBookings API Started - Method: GET at 2025-03-29 05:30:28
+getAllBookings API Started - Method: GET at 2025-03-29 05:30:28
+updateBookingStatus API Started - Method: OPTIONS at 2025-03-29 05:30:33
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-03-29 05:30:33
+Raw input: {"booking_id":1,"status":"confirmed"}
+Updating status for booking_id: 1 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 1: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getUserBookings API Started - Method: GET at 2025-03-29 05:30:54
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 05:30:54
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+cancelBooking API Started - Method: OPTIONS at 2025-03-29 05:31:19
+Handling OPTIONS request for cancelBooking
+cancelBooking API Started - Method: POST at 2025-03-29 05:31:19
+BookingModel::cancelBooking Result for booking_id 2: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Cancel result for booking_id 2: {"success":true,"message":"Booking canceled successfully"}
+getAllBookings API Started - Method: GET at 2025-03-29 05:31:25
+getAllBookings API Started - Method: GET at 2025-03-29 05:31:25
+updateBookingStatus API Started - Method: OPTIONS at 2025-03-29 05:31:29
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-03-29 05:31:30
+Raw input: {"booking_id":2,"status":"confirmed"}
+Updating status for booking_id: 2 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 2: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getUserBookings API Started - Method: GET at 2025-03-29 05:31:36
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 05:31:36
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+editBooking API Started - Method: OPTIONS at 2025-03-29 05:31:51
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 05:31:51
+BookingModel::editBooking Result for booking_id 2: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Edit result for booking_id 2: {"success":true,"message":"Edit request submitted and awaiting admin confirmation"}
+getAllBookings API Started - Method: GET at 2025-03-29 05:32:02
+getAllBookings API Started - Method: GET at 2025-03-29 05:32:02
+updateBookingStatus API Started - Method: OPTIONS at 2025-03-29 05:32:08
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-03-29 05:32:08
+Raw input: {"booking_id":2,"status":"confirmed"}
+Updating status for booking_id: 2 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 2: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getUserBookings API Started - Method: GET at 2025-03-29 06:29:40
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 06:29:40
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+createBooking API Started - Method: OPTIONS at 2025-03-29 06:31:51
+Handling OPTIONS
+createBooking API Started - Method: POST at 2025-03-29 06:31:51
+POST Data: Array
+(
+    [user_id] => 2
+    [booking_type] => flight_hotel
+    [flight_details] => Array
+        (
+            [from] => CANADA
+            [to] => AMERICA
+            [passengers] => 1
+        )
+
+    [hotel_details] => Array
+        (
+            [destination] => KANSAS
+        )
+
+    [start_date] => 2025-03-29
+    [end_date] => 2025-04-03
+    [persons] => 1
+    [total_price] => 500
+)
+
+createBooking API Started - Method: POST at 2025-03-29 06:31:53
+POST Data: Array
+(
+    [user_id] => 2
+    [booking_type] => flight_hotel
+    [flight_details] => Array
+        (
+            [from] => CANADA
+            [to] => AMERICA
+            [passengers] => 1
+        )
+
+    [hotel_details] => Array
+        (
+            [destination] => KANSAS
+        )
+
+    [start_date] => 2025-03-29
+    [end_date] => 2025-04-03
+    [persons] => 1
+    [total_price] => 500
+)
+
+createBooking API Started - Method: OPTIONS at 2025-03-29 06:39:30
+Handling OPTIONS
+createBooking API Started - Method: POST at 2025-03-29 06:39:30
+POST Data: Array
+(
+    [user_id] => 2
+    [booking_type] => flight_hotel
+    [flight_details] => Array
+        (
+            [from] => CANADA
+            [to] => AMERICA
+            [passengers] => 1
+        )
+
+    [hotel_details] => Array
+        (
+            [destination] => KANSAS
+        )
+
+    [start_date] => 2025-03-29
+    [end_date] => 2025-04-03
+    [persons] => 1
+    [total_price] => 500
+)
+
+createBooking API Started - Method: OPTIONS at 2025-03-29 06:51:32
+Handling OPTIONS
+createBooking API Started - Method: POST at 2025-03-29 06:51:32
+POST Data: Array
+(
+    [user_id] => 2
+    [booking_type] => flight_hotel
+    [flight_details] => Array
+        (
+            [from] => CANADA
+            [to] => AMERICA
+            [passengers] => 2
+        )
+
+    [hotel_details] => Array
+        (
+            [destination] => KANSAS
+        )
+
+    [start_date] => 2025-03-29
+    [end_date] => 2025-03-30
+    [persons] => 2
+    [total_price] => 500
+)
+
+BookingModel::createBooking Result for user_id 2: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+createBooking API Started - Method: OPTIONS at 2025-03-29 07:00:28
+Handling OPTIONS
+createBooking API Started - Method: POST at 2025-03-29 07:00:28
+POST Data: Array
+(
+    [user_id] => 2
+    [booking_type] => flight_hotel
+    [flight_details] => Array
+        (
+            [from] => CANADA
+            [to] => AMERICA
+            [passengers] => 2
+        )
+
+    [hotel_details] => Array
+        (
+            [destination] => KANSAS
+        )
+
+    [start_date] => 2025-03-29
+    [end_date] => 2025-03-30
+    [persons] => 2
+    [total_price] => 500
+)
+
+BookingModel::createBooking Result for user_id 2: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Create booking result: {"success":true,"message":"Booking created successfully"}
+getAllBookings API Started - Method: GET at 2025-03-29 07:00:35
+getAllBookings API Started - Method: GET at 2025-03-29 07:00:35
+getAllBookings API Started - Method: GET at 2025-03-29 07:01:29
+getAllBookings API Started - Method: GET at 2025-03-29 07:01:29
+getAllBookings API Started - Method: GET at 2025-03-29 07:05:08
+getAllBookings API Started - Method: GET at 2025-03-29 07:05:14
+getAllBookings API Started - Method: GET at 2025-03-29 07:05:14
+getAllBookings API Started - Method: GET at 2025-03-29 07:05:28
+updateBookingStatus API Started - Method: OPTIONS at 2025-03-29 07:05:58
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-03-29 07:05:58
+Raw input: {"booking_id":3,"status":"confirmed"}
+Updating status for booking_id: 3 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 3: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+updateBookingStatus API Started - Method: POST at 2025-03-29 07:05:59
+Raw input: {"booking_id":4,"status":"confirmed"}
+Updating status for booking_id: 4 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 4: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getUserBookings API Started - Method: GET at 2025-03-29 07:06:04
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:06:04
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+cancelBooking API Started - Method: OPTIONS at 2025-03-29 07:06:10
+Handling OPTIONS request for cancelBooking
+cancelBooking API Started - Method: POST at 2025-03-29 07:06:10
+BookingModel::cancelBooking Result for booking_id 2: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Cancel result for booking_id 2: {"success":true,"message":"Booking canceled successfully"}
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:06:16
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:06:16
+BookingModel::editBooking Result for booking_id 3: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Edit result for booking_id 3: {"success":true,"message":"Edit request submitted and awaiting admin confirmation"}
+getAllBookings API Started - Method: GET at 2025-03-29 07:06:24
+getAllBookings API Started - Method: GET at 2025-03-29 07:06:24
+getUserBookings API Started - Method: GET at 2025-03-29 07:09:05
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:09:14
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:09:14
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:09:22
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:09:22
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:13:14
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:13:20
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:13:20
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:13:42
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:13:42
+BookingModel::editBooking Result for booking_id 1: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Edit result for booking_id 1: {"success":true,"message":"Edit request submitted and awaiting admin confirmation"}
+cancelBooking API Started - Method: OPTIONS at 2025-03-29 07:13:47
+Handling OPTIONS request for cancelBooking
+cancelBooking API Started - Method: POST at 2025-03-29 07:13:47
+BookingModel::cancelBooking Result for booking_id 4: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Cancel result for booking_id 4: {"success":true,"message":"Booking canceled successfully"}
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:13:59
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:13:59
+BookingModel::editBooking Result for booking_id 3: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 0
+)
+
+Edit result for booking_id 3: {"success":false,"message":"Booking not found or cannot be edited"}
+getUserBookings API Started - Method: GET at 2025-03-29 07:14:08
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:14:08
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:14:23
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:14:23
+BookingModel::editBooking Result for booking_id 3: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Edit result for booking_id 3: {"success":true,"message":"Edit request submitted and awaiting admin confirmation"}
+getAllBookings API Started - Method: GET at 2025-03-29 07:14:48
+getAllBookings API Started - Method: GET at 2025-03-29 07:14:48
+getAllBookings API Started - Method: GET at 2025-03-29 07:14:52
+getAllBookings API Started - Method: GET at 2025-03-29 07:14:52
+updateBookingStatus API Started - Method: OPTIONS at 2025-03-29 07:15:51
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-03-29 07:15:51
+Raw input: {"booking_id":1,"status":"confirmed"}
+Updating status for booking_id: 1 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 1: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+updateBookingStatus API Started - Method: POST at 2025-03-29 07:15:52
+Raw input: {"booking_id":2,"status":"confirmed"}
+Updating status for booking_id: 2 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 2: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+updateBookingStatus API Started - Method: POST at 2025-03-29 07:15:53
+Raw input: {"booking_id":3,"status":"confirmed"}
+Updating status for booking_id: 3 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 3: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+updateBookingStatus API Started - Method: POST at 2025-03-29 07:15:55
+Raw input: {"booking_id":4,"status":"confirmed"}
+Updating status for booking_id: 4 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 4: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getUserBookings API Started - Method: GET at 2025-03-29 07:15:58
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:15:58
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:16:44
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:17:05
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:17:05
+BookingModel::editBooking Result for booking_id 3: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Edit result for booking_id 3: {"success":true,"message":"Edit request submitted and awaiting admin confirmation"}
+getUserBookings API Started - Method: GET at 2025-03-29 07:21:27
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:21:27
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:21:36
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:21:36
+BookingModel::editBooking Result for booking_id 1: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Edit result for booking_id 1: {"success":true,"message":"Edit request submitted and awaiting admin confirmation"}
+getAllBookings API Started - Method: GET at 2025-03-29 07:21:44
+getAllBookings API Started - Method: GET at 2025-03-29 07:21:44
+updateBookingStatus API Started - Method: OPTIONS at 2025-03-29 07:21:51
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-03-29 07:21:51
+Raw input: {"booking_id":1,"status":"confirmed"}
+Updating status for booking_id: 1 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 1: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getUserBookings API Started - Method: GET at 2025-03-29 07:21:59
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:21:59
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:22:53
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:25:48
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:25:56
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:25:56
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:26:10
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:26:10
+BookingModel::editBooking Result for booking_id 3: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Edit result for booking_id 3: {"success":true,"message":"Edit request submitted and awaiting admin confirmation"}
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:26:22
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:26:22
+BookingModel::editBooking Result for booking_id 1: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Edit result for booking_id 1: {"success":true,"message":"Edit request submitted and awaiting admin confirmation"}
+getAllBookings API Started - Method: GET at 2025-03-29 07:26:58
+getAllBookings API Started - Method: GET at 2025-03-29 07:26:58
+getUserBookings API Started - Method: GET at 2025-03-29 07:29:12
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:29:12
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getAllBookings API Started - Method: GET at 2025-03-29 07:29:19
+getAllBookings API Started - Method: GET at 2025-03-29 07:29:19
+getAllBookings API Started - Method: GET at 2025-03-29 07:29:23
+getAllBookings API Started - Method: GET at 2025-03-29 07:29:23
+getAllBookings API Started - Method: GET at 2025-03-29 07:29:36
+getAllBookings API Started - Method: GET at 2025-03-29 07:29:36
+getUserBookings API Started - Method: GET at 2025-03-29 07:32:16
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:32:16
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getAllBookings API Started - Method: GET at 2025-03-29 07:32:23
+getAllBookings API Started - Method: GET at 2025-03-29 07:32:23
+getAllBookings API Started - Method: GET at 2025-03-29 07:34:02
+getUserBookings API Started - Method: GET at 2025-03-29 07:34:08
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:34:08
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:34:14
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:34:14
+BookingModel::editBooking Result for booking_id 1: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 0
+)
+
+Edit result for booking_id 1: {"success":false,"message":"Booking not found or cannot be edited"}
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:34:34
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:34:34
+BookingModel::editBooking Result for booking_id 1: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 0
+)
+
+Edit result for booking_id 1: {"success":false,"message":"Booking not found or cannot be edited"}
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:34:41
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:34:41
+Missing or invalid parameters: {"booking_id":1,"user_id":2}
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:34:56
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:34:56
+Missing or invalid parameters: {"booking_id":1,"user_id":2}
+getUserBookings API Started - Method: GET at 2025-03-29 07:35:04
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:35:04
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:35:08
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:35:08
+Missing or invalid parameters: {"booking_id":1,"user_id":2}
+editBooking API Started - Method: GET at 2025-03-29 07:35:32
+Invalid Method: GET
+getUserBookings API Started - Method: GET at 2025-03-29 07:37:03
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:39:35
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:39:35
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:39:38
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:39:38
+Fetching bookings for user_id: 2
+Bookings fetched successfully for user_id: 2
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:39:41
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:39:41
+Missing or invalid parameters: {"booking_id":1,"user_id":2}
+getAllBookings API Started - Method: GET at 2025-03-29 07:40:56
+getAllBookings API Started - Method: GET at 2025-03-29 07:41:13
+getAllBookings API Started - Method: GET at 2025-03-29 07:41:13
+getAllBookings API Started - Method: GET at 2025-03-29 07:42:00
+getAllBookings API Started - Method: GET at 2025-03-29 07:42:10
+getAllBookings API Started - Method: GET at 2025-03-29 07:42:10
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:42:25
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:42:25
+Missing or invalid parameters: {"booking_id":2,"user_id":2}
+editBooking API Started - Method: GET at 2025-03-29 07:42:35
+Invalid Method: GET
+updateBookingStatus API Started - Method: OPTIONS at 2025-03-29 07:45:58
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-03-29 07:45:58
+Raw input: {"booking_id":1,"status":"confirmed"}
+Updating status for booking_id: 1 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 1 to confirmed: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getUserBookings API Started - Method: GET at 2025-03-29 07:46:05
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 3
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-21
+            [end_date] => 2025-04-17
+            [persons] => 4
+            [total_price] => 1920.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 4
+            [total_price] => 500.00
+            [status] => pending
+            [created_at] => 2025-03-29 00:51:32
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+        )
+
+)
+
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:46:05
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 3
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-21
+            [end_date] => 2025-04-17
+            [persons] => 4
+            [total_price] => 1920.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 4
+            [total_price] => 500.00
+            [status] => pending
+            [created_at] => 2025-03-29 00:51:32
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+        )
+
+)
+
+Bookings fetched successfully for user_id: 2
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:46:07
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:46:07
+editBooking API Started - Method: POST at 2025-03-29 07:46:09
+getUserBookings API Started - Method: GET at 2025-03-29 07:46:15
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 3
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-21
+            [end_date] => 2025-04-17
+            [persons] => 4
+            [total_price] => 1920.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 4
+            [total_price] => 500.00
+            [status] => pending
+            [created_at] => 2025-03-29 00:51:32
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+        )
+
+)
+
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-03-29 07:46:15
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 3
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-21
+            [end_date] => 2025-04-17
+            [persons] => 4
+            [total_price] => 1920.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 4
+            [total_price] => 500.00
+            [status] => pending
+            [created_at] => 2025-03-29 00:51:32
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+        )
+
+)
+
+Bookings fetched successfully for user_id: 2
+editBooking API Started - Method: OPTIONS at 2025-03-29 07:46:18
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-03-29 07:46:18
+editBooking API Started - Method: POST at 2025-03-29 07:46:20
+editBooking API Started - Method: POST at 2025-03-29 07:46:22
+Missing or invalid parameters: {"booking_id":1,"user_id":2}
+getAllBookings API Started - Method: GET at 2025-03-29 07:46:33
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 3
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-21
+            [end_date] => 2025-04-17
+            [persons] => 4
+            [total_price] => 1920.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 4
+            [total_price] => 500.00
+            [status] => pending
+            [created_at] => 2025-03-29 00:51:32
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+        )
+
+)
+
+getAllBookings API Started - Method: GET at 2025-03-29 07:46:33
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => america
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => hyd
+                )
+
+            [start_date] => 2025-03-28
+            [end_date] => 2025-04-04
+            [persons] => 3
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-03-21
+            [end_date] => 2025-04-17
+            [persons] => 4
+            [total_price] => 1920.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 4
+            [total_price] => 500.00
+            [status] => pending
+            [created_at] => 2025-03-29 00:51:32
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+        )
+
+)
+
