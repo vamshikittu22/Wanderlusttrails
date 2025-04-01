@@ -210,7 +210,7 @@ function FlightAndHotel() {
         passengers: 1,
     });
     const [hotelDetails, setHotelDetails] = useState({
-        destination: '',
+        hotel: '',
     });
     const [dates, setDates] = useState([null, null]); // [startDate, endDate]
     const today = new Date();

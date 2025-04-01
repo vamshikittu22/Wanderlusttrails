@@ -66,12 +66,13 @@ import UserDetails from '../components/UserDetails';
 
 function BookingDetails() {
     const { user } = useUser();
-    const [packageDetails, setPackageDetails] = useState({ name: '', location: '', price: '', imageUrl: '' });
+    const [packageDetails, setPackageDetails] = useState({ id: '',name: '', location: '', price: '', imageUrl: '' });
 
     useEffect(() => {
         const storedPackage = JSON.parse(sessionStorage.getItem('selectedPackage'));
         if (storedPackage) {
             setPackageDetails({
+                id: storedPackage.id, 
                 name: storedPackage.name,
                 location: storedPackage.location,
                 price: parseFloat(storedPackage.price),

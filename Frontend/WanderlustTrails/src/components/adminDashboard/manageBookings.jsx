@@ -1,133 +1,12 @@
-// import React, { useState, useEffect } from 'react';
-// import axios from 'axios';
-// import { toast } from 'react-toastify';
-
-// function ManageBookings() {
-//     const [bookings, setBookings] = useState([]);
-//     const [loading, setLoading] = useState(true);
-
-//     useEffect(() => {
-//         fetchBookings();
-//     }, []);
-
-//     const fetchBookings = async () => {
-//         try {
-//             const response = await axios.get(
-//                 'http://localhost/WanderlustTrails/Backend/config/booking/getAllBookings.php',
-//                 { headers: { 'Content-Type': 'application/json' } }
-//             );
-//             console.log("Fetched packages:", response.data);
-//             if (response.data.success) {
-//                 setBookings(response.data.data);
-//             } else {
-//                 toast.error(response.data.message || 'Failed to fetch bookings');
-//             }
-//         } catch (error) {
-//             toast.error('Error fetching bookings: ' + (error.response?.data?.message || error.message));
-//         } finally {
-//             setLoading(false);
-//         }
-//     };
-
-//     const handleApproveBooking = async (bookingId) => {
-//         try {
-//             const payload = { booking_id: bookingId };
-//             console.log("Sending payload to approveBooking.php:", JSON.stringify(payload));
-//             const response = await axios.post(
-//                 'http://localhost/WanderlustTrails/Backend/config/booking/approveBooking.php',
-//                 payload,
-//                 { headers: { 'Content-Type': 'application/json' } }
-//             );
-//             console.log("Response from approveBooking.php:", response.data); // Log full response
-//             if (response.data.success) {
-//                 setBookings((prevBookings) =>
-//                     prevBookings.map((booking) =>
-//                         booking.id === bookingId ? { ...booking, status: 'confirmed' } : booking
-//                     )
-//                 );
-//                 toast.success('Booking approved successfully!');
-//             } else {
-//                 console.error("Approval failed:", response.data.message);
-//                 toast.error(response.data.message || 'Failed to approve booking');
-//             }
-//         } catch (error) {
-//             console.error("Error approving booking:", error.response?.data || error.message);
-//             toast.error('Error approving booking: ' + (error.response?.data?.message || error.message));
-//         }
-//     };
-
-//     if (loading) {
-//         return <div className="text-center p-4 text-white">Loading bookings...</div>;
-//     }
-
-//     return (
-//         <div className="max-w-6xl mx-auto p-6 bg-gray-700 text-white rounded-lg shadow-md">
-//             <h2 className="text-2xl font-semibold text-orange-600 text-center mb-6">Manage Bookings</h2>
-//             {bookings.length === 0 ? (
-//                 <p className="text-center text-gray-300">No bookings found.</p>
-//             ) : (
-//                 <div className="overflow-x-auto">
-//                     <table className="min-w-full bg-gray-800 border border-gray-400 text-white">
-//                         <thead>
-//                             <tr className="bg-gray-600">
-//                                 <th className="py-2 px-4 border-b border-gray-400">ID</th>
-//                                 <th className="py-2 px-4 border-b border-gray-400">User</th>
-//                                 <th className="py-2 px-4 border-b border-gray-400">Type</th>
-//                                 <th className="py-2 px-4 border-b border-gray-400">Flight Details</th>
-//                                 <th className="py-2 px-4 border-b border-gray-400">Hotel Details</th>
-//                                 <th className="py-2 px-4 border-b border-gray-400">Start Date</th>
-//                                 <th className="py-2 px-4 border-b border-gray-400">End Date</th>
-//                                 <th className="py-2 px-4 border-b border-gray-400">Persons</th>
-//                                 <th className="py-2 px-4 border-b border-gray-400">Total Price</th>
-//                                 <th className="py-2 px-4 border-b border-gray-400">Status</th>
-//                                 <th className="py-2 px-4 border-b border-gray-400">Created At</th>
-//                                 <th className="py-2 px-4 border-b border-gray-400">Actions</th>
-//                             </tr>
-//                         </thead>
-//                         <tbody>
-//                             {bookings.map((booking) => (
-//                                 <tr key={booking.id} className="hover:bg-gray-600">
-//                                     <td className="py-2 px-4 border-b border-gray-400">{booking.id}</td>
-//                                     <td className="py-2 px-4 border-b border-gray-400">{`${booking.firstName} ${booking.lastName}`}</td>
-//                                     <td className="py-2 px-4 border-b border-gray-400">{booking.booking_type}</td>
-//                                     <td className="py-2 px-4 border-b border-gray-400">{booking.flight_details ? `${booking.flight_details.from} to ${booking.flight_details.to}` : '-'}</td>
-//                                     <td className="py-2 px-4 border-b border-gray-400">{booking.hotel_details ? booking.hotel_details.destination : '-'}</td>
-//                                     <td className="py-2 px-4 border-b border-gray-400">{booking.start_date}</td>
-//                                     <td className="py-2 px-4 border-b border-gray-400">{booking.end_date}</td>
-//                                     <td className="py-2 px-4 border-b border-gray-400">{booking.persons}</td>
-//                                     <td className="py-2 px-4 border-b border-gray-400">${booking.total_price}</td>
-//                                     <td className="py-2 px-4 border-b border-gray-400">{booking.status}</td>
-//                                     <td className="py-2 px-4 border-b border-gray-400">{new Date(booking.created_at).toLocaleString()}</td>
-//                                     <td className="py-2 px-4 border-b border-gray-400">
-//                                         {booking.status === 'pending' && (
-//                                             <button
-//                                                 onClick={() => handleApproveBooking(booking.id)}
-//                                                 className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
-//                                             >
-//                                                 Approve
-//                                             </button>
-//                                         )}
-//                                     </td>
-//                                 </tr>
-//                             ))}
-//                         </tbody>
-//                     </table>
-//                 </div>
-//             )}
-//         </div>
-//     );
-// }
-
-// export default ManageBookings;
-
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
 function ManageBookings() {
     const [bookings, setBookings] = useState([]);
+    const [filteredBookings, setFilteredBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [statusFilter, setStatusFilter] = useState('all');
 
     useEffect(() => {
         fetchBookings();
@@ -139,9 +18,10 @@ function ManageBookings() {
                 'http://localhost/WanderlustTrails/Backend/config/booking/getAllBookings.php',
                 { headers: { 'Content-Type': 'application/json' } }
             );
-            console.log("Fetched packages:", response.data);
+            console.log("Fetched bookings:", response.data);
             if (response.data.success) {
                 setBookings(response.data.data);
+                setFilteredBookings(response.data.data);
             } else {
                 toast.error(response.data.message || 'Failed to fetch bookings');
             }
@@ -154,6 +34,9 @@ function ManageBookings() {
 
     const handleStatusChange = async (bookingId, newStatus) => {
         try {
+            const currentBooking = bookings.find(b => b.id === bookingId);
+            const oldPrice = currentBooking.total_price;
+
             const payload = { booking_id: bookingId, status: newStatus };
             console.log("Sending payload to updateBookingStatus.php:", JSON.stringify(payload));
             const response = await axios.post(
@@ -163,20 +46,32 @@ function ManageBookings() {
             );
             console.log("Response from updateBookingStatus.php:", response.data);
             if (response.data.success) {
-                setBookings((prevBookings) =>
-                    prevBookings.map((booking) =>
-                        booking.id === bookingId ? { ...booking, status: newStatus } : booking
-                    )
-                );
                 toast.success('Booking status updated successfully!');
+                await fetchBookings(); // Refresh the list
+
+                const updatedBooking = bookings.find(b => b.id === bookingId);
+                const newPrice = updatedBooking.total_price;
+                if (newStatus === 'confirmed' && oldPrice !== newPrice) {
+                    const priceChange = newPrice - oldPrice;
+                    toast.info(`Price updated: ${priceChange >= 0 ? '+' : ''}$${priceChange.toFixed(2)} (New total: $${newPrice.toFixed(2)})`);
+                }
             } else {
                 console.error("Status update failed:", response.data.message);
                 toast.error(response.data.message || 'Failed to update booking status');
             }
         } catch (error) {
             console.error("Error updating status:", error.response?.data || error.message);
-            const errorMessage = error.response?.data?.message || error.message || 'Unknown error';
-            toast.error('Error updating booking status: ' + errorMessage);
+            toast.error('Error updating booking status: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
+    const handleFilterChange = (e) => {
+        const selectedStatus = e.target.value;
+        setStatusFilter(selectedStatus);
+        if (selectedStatus === 'all') {
+            setFilteredBookings(bookings);
+        } else {
+            setFilteredBookings(bookings.filter(booking => booking.status === selectedStatus));
         }
     };
 
@@ -185,58 +80,115 @@ function ManageBookings() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto p-6 bg-gray-700 text-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold text-orange-600 text-center mb-6">Manage Bookings</h2>
-            {bookings.length === 0 ? (
-                <p className="text-center text-gray-300">No bookings found.</p>
+        <div className="max-w-6xl mx-auto p-6 bg-gray-700 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold text-orange-600">Manage Bookings</h2>
+                <div className="flex items-center">
+                    <label className="text-gray-300 font-semibold mr-2">Filter:</label>
+                    <select
+                        value={statusFilter}
+                        onChange={handleFilterChange}
+                        className="bg-gray-800 text-white border border-gray-400 rounded px-3 py-1 focus:outline-none focus:border-orange-600"
+                    >
+                        <option value="all">All</option>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="canceled">Canceled</option>
+                    </select>
+                </div>
+            </div>
+
+            {filteredBookings.length === 0 ? (
+                <p className="text-center text-gray-300">No bookings found for this status.</p>
             ) : (
-                <div className="overflow-x-auto">
-                    <table className="min-w-full bg-gray-800 border border-gray-400 text-white">
-                        <thead>
-                            <tr className="bg-gray-600">
-                                <th className="py-2 px-4 border-b border-gray-400">ID</th>
-                                <th className="py-2 px-4 border-b border-gray-400">User</th>
-                                <th className="py-2 px-4 border-b border-gray-400">Type</th>
-                                <th className="py-2 px-4 border-b border-gray-400">Flight Details</th>
-                                <th className="py-2 px-4 border-b border-gray-400">Hotel Details</th>
-                                <th className="py-2 px-4 border-b border-gray-400">Start Date</th>
-                                <th className="py-2 px-4 border-b border-gray-400">End Date</th>
-                                <th className="py-2 px-4 border-b border-gray-400">Persons</th>
-                                <th className="py-2 px-4 border-b border-gray-400">Total Price</th>
-                                <th className="py-2 px-4 border-b border-gray-400">Status</th>
-                                <th className="py-2 px-4 border-b border-gray-400">Created At</th>
-                                <th className="py-2 px-4 border-b border-gray-400">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {bookings.map((booking) => (
-                                <tr key={booking.id} className="hover:bg-gray-600">
-                                    <td className="py-2 px-4 border-b border-gray-400">{booking.id}</td>
-                                    <td className="py-2 px-4 border-b border-gray-400">{`${booking.firstName} ${booking.lastName}`}</td>
-                                    <td className="py-2 px-4 border-b border-gray-400">{booking.booking_type}</td>
-                                    <td className="py-2 px-4 border-b border-gray-400">{booking.flight_details ? `${booking.flight_details.from} to ${booking.flight_details.to}` : '-'}</td>
-                                    <td className="py-2 px-4 border-b border-gray-400">{booking.hotel_details ? booking.hotel_details.destination : '-'}</td>
-                                    <td className="py-2 px-4 border-b border-gray-400">{booking.start_date}</td>
-                                    <td className="py-2 px-4 border-b border-gray-400">{booking.end_date}</td>
-                                    <td className="py-2 px-4 border-b border-gray-400">{booking.persons}</td>
-                                    <td className="py-2 px-4 border-b border-gray-400">${booking.total_price}</td>
-                                    <td className="py-2 px-4 border-b border-gray-400">{booking.status}</td>
-                                    <td className="py-2 px-4 border-b border-gray-400">{new Date(booking.created_at).toLocaleString()}</td>
-                                    <td className="py-2 px-4 border-b border-gray-400">
-                                        <select
-                                            value={booking.status}
-                                            onChange={(e) => handleStatusChange(booking.id, e.target.value)}
-                                            className="bg-gray-700 text-white border border-gray-400 rounded px-2 py-1 focus:outline-none focus:border-blue-500"
-                                        >
-                                            <option value="pending">Pending</option>
-                                            <option value="confirmed">Confirmed</option>
-                                            <option value="canceled">Canceled</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {filteredBookings.map((booking) => (
+                        <div
+                            key={booking.id}
+                            className="bg-gray-800 text-white rounded-lg shadow-lg p-6 relative border-l-4 border-orange-600"
+                        >
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-bold text-orange-600">
+                                    Booking #{booking.id}
+                                </h3>
+                                <span
+                                    className={`text-sm px-2 py-1 rounded-full ${
+                                        booking.status === 'confirmed'
+                                            ? 'bg-green-500'
+                                            : booking.status === 'pending'
+                                            ? 'bg-yellow-500'
+                                            : 'bg-red-500'
+                                    }`}
+                                >
+                                    {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                </span>
+                            </div>
+
+                            <div className="space-y-2">
+                                <p>
+                                    <span className="font-semibold text-gray-300">User:</span>{' '}
+                                    {`${booking.firstName} ${booking.lastName}`}
+                                </p>
+                                <p>
+                                    <span className="font-semibold text-gray-300">Type:</span>{' '}
+                                    {booking.booking_type}
+                                </p>
+                                <p>
+                                    <span className="font-semibold text-gray-300">Flight Details:</span>{' '}
+                                    {booking.flight_details
+                                        ? `${booking.flight_details.from} to ${booking.flight_details.to}`
+                                        : '-'}
+                                </p>
+                                <p>
+                                    <span className="font-semibold text-gray-300">Hotel:</span>{' '}
+                                    {booking.hotel_details ? booking.hotel_details.hotel : '-'}
+                                </p>
+                                <p>
+                                    <span className="font-semibold text-gray-300">Start Date:</span>{' '}
+                                    {booking.start_date}
+                                </p>
+                                <p>
+                                    <span className="font-semibold text-gray-300">End Date:</span>{' '}
+                                    {booking.end_date}
+                                </p>
+                                <p>
+                                    <span className="font-semibold text-gray-300">Persons:</span>{' '}
+                                    {booking.persons}
+                                </p>
+                                <p>
+                                    <span className="font-semibold text-gray-300">Total Price:</span>{' '}
+                                    ${booking.total_price}
+                                </p>
+                                {booking.pending_changes && (
+                                    <div>
+                                        <span className="font-semibold text-gray-300">Pending Changes:</span>
+                                        <ul className="list-disc pl-5">
+                                            {Object.entries(booking.pending_changes).map(([key, value]) => (
+                                                <li key={key}>{key}: {value}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                <p>
+                                    <span className="font-semibold text-gray-300">Created At:</span>{' '}
+                                    {new Date(booking.created_at).toLocaleString()}
+                                </p>
+                            </div>
+
+                            <div className="mt-4">
+                                <label className="font-semibold text-gray-300">Status:</label>
+                                <select
+                                    value={booking.status}
+                                    onChange={(e) => handleStatusChange(booking.id, e.target.value)}
+                                    className="mt-1 bg-gray-700 text-white border border-gray-400 rounded px-2 py-1 w-full focus:outline-none focus:border-blue-500"
+                                >
+                                    <option value="pending">Pending</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="canceled">Canceled</option>
+                                </select>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
         </div>
