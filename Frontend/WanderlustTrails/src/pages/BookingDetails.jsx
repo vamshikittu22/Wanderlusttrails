@@ -82,29 +82,35 @@ function BookingDetails() {
     }, []);
 
     const handleBookingSubmit = async (formData) => {
+        const bookingData = {
+            user_id: user.id,
+            booking_type: 'package',
+            package_id: packageDetails.id,
+            //  package_name: packageDetails.name, 
+            start_date: formData.startDate.toISOString().split('T')[0],
+            end_date: formData.endDate.toISOString().split('T')[0],
+            persons: formData.persons
+            // total_price: formData.totalPrice
+            // Add any other necessary fields from formData
+        };
+        console.log("Booking data being sent:", bookingData);
         try {
             const response = await axios.post(
                 'http://localhost/WanderlustTrails/backend/config/booking/createBooking.php',
-                {
-                    user_id: user.id,
-                    booking_type: 'package',
-                    package_id: packageDetails.id, // Assume storedPackage includes an ID
-                    start_date: formData.startDate.toISOString().split('T')[0],
-                    end_date: formData.endDate.toISOString().split('T')[0],
-                    persons: formData.persons,
-                    total_price: formData.totalPrice
-                },
+                bookingData,
                 { headers: { 'Content-Type': 'application/json' } }
             );
+            console.log("Booking response:", response.data);
             if (response.data.success) {
                 toast.success('Booking saved! Proceed to payment.', { position: 'top-center', autoClose: 1000 });
-                return true; // Signal success for navigation
+                return true;
             } else {
                 toast.error(response.data.message);
                 return false;
             }
         } catch (error) {
-            toast.error('Error saving booking.');
+            console.error("Booking error:", error.response?.data || error.message);
+            toast.error('Error saving booking: ' + (error.response?.data?.message || error.message));
             return false;
         }
     };

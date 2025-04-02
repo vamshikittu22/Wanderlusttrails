@@ -7,6 +7,8 @@ function ManageBookings() {
     const [filteredBookings, setFilteredBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('all');
+    const [updatingStatus, setUpdatingStatus] = useState(false);
+
 
     useEffect(() => {
         fetchBookings();
@@ -26,6 +28,7 @@ function ManageBookings() {
                 toast.error(response.data.message || 'Failed to fetch bookings');
             }
         } catch (error) {
+            console.error('Error fetching bookings:', error);
             toast.error('Error fetching bookings: ' + (error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
@@ -33,6 +36,8 @@ function ManageBookings() {
     };
 
     const handleStatusChange = async (bookingId, newStatus) => {
+        if (!confirm(`Are you sure you want to change the status to ${newStatus}?`)) return;
+
         try {
             const currentBooking = bookings.find(b => b.id === bookingId);
             const oldPrice = currentBooking.total_price;
@@ -62,6 +67,8 @@ function ManageBookings() {
         } catch (error) {
             console.error("Error updating status:", error.response?.data || error.message);
             toast.error('Error updating booking status: ' + (error.response?.data?.message || error.message));
+        }finally {
+            setUpdatingStatus(false);
         }
     };
 
@@ -88,7 +95,11 @@ function ManageBookings() {
                     <select
                         value={statusFilter}
                         onChange={handleFilterChange}
-                        className="bg-gray-800 text-white border border-gray-400 rounded px-3 py-1 focus:outline-none focus:border-orange-600"
+                        // className="bg-gray-800 text-white border border-gray-400 rounded px-3 py-1 focus:outline-none focus:border-orange-600"
+                        disabled={updatingStatus}
+                        className={`mt-1 bg-gray-700 text-white border border-gray-400 rounded px-2 py-1 w-full ${
+                            updatingStatus ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                     >
                         <option value="all">All</option>
                         <option value="pending">Pending</option>
@@ -124,6 +135,7 @@ function ManageBookings() {
                                 </span>
                             </div>
 
+                            
                             <div className="space-y-2">
                                 <p>
                                     <span className="font-semibold text-gray-300">User:</span>{' '}
@@ -133,16 +145,32 @@ function ManageBookings() {
                                     <span className="font-semibold text-gray-300">Type:</span>{' '}
                                     {booking.booking_type}
                                 </p>
-                                <p>
-                                    <span className="font-semibold text-gray-300">Flight Details:</span>{' '}
-                                    {booking.flight_details
-                                        ? `${booking.flight_details.from} to ${booking.flight_details.to}`
-                                        : '-'}
-                                </p>
-                                <p>
-                                    <span className="font-semibold text-gray-300">Hotel:</span>{' '}
-                                    {booking.hotel_details ? booking.hotel_details.hotel : '-'}
-                                </p>
+                                {booking.booking_type === 'package' ? (
+                                    <>
+                                        <p>
+                                            <span className="font-semibold text-gray-300">Package ID:</span>{' '}
+                                            {booking.package_id || 'N/A'}
+                                        </p>
+                                        <p>
+                                            <span className="font-semibold text-gray-300">Package Name:</span>{' '}
+                                            {booking.package_name || 'N/A'}
+                                        </p>
+                                    </>
+                                    
+                                ) : (
+                                    <>
+                                        <p>
+                                            <span className="font-semibold text-gray-300">Flight Details:</span>{' '}
+                                            {booking.flight_details
+                                                ? `${booking.flight_details.from} to ${booking.flight_details.to}`
+                                                : '-'}
+                                        </p>
+                                        <p>
+                                            <span className="font-semibold text-gray-300">Hotel:</span>{' '}
+                                            {booking.hotel_details ? booking.hotel_details.hotel : '-'}
+                                        </p>
+                                    </>
+                                )}
                                 <p>
                                     <span className="font-semibold text-gray-300">Start Date:</span>{' '}
                                     {booking.start_date}
@@ -161,7 +189,7 @@ function ManageBookings() {
                                 </p>
                                 {booking.pending_changes && (
                                     <div>
-                                        <span className="font-semibold text-gray-300">Pending Changes:</span>
+                                        <span className="font-semibold text-yellow-300">Pending Changes:</span>
                                         <ul className="list-disc pl-5">
                                             {Object.entries(booking.pending_changes).map(([key, value]) => (
                                                 <li key={key}>{key}: {value}</li>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -15,7 +14,8 @@ function UserViewBookings() {
         persons: '',
         from: '',
         to: '',
-        hotel: ''
+        hotel: '',
+        package_id: '' // Added for editing package_id
     });
 
     useEffect(() => {
@@ -57,7 +57,7 @@ function UserViewBookings() {
                 { headers: { 'Content-Type': 'application/json' } }
             );
             if (response.data.success) {
-                fetchBookings(); // Refresh after cancellation
+                fetchBookings();
                 toast.success('Booking canceled successfully!');
             } else {
                 toast.error(response.data.message);
@@ -75,7 +75,8 @@ function UserViewBookings() {
             persons: booking.pending_changes?.persons || booking.persons,
             from: booking.pending_changes?.from || booking.flight_details?.from || '',
             to: booking.pending_changes?.to || booking.flight_details?.to || '',
-            hotel: booking.pending_changes?.hotel || booking.hotel_details?.hotel || ''
+            hotel: booking.pending_changes?.hotel || booking.hotel_details?.hotel || '',
+            package_id: booking.pending_changes?.package_id || booking.package_id || '' // Initialize package_id
         };
         setEditForm(newEditForm);
         console.log('Edit form initialized:', newEditForm);
@@ -87,14 +88,27 @@ function UserViewBookings() {
 
     const handleEditSubmit = async (bookingId) => {
         try {
-            const changes = {
-                start_date: editForm.start_date,
-                end_date: editForm.end_date,
-                persons: editForm.persons,
-                from: editForm.from,
-                to: editForm.to,
-                hotel: editForm.hotel
-            };
+            const changes = {};
+            // Only include fields that have changed from the original booking
+            const booking = bookings.find(b => b.id === bookingId);
+            if (editForm.start_date !== booking.start_date) changes.start_date = editForm.start_date;
+            if (editForm.end_date !== booking.end_date) changes.end_date = editForm.end_date;
+            if (editForm.persons !== booking.persons) changes.persons = parseInt(editForm.persons);
+            if (booking.booking_type === 'flight_hotel') {
+                if (editForm.from !== (booking.flight_details?.from || '')) changes.from = editForm.from;
+                if (editForm.to !== (booking.flight_details?.to || '')) changes.to = editForm.to;
+                if (editForm.hotel !== (booking.hotel_details?.hotel || '')) changes.hotel = editForm.hotel;
+            }
+            if (booking.booking_type === 'package' && editForm.package_id !== booking.package_id) {
+                changes.package_id = parseInt(editForm.package_id);
+            }
+
+            if (Object.keys(changes).length === 0) {
+                toast.info('No changes detected.');
+                setEditBookingId(null);
+                return;
+            }
+
             console.log('Submitting edit with changes:', changes);
             const response = await axios.post(
                 'http://localhost/WanderlustTrails/Backend/config/booking/editBooking.php',
@@ -104,7 +118,7 @@ function UserViewBookings() {
             if (response.data.success) {
                 setEditBookingId(null);
                 toast.success('Edit request submitted and awaiting admin confirmation!');
-                fetchBookings(); // Refresh after edit
+                fetchBookings();
             } else {
                 toast.error(response.data.message);
             }
@@ -147,7 +161,25 @@ function UserViewBookings() {
                             <div className="space-y-2">
                                 <p><span className="font-semibold text-gray-300">Type:</span> {booking.booking_type}</p>
                                 {booking.booking_type === 'package' ? (
-                                    <p><span className="font-semibold text-gray-300">Package ID:</span> {booking.package_id}</p>
+                                    <>
+                                        <p>
+                                            <span className="font-semibold text-gray-300">Package:</span>{' '}
+                                            {booking.package_name || 'Unknown Package'} (ID:{' '}
+                                            {editBookingId === booking.id ? (
+                                                <input
+                                                    type="number"
+                                                    name="package_id"
+                                                    value={editForm.package_id}
+                                                    onChange={handleEditChange}
+                                                    className="bg-gray-700 text-white border border-gray-400 rounded px-2 py-1 w-20"
+                                                    min="1"
+                                                />
+                                            ) : (
+                                                booking.package_id
+                                            )}
+                                            )
+                                        </p>
+                                    </>
                                 ) : (
                                     <>
                                         <p><span className="font-semibold text-gray-300">From:</span>{' '}
@@ -197,6 +229,7 @@ function UserViewBookings() {
                                             type="date"
                                             name="start_date"
                                             value={editForm.start_date}
+                                            min={new Date().toISOString().split('T')[0]}
                                             onChange={handleEditChange}
                                             className="bg-gray-700 text-white border border-gray-400 rounded px-2 py-1 w-full"
                                         />
@@ -279,116 +312,6 @@ function UserViewBookings() {
 
 export default UserViewBookings;
 
-// // import React, { useState, useEffect } from "react";
-// // import axios from "axios";
-
-// // const UserViewBookings = () => {
-// //     const [bookings, setBookings] = useState(null); // Similar to 'user' in UserProfile
-// //     const [loading, setLoading] = useState(true);  // Add loading state for clarity
-
-// //     useEffect(() => {
-// //         const fetchUserBookings = async () => {
-// //             try {
-// //                 const userId = localStorage.getItem("userId");
-// //                 console.log("User ID from localStorage:", userId);
-// //                 if (!userId) {
-// //                     alert("Please log in to view your bookings.");
-// //                     return;
-// //                 }
-// //                 const response = await axios.get(
-// //                     `http://localhost/WanderlustTrails/Backend/config/booking/getUserBooking.php?user_id=${userId}`,
-// //                     { headers: { "Content-Type": "application/json" } }
-// //                 );
-// //                 console.log("Response from getUserBooking.php:", response.data);
-// //                 if (response.data.success) {
-// //                     setBookings(response.data.data); // Array of bookings
-// //                 } else {
-// //                     console.error("Failed to fetch bookings:", response.data);
-// //                     alert("Failed to fetch bookings: " + (response.data.message || "Unknown error"));
-// //                 }
-// //             } catch (error) {
-// //                 console.error("Error fetching bookings:", error.response?.data || error.message);
-// //                 alert("Error fetching bookings: " + (error.response?.data?.message || "Server error"));
-// //             } finally {
-// //                 setLoading(false);
-// //             }
-// //         };
-// //         fetchUserBookings();
-// //     }, []);
-
-// //     if (loading) {
-// //         return <div className="p-8 text-white">Loading bookings...</div>;
-// //     }
-
-// //     if (!bookings || bookings.length === 0) {
-// //         return (
-// //             <div className="p-6 bg-gray-700 text-white rounded-lg shadow-md">
-// //                 <h2 className="text-2xl text-orange-600 font-bold mb-4">Your Bookings</h2>
-// //                 <p>No bookings found.</p>
-// //             </div>
-// //         );
-// //     }
-
-// //     return (
-// //         <div className="p-6 bg-gray-700 text-white rounded-lg shadow-md">
-// //             <h2 className="text-2xl text-orange-600 font-bold mb-4">Your Bookings</h2>
-// //             <div className="grid grid-cols-1 gap-4">
-// //                 {bookings.map((booking) => (
-// //                     <div key={booking.id} className="bg-gray-800 p-4 rounded-md border border-gray-600">
-// //                         <h3 className="text-lg font-semibold">Booking ID: {booking.id}</h3>
-// //                         <div className="grid grid-cols-2 gap-2 mt-2">
-// //                             <div>
-// //                                 <label className="block text-sm font-medium">Type</label>
-// //                                 <p>{booking.booking_type}</p>
-// //                             </div>
-// //                             <div>
-// //                                 <label className="block text-sm font-medium">Start Date</label>
-// //                                 <p>{booking.start_date}</p>
-// //                             </div>
-// //                             <div>
-// //                                 <label className="block text-sm font-medium">End Date</label>
-// //                                 <p>{booking.end_date}</p>
-// //                             </div>
-// //                             <div>
-// //                                 <label className="block text-sm font-medium">Persons</label>
-// //                                 <p>{booking.persons}</p>
-// //                             </div>
-// //                             <div>
-// //                                 <label className="block text-sm font-medium">Total Price</label>
-// //                                 <p>${booking.total_price}</p>
-// //                             </div>
-// //                             <div>
-// //                                 <label className="block text-sm font-medium">Status</label>
-// //                                 <p>{booking.status}</p>
-// //                             </div>
-// //                             {booking.flight_details && (
-// //                                 <div>
-// //                                     <label className="block text-sm font-medium">Flight</label>
-// //                                     <p>{`${booking.flight_details.from} to ${booking.flight_details.to}, ${booking.flight_details.passengers} passenger(s)`}</p>
-// //                                 </div>
-// //                             )}
-// //                             {booking.hotel_details && (
-// //                                 <div>
-// //                                     <label className="block text-sm font-medium">Hotel</label>
-// //                                     <p>{booking.hotel_details.destination}</p>
-// //                                 </div>
-// //                             )}
-// //                             <div>
-// //                                 <label className="block text-sm font-medium">Created At</label>
-// //                                 <p>{new Date(booking.created_at).toLocaleString()}</p>
-// //                             </div>
-// //                         </div>
-// //                     </div>
-// //                 ))}
-// //             </div>
-// //         </div>
-// //     );
-// // };
-
-// // export default UserViewBookings;
-
-
-
 
 // import React, { useState, useEffect } from 'react';
 // import axios from 'axios';
@@ -447,9 +370,8 @@ export default UserViewBookings;
 //                 { booking_id: bookingId, user_id: user.id },
 //                 { headers: { 'Content-Type': 'application/json' } }
 //             );
-//             console.log('Cancel booking response:', response.data);
 //             if (response.data.success) {
-//                 setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'canceled' } : b));
+//                 fetchBookings(); // Refresh after cancellation
 //                 toast.success('Booking canceled successfully!');
 //             } else {
 //                 toast.error(response.data.message);
@@ -458,22 +380,6 @@ export default UserViewBookings;
 //             toast.error('Error canceling booking: ' + (error.response?.data?.message || error.message));
 //         }
 //     };
-
-//     // const handleEditClick = (booking) => {
-//     //     setEditBookingId(booking.id);
-//     //     setEditForm({
-//     //         start_date: booking.pending_changes?.start_date || booking.start_date,
-//     //         end_date: booking.pending_changes?.end_date || booking.end_date,
-//     //         persons: booking.pending_changes?.persons || booking.persons,
-//     //         from: booking.pending_changes?.from || booking.flight_details?.from || '',
-//     //         to: booking.pending_changes?.to || booking.flight_details?.to || '',
-//     //         hotel: booking.pending_changes?.hotel || booking.hotel_details?.hotel || ''
-//     //     });
-//     // };
-
-//     // const handleEditChange = (e) => {
-//     //     setEditForm({ ...editForm, [e.target.name]: e.target.value });
-//     // };
 
 //     const handleEditClick = (booking) => {
 //         setEditBookingId(booking.id);
@@ -491,7 +397,6 @@ export default UserViewBookings;
 
 //     const handleEditChange = (e) => {
 //         setEditForm({ ...editForm, [e.target.name]: e.target.value });
-//         console.log('Edit form updated:', { ...editForm, [e.target.name]: e.target.value });
 //     };
 
 //     const handleEditSubmit = async (bookingId) => {
@@ -511,9 +416,9 @@ export default UserViewBookings;
 //                 { headers: { 'Content-Type': 'application/json' } }
 //             );
 //             if (response.data.success) {
-//                 setBookings(bookings.map(b => b.id === bookingId ? { ...b, pending_changes: changes, status: 'pending' } : b));
 //                 setEditBookingId(null);
 //                 toast.success('Edit request submitted and awaiting admin confirmation!');
+//                 fetchBookings(); // Refresh after edit
 //             } else {
 //                 toast.error(response.data.message);
 //             }
@@ -554,17 +459,12 @@ export default UserViewBookings;
 //                             </div>
 
 //                             <div className="space-y-2">
-//                                 <p>
-//                                     <span className="font-semibold text-gray-300">Type:</span> {booking.booking_type}
-//                                 </p>
+//                                 <p><span className="font-semibold text-gray-300">Type:</span> {booking.booking_type}</p>
 //                                 {booking.booking_type === 'package' ? (
-//                                     <p>
-//                                         <span className="font-semibold text-gray-300">Package ID:</span> {booking.package_id}
-//                                     </p>
+//                                     <p><span className="font-semibold text-gray-300">Package ID:</span> {booking.package_id}</p>
 //                                 ) : (
 //                                     <>
-//                                         <p>
-//                                             <span className="font-semibold text-gray-300">From:</span>{' '}
+//                                         <p><span className="font-semibold text-gray-300">From:</span>{' '}
 //                                             {editBookingId === booking.id ? (
 //                                                 <input
 //                                                     type="text"
@@ -577,8 +477,7 @@ export default UserViewBookings;
 //                                                 booking.flight_details?.from || 'N/A'
 //                                             )}
 //                                         </p>
-//                                         <p>
-//                                             <span className="font-semibold text-gray-300">To:</span>{' '}
+//                                         <p><span className="font-semibold text-gray-300">To:</span>{' '}
 //                                             {editBookingId === booking.id ? (
 //                                                 <input
 //                                                     type="text"
@@ -591,8 +490,7 @@ export default UserViewBookings;
 //                                                 booking.flight_details?.to || 'N/A'
 //                                             )}
 //                                         </p>
-//                                         <p>
-//                                             <span className="font-semibold text-gray-300">Hotel:</span>{' '}
+//                                         <p><span className="font-semibold text-gray-300">Hotel:</span>{' '}
 //                                             {editBookingId === booking.id ? (
 //                                                 <input
 //                                                     type="text"
@@ -602,18 +500,18 @@ export default UserViewBookings;
 //                                                     className="bg-gray-700 text-white border border-gray-400 rounded px-2 py-1 w-full"
 //                                                 />
 //                                             ) : (
-//                                                 booking.hotel_details?.destination || 'N/A'
+//                                                 booking.hotel_details?.hotel || 'N/A'
 //                                             )}
 //                                         </p>
 //                                     </>
 //                                 )}
-//                                 <p>
-//                                     <span className="font-semibold text-gray-300">Start Date:</span>{' '}
+//                                 <p><span className="font-semibold text-gray-300">Start Date:</span>{' '}
 //                                     {editBookingId === booking.id ? (
 //                                         <input
 //                                             type="date"
 //                                             name="start_date"
 //                                             value={editForm.start_date}
+//                                             min={new Date().toISOString().split('T')[0]}
 //                                             onChange={handleEditChange}
 //                                             className="bg-gray-700 text-white border border-gray-400 rounded px-2 py-1 w-full"
 //                                         />
@@ -621,8 +519,7 @@ export default UserViewBookings;
 //                                         booking.start_date
 //                                     )}
 //                                 </p>
-//                                 <p>
-//                                     <span className="font-semibold text-gray-300">End Date:</span>{' '}
+//                                 <p><span className="font-semibold text-gray-300">End Date:</span>{' '}
 //                                     {editBookingId === booking.id ? (
 //                                         <input
 //                                             type="date"
@@ -635,8 +532,7 @@ export default UserViewBookings;
 //                                         booking.end_date
 //                                     )}
 //                                 </p>
-//                                 <p>
-//                                     <span className="font-semibold text-gray-300">Persons:</span>{' '}
+//                                 <p><span className="font-semibold text-gray-300">Persons:</span>{' '}
 //                                     {editBookingId === booking.id ? (
 //                                         <input
 //                                             type="number"
@@ -650,14 +546,16 @@ export default UserViewBookings;
 //                                         booking.persons
 //                                     )}
 //                                 </p>
-//                                 <p>
-//                                     <span className="font-semibold text-gray-300">Total Price:</span> ${booking.total_price}
-//                                 </p>
+//                                 <p><span className="font-semibold text-gray-300">Total Price:</span> ${booking.total_price}</p>
 //                                 {booking.pending_changes && (
-//                                     <p>
-//                                         <span className="font-semibold justify-between  text-gray-300">Pending Changes:</span>{' '}
-//                                         {JSON.stringify(booking.pending_changes)}
-//                                     </p>
+//                                     <div>
+//                                         <span className="font-semibold text-gray-300">Pending Changes:</span>
+//                                         <ul className="list-disc pl-5">
+//                                             {Object.entries(booking.pending_changes).map(([key, value]) => (
+//                                                 <li key={key}>{key}: {value}</li>
+//                                             ))}
+//                                         </ul>
+//                                     </div>
 //                                 )}
 //                             </div>
 
