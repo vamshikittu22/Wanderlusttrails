@@ -95810,3 +95810,4132 @@ BookingModel::getAllBookings: Array
 
 )
 
+getUserBookings API Started - Method: GET at 2025-04-03 06:46:18
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texas
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => 
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+)
+
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-04-03 06:46:18
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texas
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => 
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+)
+
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-04-03 06:47:18
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texas
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => 
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+)
+
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-04-03 06:47:18
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texas
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => 
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+)
+
+Bookings fetched successfully for user_id: 2
+createBooking API Started - Method: OPTIONS at 2025-04-05 02:55:10
+Handling OPTIONS
+createBooking API Started - Method: POST at 2025-04-05 02:55:10
+POST Data: Array
+(
+    [user_id] => 2
+    [booking_type] => package
+    [package_id] => 5
+    [start_date] => 2025-04-05
+    [end_date] => 2025-04-12
+    [persons] => 1
+)
+
+getPackageDetails: package_id=5, price=140, name=Atacama Desert
+createBooking: Calculated total_price=1120 for booking_type=package, persons=1, package_id=5
+BookingModel::createBooking Result: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Create booking result: {"success":true,"message":"Query executed successfully","affected_rows":1}
+getUserBookings API Started - Method: GET at 2025-04-05 02:55:16
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texas
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => 
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+    [9] => Array
+        (
+            [id] => 10
+            [booking_type] => package
+            [package_id] => 5
+            [package_name] => Atacama Desert
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-04-05
+            [end_date] => 2025-04-12
+            [persons] => 1
+            [total_price] => 1120.00
+            [status] => pending
+            [created_at] => 2025-04-04 19:55:10
+            [pending_changes] => 
+        )
+
+)
+
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-04-05 02:55:16
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texas
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => 
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+    [9] => Array
+        (
+            [id] => 10
+            [booking_type] => package
+            [package_id] => 5
+            [package_name] => Atacama Desert
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-04-05
+            [end_date] => 2025-04-12
+            [persons] => 1
+            [total_price] => 1120.00
+            [status] => pending
+            [created_at] => 2025-04-04 19:55:10
+            [pending_changes] => 
+        )
+
+)
+
+Bookings fetched successfully for user_id: 2
+getAllBookings API Started - Method: GET at 2025-04-05 02:55:33
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texas
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => 
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+    [9] => Array
+        (
+            [id] => 10
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 5
+            [package_name] => Atacama Desert
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-04-05
+            [end_date] => 2025-04-12
+            [persons] => 1
+            [total_price] => 1120.00
+            [status] => pending
+            [created_at] => 2025-04-04 19:55:10
+            [pending_changes] => 
+        )
+
+)
+
+getAllBookings API Started - Method: GET at 2025-04-05 02:55:33
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texas
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => 
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+    [9] => Array
+        (
+            [id] => 10
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 5
+            [package_name] => Atacama Desert
+            [flight_details] => 
+            [hotel_details] => 
+            [start_date] => 2025-04-05
+            [end_date] => 2025-04-12
+            [persons] => 1
+            [total_price] => 1120.00
+            [status] => pending
+            [created_at] => 2025-04-04 19:55:10
+            [pending_changes] => 
+        )
+
+)
+
+updateBookingStatus API Started - Method: OPTIONS at 2025-04-05 02:55:38
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-04-05 02:55:38
+Raw input: {"booking_id":10,"status":"confirmed"}
+Updating status for booking_id: 10 to confirmed
+getPackageDetails: package_id=5, price=140, name=Atacama Desert
+BookingModel::updateBookingStatus Result for booking_id 10 to confirmed: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getAllBookings API Started - Method: GET at 2025-04-05 02:55:38
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texas
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => 
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+    [9] => Array
+        (
+            [id] => 10
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 5
+            [package_name] => Atacama Desert
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-05
+            [end_date] => 2025-04-12
+            [persons] => 1
+            [total_price] => 1120.00
+            [status] => confirmed
+            [created_at] => 2025-04-04 19:55:10
+            [pending_changes] => 
+        )
+
+)
+
+editBooking API Started - Method: OPTIONS at 2025-04-05 02:55:46
+Handling OPTIONS request for editBooking
+editBooking API Started - Method: POST at 2025-04-05 02:55:46
+BookingModel::editBooking Result for booking_id 1: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+Edit result for booking_id 1: {"success":true,"message":"Edit request submitted and awaiting admin confirmation"}
+getUserBookings API Started - Method: GET at 2025-04-05 02:55:46
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texas
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => Array
+                (
+                    [hotel] => texashujj,m 
+                )
+
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+    [9] => Array
+        (
+            [id] => 10
+            [booking_type] => package
+            [package_id] => 5
+            [package_name] => Atacama Desert
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-05
+            [end_date] => 2025-04-12
+            [persons] => 1
+            [total_price] => 1120.00
+            [status] => confirmed
+            [created_at] => 2025-04-04 19:55:10
+            [pending_changes] => 
+        )
+
+)
+
+Bookings fetched successfully for user_id: 2
+getAllBookings API Started - Method: GET at 2025-04-05 02:55:52
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texas
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => Array
+                (
+                    [hotel] => texashujj,m 
+                )
+
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+    [9] => Array
+        (
+            [id] => 10
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 5
+            [package_name] => Atacama Desert
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-05
+            [end_date] => 2025-04-12
+            [persons] => 1
+            [total_price] => 1120.00
+            [status] => confirmed
+            [created_at] => 2025-04-04 19:55:10
+            [pending_changes] => 
+        )
+
+)
+
+getAllBookings API Started - Method: GET at 2025-04-05 02:55:52
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texas
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => pending
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => Array
+                (
+                    [hotel] => texashujj,m 
+                )
+
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+    [9] => Array
+        (
+            [id] => 10
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 5
+            [package_name] => Atacama Desert
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-05
+            [end_date] => 2025-04-12
+            [persons] => 1
+            [total_price] => 1120.00
+            [status] => confirmed
+            [created_at] => 2025-04-04 19:55:10
+            [pending_changes] => 
+        )
+
+)
+
+updateBookingStatus API Started - Method: OPTIONS at 2025-04-05 02:56:00
+Handling OPTIONS
+updateBookingStatus API Started - Method: POST at 2025-04-05 02:56:00
+Raw input: {"booking_id":1,"status":"confirmed"}
+Updating status for booking_id: 1 to confirmed
+BookingModel::updateBookingStatus Result for booking_id 1 to confirmed: Array
+(
+    [success] => 1
+    [message] => Query executed successfully
+    [affected_rows] => 1
+)
+
+getAllBookings API Started - Method: GET at 2025-04-05 02:56:00
+BookingModel::getAllBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texashujj,m 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => 
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+    [9] => Array
+        (
+            [id] => 10
+            [user_id] => 2
+            [firstName] => Krishna
+            [lastName] => Vamshi
+            [booking_type] => package
+            [package_id] => 5
+            [package_name] => Atacama Desert
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-05
+            [end_date] => 2025-04-12
+            [persons] => 1
+            [total_price] => 1120.00
+            [status] => confirmed
+            [created_at] => 2025-04-04 19:55:10
+            [pending_changes] => 
+        )
+
+)
+
+OTP for krishnavamshi.2297@gmail.com: 260527
+OTP for krishnavamshi.2297@gmail.com: 869626
+OTP for krishnavamshi.2297@gmail.com: 841378
+OTP for krishnavamshi.2297@gmail.com: 896525
+OTP for krishnavamshi.2297@gmail.com: 637497
+OTP for krishnavamshi.2297@gmail.com: 601355
+[2025-04-05 05:35:17] OTP for user@wl.com: 150649
+[2025-04-05 05:44:07] OTP for user@wl.com: 488005
+[2025-04-05 06:02:42] OTP for admin@wl.com: 707788 (Email failed)
+[2025-04-05 06:41:24] OTP for admin@wl.com: 210374 (Email failed)
+[2025-04-05 06:42:49] OTP for admin@wl.com: 766547 (Email failed)
+[2025-04-05 06:48:09] OTP for krishnavamshi.2297@gmail.com: 108209 (Email failed)
+[2025-04-05 07:40:29] OTP for krishnavamshi.2297@gmail.com: 117430 (Email failed: SMTP Error: Could not authenticate.)
+[2025-04-05 07:45:19] OTP for krishnavamshi.2297@gmail.com: 008197 (Email failed: SMTP Error: Could not authenticate.)
+[2025-04-05 07:50:28] OTP for krishnavamshi.2297@gmail.com: 643278 (Email failed: SMTP Error: Could not authenticate.)
+[2025-04-06 07:46:40] OTP for krishnavamshi.2297@gmail.com: 926658 (Email failed: SMTP Error: Could not authenticate.)
+getUserBookings API Started - Method: GET at 2025-04-06 08:04:38
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texashujj,m 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => 
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+    [9] => Array
+        (
+            [id] => 10
+            [booking_type] => package
+            [package_id] => 5
+            [package_name] => Atacama Desert
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-05
+            [end_date] => 2025-04-12
+            [persons] => 1
+            [total_price] => 1120.00
+            [status] => confirmed
+            [created_at] => 2025-04-04 19:55:10
+            [pending_changes] => 
+        )
+
+)
+
+Bookings fetched successfully for user_id: 2
+getUserBookings API Started - Method: GET at 2025-04-06 08:04:38
+Fetching bookings for user_id: 2
+BookingModel::getUserBookings: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => cali
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => texashujj,m 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 1
+            [total_price] => 310.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:45:49
+            [pending_changes] => 
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [booking_type] => package
+            [package_id] => 22
+            [package_name] => Algarve Region
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-19
+            [end_date] => 2025-04-21
+            [persons] => 1
+            [total_price] => 510.00
+            [status] => confirmed
+            [created_at] => 2025-03-28 20:50:48
+            [pending_changes] => 
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => HYD
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-03-30
+            [persons] => 2
+            [total_price] => 360.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 00:51:32
+            [pending_changes] => 
+        )
+
+    [3] => Array
+        (
+            [id] => 4
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => CANADA
+                    [to] => AMERICA
+                    [passengers] => 2
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => gutjkvkhlbn 
+                )
+
+            [start_date] => 2025-03-29
+            [end_date] => 2025-04-01
+            [persons] => 3
+            [total_price] => 1710.00
+            [status] => confirmed
+            [created_at] => 2025-03-29 01:00:28
+            [pending_changes] => 
+        )
+
+    [4] => Array
+        (
+            [id] => 5
+            [booking_type] => flight_hotel
+            [package_id] => 
+            [package_name] => 
+            [flight_details] => Array
+                (
+                    [from] => hyderabad
+                    [to] => AMERICA
+                    [passengers] => 1
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                    [destination] => KANSAS
+                )
+
+            [start_date] => 2025-04-16
+            [end_date] => 2025-04-17
+            [persons] => 1
+            [total_price] => 500.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:28:50
+            [pending_changes] => 
+        )
+
+    [5] => Array
+        (
+            [id] => 6
+            [booking_type] => package
+            [package_id] => 1
+            [package_name] => Andes Mountain Range
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-03
+            [persons] => 3
+            [total_price] => 900.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 03:39:09
+            [pending_changes] => 
+        )
+
+    [6] => Array
+        (
+            [id] => 7
+            [booking_type] => package
+            [package_id] => 4
+            [package_name] => Banff National Park
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-04
+            [persons] => 1
+            [total_price] => 540.00
+            [status] => confirmed
+            [created_at] => 2025-04-01 04:04:16
+            [pending_changes] => 
+        )
+
+    [7] => Array
+        (
+            [id] => 8
+            [booking_type] => package
+            [package_id] => 2
+            [package_name] => Uluru (Ayers Rock)
+            [flight_details] => Array
+                (
+                    [from] => 
+                    [to] => 
+                )
+
+            [hotel_details] => Array
+                (
+                    [hotel] => 
+                )
+
+            [start_date] => 2025-04-02
+            [end_date] => 2025-04-02
+            [persons] => 2
+            [total_price] => 400.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 00:17:05
+            [pending_changes] => 
+        )
+
+    [8] => Array
+        (
+            [id] => 9
+            [booking_type] => package
+            [package_id] => 8
+            [package_name] => Santorini
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-18
+            [end_date] => 2025-04-19
+            [persons] => 2
+            [total_price] => 880.00
+            [status] => confirmed
+            [created_at] => 2025-04-02 02:42:44
+            [pending_changes] => 
+        )
+
+    [9] => Array
+        (
+            [id] => 10
+            [booking_type] => package
+            [package_id] => 5
+            [package_name] => Atacama Desert
+            [flight_details] => Array
+                (
+                )
+
+            [hotel_details] => Array
+                (
+                )
+
+            [start_date] => 2025-04-05
+            [end_date] => 2025-04-12
+            [persons] => 1
+            [total_price] => 1120.00
+            [status] => confirmed
+            [created_at] => 2025-04-04 19:55:10
+            [pending_changes] => 
+        )
+
+)
+
+Bookings fetched successfully for user_id: 2
