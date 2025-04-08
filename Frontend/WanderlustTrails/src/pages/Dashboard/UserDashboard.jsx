@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import UserProfile from "../../components/userDashboard/UserProfile.jsx";
 import UserViewBookings from "../../components/userDashboard/userViewBookings.jsx";
+import UserReviews from "../../components/userDashboard/UserReviews.jsx";
 
 const UserDashboard = () => {
     const [activeSection, setActiveSection] = useState("profile");
@@ -10,10 +11,13 @@ const UserDashboard = () => {
         switch (activeSection) {
             case "profile":
                 return <UserProfile />;
-            case "bookings":
-                return <UserViewBookings />;
+            case "bookings": 
+                return <UserViewBookings />;         
+            case "reviews":
+                return <UserReviews />;
             default:
                 return <UserProfile /> ;
+
         }
      }
 
@@ -34,6 +38,12 @@ const UserDashboard = () => {
                         className={`py-2 px-4 rounded-lg ${activeSection === "bookings" ? "bg-gray-700" : "hover:bg-gray-700"}`}
                     >
                         Bookings    
+                    </button>
+                    <button 
+                        onClick={() => setActiveSection("reviews")}
+                        className={`py-2 px-4 rounded-lg ${activeSection === "reviews" ? "bg-gray-700" : "hover:bg-gray-700"}`}
+                    >
+                        Reviews
                     </button>
                 </nav>
             </aside>

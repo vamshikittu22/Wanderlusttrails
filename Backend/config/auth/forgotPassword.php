@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $identifier = $data['identifier'];
+    $currentPassword = $data['currentPassword'] ?? null; // Optional for Forgot Password, required for Change Password
     $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
     $isPhone = preg_match('/^[0-9]{10}$/', $identifier);
 
@@ -34,11 +35,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $db = new DatabaseClass();
 
-    $query = "SELECT id, email, phone FROM users WHERE " . ($isEmail ? "email = ?" : "phone = ?");
+    $query = "SELECT id, email, phone, password FROM users WHERE " . ($isEmail ? "email = ?" : "phone = ?");
     $user = $db->fetchQuery($query, "s", $identifier);
     if (empty($user)) {
         http_response_code(404);
         echo json_encode(["success" => false, "message" => "Email or phone not found"]);
+        exit;
+    }
+
+    // Verify current password if provided (for Change Password)
+    if ($currentPassword && !password_verify($currentPassword, $user[0]['password'])) {
+        http_response_code(401);
+        echo json_encode(["success" => false, "message" => "Incorrect current password"]);
         exit;
     }
 

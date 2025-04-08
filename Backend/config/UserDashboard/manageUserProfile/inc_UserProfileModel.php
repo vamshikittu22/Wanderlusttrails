@@ -27,7 +27,7 @@ class UserProfileModel {
             return ["success" => false, "message" => "All fields are required"];
         }
         $query = "UPDATE users SET firstName = ?, lastName = ?, email = ?, dob = ?, gender = ?, nationality = ?, phone = ?, street = ?, city = ?, state = ?, zip = ? WHERE id = ?";
-        $types = "sssisssssssi"; // Adjusted for dob as string
+        $types = "sssssssssssi"; // Define the types for each parameter
         $result = $this->db->executeQuery($query, $types, $firstName, $lastName, $email, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip, $userId);
         if ($result['success']) {
             return ["success" => true, "message" => "Profile updated successfully"];

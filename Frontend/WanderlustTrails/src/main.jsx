@@ -49,6 +49,7 @@ const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgotpassword" element={<ForgotPassword />} />
+      <Route path="test2" element={<Test2 />} />
 
 
       {/* Redirect any unauthorized user to Login */}
@@ -72,7 +73,7 @@ const router = createBrowserRouter(
         <Route path="contactus" element={<ContactUs />} />
         <Route path="Payment" element={<Payment />} />
         <Route path="test" element={<Test />} />
-        <Route path="test2" element={<Test2 />} />
+    
 
         <Route path="unauthorized" element={<Unauthorized />} />
       </Route>

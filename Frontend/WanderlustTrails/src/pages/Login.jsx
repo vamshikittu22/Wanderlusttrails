@@ -52,9 +52,12 @@ function Login() {
         const { token, role, firstname, lastname, id, email, phone, dob, gender, nationality, street, city, state, zip} = response.data;
         login({ firstname, lastname, role, id, email, phone, dob, gender, nationality, street, city, state, zip}, token);
 
-        localStorage.setItem("userId", id);  // Store in local storage
-        console.log("User ID stored:", id); //log the user id
-    
+        
+        // Store userId and userName in localStorage
+        localStorage.setItem("userId", id);
+        localStorage.setItem("userName", `${firstname} ${lastname}`); // Store full name
+        console.log("User ID stored:", id);
+        console.log("User Name stored:", `${firstname} ${lastname}`);
         
         // Show the success toast with user's name
         toast.success(`Welcome, ${firstname} ${lastname}!`, {
@@ -158,7 +161,7 @@ function Login() {
               <p className="text-lg">Login to explore the world with us.</p>
               <div>
                 <p className="mt-4 text-center">
-                  Don't have an account? <Link to="/signup" className="py-2 px-3 rounded-md bg-gradient-to-r from-orange-500 to-red-700">Sign Up Now</Link>
+                  Don't have an account? <Link to="/Signup" className="py-2 px-3 rounded-md bg-gradient-to-r from-orange-500 to-red-700">Sign Up Now</Link>
                 </p>
               </div>
             </div>
