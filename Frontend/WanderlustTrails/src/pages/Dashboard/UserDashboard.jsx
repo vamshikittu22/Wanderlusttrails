@@ -1,3 +1,5 @@
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+
 import React, { useState } from "react";
 import UserProfile from "../../components/userDashboard/UserProfile.jsx";
 import UserViewBookings from "../../components/userDashboard/userViewBookings.jsx";

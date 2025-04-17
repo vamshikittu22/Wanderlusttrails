@@ -1,3 +1,5 @@
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+
 import Carousel from 'react-bootstrap/Carousel';
 import  Image1 from '../../assets/Images/travel1.jpg';
 import  Image2 from '../../assets/Images/travel2.jpg';
@@ -22,7 +24,7 @@ function Banner() {
           <h3 className='text-green-700 font-extrabold'>Welcome!! plan your trip with us now</h3>
           <p className='text-blue-700 font-semibold'>Give us the dates and you are ready to go</p>
           <p className="mt-4 text-center">
-              <a href="/Review" className="py-2 px-3 rounded-md bg-gradient-to-r from-orange-500 to-red-700">read our reviews</a>
+              <a href="/Reviews" className="py-2 px-3 rounded-md bg-gradient-to-r from-orange-500 to-red-700">read our reviews</a>
           </p>
         </Carousel.Caption>
       </Carousel.Item>
@@ -66,11 +68,11 @@ function Banner() {
           <img 
               src={Image4} 
               className=" d-block w-full h-100 object-cover " 
-              alt="Third slide" 
+              alt="Forth slide" 
             />
         </div>
         <Carousel.Caption>
-          <h3 className='text-gray-200 font-extrabold'> Welcome!! need a family vacation</h3>
+          <h3 className='text-gray-200 font-extrabold'> Welcome!! need a family vacation-</h3>
           <p className='text-red-400 font-semibold'>check out our pre planned packages.</p>
           <p className="mt-4 text-center">
                 <a href="/TravelPackages" className="py-2 px-3 rounded-md bg-gradient-to-r from-orange-500 to-red-700">click here !!</a>
@@ -83,7 +85,7 @@ function Banner() {
           <img 
               src={Image5} 
               className=" d-block w-full h-100 object-cover " 
-              alt="Third slide" 
+              alt="Fifth slide" 
             />
         </div>
         <Carousel.Caption>

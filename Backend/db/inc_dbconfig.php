@@ -1,5 +1,5 @@
 <?php 
-//inc_dbconfig.php
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
 
 /********
  * DATABASE CREDENTIALS FILE

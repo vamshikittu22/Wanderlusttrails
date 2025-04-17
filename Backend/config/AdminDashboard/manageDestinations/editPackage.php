@@ -1,84 +1,87 @@
 <?php
-// editPackage.php
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+// Updates a package for admin.
 
-header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Max-Age: 86400");
 
-include("inc_PackageModel.php");
+require_once __DIR__ . "/../../inc_logger.php";
+require_once __DIR__ . "/inc_PackageModel.php";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Validate incoming data from $_POST
-    $id = $_POST['id'] ?? $_POST['currenteditid'] ?? '';  // Check for both fields
-    $packageName = $_POST['name'] ?? '';
-    $description = $_POST['description'] ?? '';
-    $location = $_POST['location'] ?? '';
-    $price = $_POST['price'] ?? '';
+Logger::log("editPackage API Started - Method: {$_SERVER['REQUEST_METHOD']}");
 
-    // Validate required fields
-    if (empty($id) || empty($packageName) || empty($description) || empty($location) || empty($price)) {
-        echo json_encode(["success" => false, "message" => "All fields are required."]);
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    Logger::log("Handling OPTIONS request for editPackage");
+    http_response_code(200);
+    echo json_encode(["message" => "OPTIONS request successful"]);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
+    http_response_code(405);
+    echo json_encode(["success" => false, "message" => "Method not allowed"]);
+    exit;
+}
+
+$id = $_POST['id'] ?? '';
+$packageName = $_POST['name'] ?? '';
+$description = $_POST['description'] ?? '';
+$location = $_POST['location'] ?? '';
+$price = $_POST['price'] ?? '';
+
+Logger::log("Received data - id: $id, name: $packageName, location: $location, price: $price, image: " . (isset($_FILES['image']) ? $_FILES['image']['name'] : 'none') . ", image_url: " . ($_POST['image_url'] ?? 'none'));
+
+if (empty($id) || !is_numeric($id) || empty($packageName) || empty($description) || empty($location) || empty($price) || !is_numeric($price) || $price <= 0) {
+    Logger::log("Validation failed: Missing or invalid fields");
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "All fields are required and price must be a positive number"]);
+    exit;
+}
+
+$packageModel = new PackageModel();
+$imageUrl = $_POST['image_url'] ?? '';
+if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+    $image = $_FILES['image'];
+    $uploadDir = __DIR__ . '/../../../../Assets/Images/packages/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
+    $imageName = time() . '_' . basename($image['name']);
+    $uploadPath = $uploadDir . $imageName;
+    if (move_uploaded_file($image['tmp_name'], $uploadPath)) {
+        $imageUrl = $imageName;
+        Logger::log("Image uploaded successfully: $imageUrl");
+    } else {
+        Logger::log("Image upload failed");
+        http_response_code(400);
+        echo json_encode(["success" => false, "message" => "Failed to upload image"]);
         exit;
     }
-
-
-    $imageUrl = null; // Default to null, will fetch existing if no new image is uploaded
-    // Check if the image was uploaded successfully
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $image = $_FILES['image'];
-        
-        // Define upload directory and file path
-        $uploadDir = '../../../../Assets/Images/packages/';
-
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true); // Create the directory if it doesn't exist
-        }
-
-        $imageTempPath = $image['tmp_name'];
-        $imageName = time().'_'.basename($image['name']); // Add timestamp for unique file name
-        $uploadPath = $uploadDir . $imageName;
-
-        // Move the uploaded file to the server
-        if (move_uploaded_file($imageTempPath, $uploadPath)) {
-            // Generate the public URL for the image
-            $imageUrl = $imageName;
-
-            // Update package details including the image URL into the database
-            $packageModel = new PackageModel();
-            $result = $packageModel->editPackage($id, $packageName, $description, $location, $price, $imageUrl);
-
-            if ($result) {
-                echo json_encode(["success" => true, "message" => "Package updated successfully", "image_url" => $imageUrl]);
-            } else {
-                echo json_encode(["success" => false, "message" => "Failed to update package details in the database."]);
-            }
-        } else {
-            echo json_encode(["success" => false, "message" => "Failed to upload image."]);
-        }
-    } else {
-
-
-        // If no image was uploaded, we can either skip the update of the image or keep the existing one.
-        // If no image is uploaded, we assume imageUrl remains unchanged.
-        
-        // Fetch existing image_url if no new image is uploaded
-        $query = "SELECT image_url FROM packages WHERE id = ?";
-        $currentImage = $packageModel->db->fetchQuery($query, "i", $id);
-        $imageUrl = $currentImage ? $currentImage[0]['image_url'] : null;
-
-
-        // Update package details without the image
-        $packageModel = new PackageModel();
-        $result = $packageModel->editPackage($id, $packageName, $description, $location, $price, $imageUrl);
-
-        if ($result) {
-            echo json_encode(["success" => true, "message" => "Package updated successfully"]);
-        } else {
-            echo json_encode(["success" => false, "message" => "Failed to update package details in the database."]);
-        }
-    }
 } else {
-    echo json_encode(["success" => false, "message" => "Invalid request method."]);
+    // Fetch existing image_url if no new image
+    $query = "SELECT image_url FROM packages WHERE id = ?";
+    $result = $packageModel->db->fetchQuery($query, "i", $id);
+    if ($result) {
+        $imageUrl = $result[0]['image_url'];
+        Logger::log("No new image uploaded, using existing: $imageUrl");
+    } else {
+        Logger::log("No existing image found for id: $id");
+        $imageUrl = '';
+    }
 }
+
+$result = $packageModel->editPackage($id, $packageName, $description, $location, $price, $imageUrl);
+
+Logger::log("editPackage result for id: $id - " . ($result['success'] ? "Success: {$result['message']}" : "Failed: {$result['message']}"));
+http_response_code($result['success'] ? 200 : 400);
+if ($result['success']) {
+    echo json_encode(["success" => true, "message" => "Package updated successfully", "image_url" => $imageUrl]);
+} else {
+    echo json_encode(["success" => false, "message" => $result['message']]);
+}
+exit;
 ?>

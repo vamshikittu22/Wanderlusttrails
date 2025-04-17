@@ -1,174 +1,103 @@
-import { useState } from 'react';
-import axios from 'axios';
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/FlightAndHotel.jsx
+import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import axios from 'axios';
+import FlightAndHotelForm from '../components/forms/FlightAndHotelForm';
 
 function FlightAndHotel() {
-    const { user } = useUser();
-    const navigate = useNavigate();
-    const [flightDetails, setFlightDetails] = useState({
-        from: '',
-        to: '',
-        passengers: 1,
-    });
-    const [hotelDetails, setHotelDetails] = useState({
-        hotel: '',
-    });
-    const [dates, setDates] = useState([null, null]); // [startDate, endDate]
-    const today = new Date();
+  const navigate = useNavigate();
+  const { user } = useUser();
 
-    const handleFlightChange = (e) => {
-        setFlightDetails({ ...flightDetails, [e.target.name]: e.target.value });
+  const handleSubmit = async (formData) => {
+    if (!user?.id) {
+      toast.error('Please log in to book.');
+      navigate('/Login');
+      return;
+    }
+
+    const payload = {
+      user_id: user.id,
+      booking_type: 'flight_hotel',
+      flight_details: {
+        from: formData.from,
+        to: formData.to,
+        class: formData.flightClass,
+        preferred_time: formData.flightTime,
+        airline: formData.airline === 'any' ? null : formData.airline,
+        duration: formData.flightDuration, // Set by form
+        insurance: formData.insurance,
+      },
+      hotel_details: {
+        destination: formData.to,
+        star_rating: parseInt(formData.hotelStars),
+        amenities: formData.amenities,
+        car_rental: formData.carRental,
+      },
+      start_date: formData.startDate.toISOString().split('T')[0],
+      end_date: formData.roundTrip && formData.endDate
+        ? formData.endDate.toISOString().split('T')[0]
+        : null,
+      persons: parseInt(formData.persons),
+      total_price: formData.totalPrice,
     };
 
-    const handleHotelChange = (e) => {
-        setHotelDetails({ ...hotelDetails, [e.target.name]: e.target.value });
-    };
+    console.log('Payload:', payload);
 
-    const handleDateChange = (selectedDates) => {
-        setDates(selectedDates);
-    };
+    try {
+      const response = await axios.post(
+        'http://localhost/WanderlustTrails/Backend/config/booking/createBooking.php',
+        payload,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const [startDate, endDate] = dates;
-        if (!startDate || !endDate) {
-            toast.error('Please select a date range.');
-            return;
-        }
+      console.log('Booking response:', response.data);
 
-        const totalPrice = 500; // Placeholder
-        const payload = {
-            user_id: user.id,
-            booking_type: 'flight_hotel',
-            flight_details: flightDetails,
-            hotel_details: hotelDetails,
-            start_date: startDate.toISOString().split('T')[0],
-            end_date: endDate.toISOString().split('T')[0],
-            persons: parseInt(flightDetails.passengers),
-            total_price: totalPrice
-        };
-        console.log("Sending payload to backend:", JSON.stringify(payload, null, 2));
-        try {
-            const response = await axios.post(
-                'http://localhost/Wanderlusttrails/backend/config/booking/createBooking.php',
-                payload,
-                { headers: { 'Content-Type': 'application/json' } }
-            );
-            console.log("Response from backend:", response.data);
-            if (response.data.success) {
-                // Store booking data in sessionStorage
-                sessionStorage.setItem('bookingData', JSON.stringify(payload));
-                console.log("Booking data stored in sessionStorage:", sessionStorage.getItem('bookingData'));
+      if (response.data.success) {
+        const updatedBookingData = { ...payload, booking_id: response.data.booking_id, total_price: formData.totalPrice };
+        sessionStorage.setItem('bookingData', JSON.stringify(updatedBookingData));
+        toast.success('Booking saved! Proceed to payment.', { position: 'top-center', autoClose: 1000 });
+        navigate('/Payment');
+      } else {
+        toast.error('Error saving booking: ' + response.data.message);
+      }
+    } catch (error) {
+      console.error('Booking error:', error.response || error);
+      toast.error('Error saving booking: ' + (error.response?.data?.message || error.message));
+    }
+  };
 
-                toast.success('Booking saved! Proceed to payment.', { position: 'top-center', autoClose: 1000 });
-                navigate('/Payment');
-            } else {
-                toast.error(response.data.message);
-            }
-        } catch (error) {
-            console.error("Error details:", {
-                message: error.message,
-                response: error.response?.data,
-                status: error.response?.status,
-                headers: error.response?.headers
-            });
-            toast.error('Error saving booking: ' + (error.response?.data?.message || error.message));
-        }
-    };
+  const handleCancel = () => {
+    navigate(-1); // Go back
+  };
 
-    return (
-        <div className="max-w-4xl mx-auto p-6 bg-gray-400 shadow-lg rounded-lg">
-            <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">Flight & Hotel Booking</h2>
-            <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="border-b-2 pb-6">
-                    <h3 className="text-xl font-medium mb-4 text-gray-800">Flight Details</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">From</label>
-                            <input
-                                type="text"
-                                name="from"
-                                value={flightDetails.from}
-                                onChange={handleFlightChange}
-                                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">To</label>
-                            <input
-                                type="text"
-                                name="to"
-                                value={flightDetails.to}
-                                onChange={handleFlightChange}
-                                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Passengers</label>
-                            <input
-                                type="number"
-                                name="passengers"
-                                value={flightDetails.passengers}
-                                onChange={handleFlightChange}
-                                min="1"
-                                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
-                                required
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div className="border-b-2 pb-6">
-                    <h3 className="text-xl font-medium mb-4 text-gray-800">Hotel Details</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Destination</label>
-                            <input
-                                type="text"
-                                name="destination"
-                                value={hotelDetails.destination}
-                                onChange={handleHotelChange}
-                                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
-                                required
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div className="border-b-2 pb-6">
-                    <h3 className="text-xl font-medium mb-4 text-gray-800">Travel Dates</h3>
-                    <div className="grid grid-cols-1 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Select Date Range</label>
-                            <DatePicker
-                                selectsRange
-                                startDate={dates[0]}
-                                endDate={dates[1]}
-                                minDate={today}
-                                onChange={handleDateChange}
-                                isClearable
-                                dateFormat="MMM d, yyyy"
-                                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
-                                required
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div className="text-center">
-                    <button
-                        type="submit"
-                        className="w-full sm:w-auto px-6 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
-                    >
-                        Book Now
-                    </button>
-                </div>
-            </form>
+  return (
+    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-center mb-8">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center">
+              <span className="w-8 h-8 flex items-center justify-center bg-indigo-600 text-white rounded-full">1</span>
+              <span className="ml-2 text-gray-300 font-medium">Details</span>
+            </div>
+            <div className="w-12 h-1 bg-gray-700"></div>
+            <div className="flex items-center">
+              <span className="w-8 h-8 flex items-center justify-center bg-gray-700 text-gray-400 rounded-full">2</span>
+              <span className="ml-2 text-gray-400">Payment</span>
+            </div>
+          </div>
         </div>
-    );
+
+        <h2 className="text-3xl font-bold text-indigo-300 mb-8 text-center">
+          Book Flight + Hotel
+        </h2>
+        <FlightAndHotelForm
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+        />
+      </div>
+    </div>
+  );
 }
 
 export default FlightAndHotel;

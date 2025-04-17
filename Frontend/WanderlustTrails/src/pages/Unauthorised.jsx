@@ -1,4 +1,4 @@
-// Unauthorized.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 

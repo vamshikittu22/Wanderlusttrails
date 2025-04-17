@@ -1,24 +1,42 @@
 <?php
-// viewPackages.php
-header("Access-Control-Allow-Origin: *");
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+// Fetches all packages for admin.
+
+header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+header("Access-Control-Allow-Methods: GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Max-Age: 86400");
 
-// Include the necessary files
-include("inc_PackageModel.php");
+require_once __DIR__ . "/../../inc_logger.php";
+require_once __DIR__ . "/inc_PackageModel.php";
 
-// Initialize the PackageModel
+Logger::log("viewPackage API Started - Method: {$_SERVER['REQUEST_METHOD']}");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    Logger::log("Handling OPTIONS request for viewPackage");
+    http_response_code(200);
+    echo json_encode(["message" => "OPTIONS request successful"]);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
+    http_response_code(405);
+    echo json_encode(["success" => false, "message" => "Method not allowed"]);
+    exit;
+}
+
 $packageModel = new PackageModel();
-
-// Fetch all packages
 $result = $packageModel->viewAllPackages();
 
+Logger::log("viewPackage result: " . (empty($result['data']) ? "No packages found" : count($result['data']) . " packages"));
 if ($result['success']) {
-    // Return the packages as a JSON response to the frontend
+    http_response_code(200);
     echo json_encode($result['data']);
 } else {
-    // Return an error message if no packages are found
+    http_response_code(500);
     echo json_encode(["success" => false, "message" => $result['message']]);
 }
+exit;
 ?>

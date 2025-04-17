@@ -1,56 +1,76 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json");
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+// Fetches travel packages with optional sorting, returns JSON response.
 
-// Connect to MySQL database
-$conn = new mysqli('localhost', 'root', '', 'wanderlusttrails');
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Methods: GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 
-// Check for connection error
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+require_once __DIR__ . "/inc_logger.php";
+
+Logger::log("travelPackages API Started - Method: {$_SERVER['REQUEST_METHOD']}");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    Logger::log("Handling OPTIONS request for travelPackages");
+    http_response_code(200);
+    echo json_encode(["message" => "OPTIONS request successful"]);
+    exit;
 }
 
-// Fetch the sort parameter from the URL
-$sortOrder = isset($_GET['sort']) ? $_GET['sort'] : 'none'; // 'none', 'price_asc', 'price_desc', 'name_asc', 'name_desc'
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
+    http_response_code(405);
+    echo json_encode(["success" => false, "message" => "Method not allowed"]);
+    exit;
+}
 
-// Build the SQL query with sorting
-$sql = "SELECT * FROM packages";
+$sortOrder = isset($_GET['sort']) ? $_GET['sort'] : 'none';
+Logger::log("Received sort parameter: '$sortOrder'");
 
-// Modify the SQL query based on the sorting order
+$conn = new mysqli("localhost", "root", "", "wanderlusttrails");
+if ($conn->connect_error) {
+    Logger::log("Database connection failed: {$conn->connect_error}");
+    http_response_code(500);
+    echo json_encode(["success" => false, "message" => "Database connection failed"]);
+    exit;
+}
+
+$sql = "SELECT id, name, description, location, price, image_url FROM packages";
 switch ($sortOrder) {
-    case 'price_asc':
+    case "price_asc":
         $sql .= " ORDER BY CAST(price AS DECIMAL(10,2)) ASC";
         break;
-    case 'price_desc':
+    case "price_desc":
         $sql .= " ORDER BY CAST(price AS DECIMAL(10,2)) DESC";
         break;
-    case 'name_asc':
+    case "name_asc":
         $sql .= " ORDER BY name ASC";
         break;
-    case 'name_desc':
+    case "name_desc":
         $sql .= " ORDER BY name DESC";
         break;
     default:
-        break; // No sorting if $sortOrder is 'none' or invalid
+        break;
 }
 
-// Execute the query and fetch data
+Logger::log("Executing SQL query: $sql");
 $result = $conn->query($sql);
 
-$travelData = array();
-if ($result->num_rows > 0) {
+$travelData = [];
+if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-       // $row['image'] = base64_encode($row['image']); // Convert binary to Base64
         $travelData[] = $row;
     }
 }
 
-// Close connection
+Logger::log("travelPackages result: " . json_encode([
+    "data_count" => count($travelData),
+    "sample" => $travelData ? array_slice($travelData, 0, 1) : []
+]));
+
 $conn->close();
-
-// Log the query for debugging
-error_log("Executed SQL Query: " . $sql);
-
-// Return data as JSON
+http_response_code(200);
 echo json_encode($travelData);
+exit;
 ?>

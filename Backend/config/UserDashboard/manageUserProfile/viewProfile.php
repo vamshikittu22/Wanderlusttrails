@@ -1,16 +1,44 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:5173"); // Match your frontend port
+// Backend/config/UserDashboard/manageUserProfile/viewProfile.php
+header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: GET");
+header("Access-Control-Allow-Methods: GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 
-include("./inc_UserProfileModel.php");
+require_once __DIR__ . "/../../inc_logger.php";
+require_once __DIR__ . "/inc_UserProfileModel.php";
 
-if (isset($_GET['userID'])) {
-    $userId = $_GET['userID'];
+Logger::log("viewProfile API Started - Method: {$_SERVER['REQUEST_METHOD']}");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    Logger::log("Handling OPTIONS request for viewProfile");
+    http_response_code(200);
+    echo json_encode(["message" => "OPTIONS request successful"]);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (!isset($_GET['userID'])) {
+        Logger::log("Missing userID parameter");
+        http_response_code(400);
+        echo json_encode(["success" => false, "message" => "User ID is required"]);
+        exit;
+    }
+
+    $userId = trim($_GET['userID']);
+    Logger::log("Fetching profile for userID: $userId");
+
     $userProfileModel = new UserProfileModel();
     $result = $userProfileModel->viewProfile($userId);
-    echo json_encode($result); // Consistent response
-} else {
-    echo json_encode(["success" => false, "message" => "User ID is required"]);
+
+    Logger::log("viewProfile result for userID: $userId - " . ($result['success'] ? "Success" : "Failed: {$result['message']}"));
+    http_response_code($result['success'] ? 200 : ($result['message'] === "User not found" ? 404 : 400));
+    echo json_encode($result);
+    exit;
 }
+
+Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
+http_response_code(405);
+echo json_encode(["success" => false, "message" => "Method not allowed"]);
+exit;
 ?>

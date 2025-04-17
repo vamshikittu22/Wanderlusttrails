@@ -1,72 +1,68 @@
 <?php
-// inc_UserOpsModel.php
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+// Handles user operations for admin.
 
-// Include the database class
-include("../../inc_databaseClass.php");
+require_once __DIR__ . "/../../inc_logger.php";
+require_once __DIR__ . "/../../inc_databaseClass.php";
 
 class UserOpsModel {
     private $db;
 
     public function __construct() {
+        Logger::log("UserOpsModel instantiated");
         $this->db = new DatabaseClass();
     }
 
-    // Get all users
     public function getUsers() {
-        // Prepare SQL query to fetch all users
+        Logger::log("getUsers started");
         $query = "SELECT id, firstName, lastName, email, role FROM users";
         $types = "";
-
-        // Execute the query
         $users = $this->db->fetchQuery($query, $types);
 
         if ($users) {
+            Logger::log("getUsers retrieved " . count($users) . " users");
             return ["success" => true, "data" => $users];
-        } else {
-            return ["success" => false, "message" => "No users found"];
         }
+        Logger::log("getUsers failed: No users found");
+        return ["success" => false, "message" => "No users found"];
     }
 
-    // Update user role
     public function updateUserRole($userId, $role) {
-        // Ensure the userId and role are provided
+        Logger::log("updateUserRole started for user_id: $userId, role: $role");
         if (empty($userId) || empty($role)) {
+            Logger::log("updateUserRole failed: User ID and role are required");
             return ["success" => false, "message" => "User ID and role are required"];
         }
 
-        // Prepare SQL query to update the user role
         $query = "UPDATE users SET role = ? WHERE id = ?";
-        $types = "si"; // string for role, integer for userId
-
-        // Execute the query
+        $types = "si";
         $result = $this->db->executeQuery($query, $types, $role, $userId);
 
         if ($result['success']) {
+            Logger::log("updateUserRole succeeded for user_id: $userId");
             return ["success" => true, "message" => "User role updated successfully"];
-        } else {
-            return ["success" => false, "message" => $result['message'] ?? "Failed to update user role"];
         }
+        Logger::log("updateUserRole failed for user_id: $userId - " . ($result['message'] ?? "Unknown error"));
+        return ["success" => false, "message" => $result['message'] ?? "Failed to update user role"];
     }
 
-    // Delete user
     public function deleteUser($userId) {
-        // Ensure the userId is provided
+        Logger::log("deleteUser started for user_id: $userId");
         if (empty($userId)) {
+            Logger::log("deleteUser failed: User ID is required");
             return ["success" => false, "message" => "User ID is required"];
         }
 
-        // Prepare SQL query to delete the user
         $query = "DELETE FROM users WHERE id = ?";
-        $types = "i"; // integer for userId
-
-        // Execute the query
+        $types = "i";
         $result = $this->db->executeQuery($query, $types, $userId);
 
         if ($result['success']) {
+            Logger::log("deleteUser succeeded for user_id: $userId");
             return ["success" => true, "message" => "User deleted successfully"];
-        } else {
-            return ["success" => false, "message" => $result['message'] ?? "Failed to delete user"];
         }
+        Logger::log("deleteUser failed for user_id: $userId - " . ($result['message'] ?? "Unknown error"));
+        return ["success" => false, "message" => $result['message'] ?? "Failed to delete user"];
     }
 }
 ?>

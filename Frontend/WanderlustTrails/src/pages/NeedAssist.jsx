@@ -1,4 +1,5 @@
 //culture and language Assist
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
 
 import React from 'react'
 

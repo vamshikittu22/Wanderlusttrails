@@ -1,4 +1,6 @@
 <?php 
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+
 /*******
  * PHP Intermediary Class for Wanderlust Database
  *******/

@@ -1,3 +1,5 @@
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+
 import React, { useState, useEffect } from 'react';
 
 const GoToTopButton = () => {

@@ -1,92 +1,87 @@
-
 <?php
-// inc_PackageModel.php
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+// Handles package operations for admin.
 
-// Include the database class
-include("../../inc_databaseClass.php");
+require_once __DIR__ . "/../../inc_logger.php";
+require_once __DIR__ . "/../../inc_databaseClass.php";
 
 class PackageModel {
-    private $db;
+    public $db;
 
     public function __construct() {
+        Logger::log("PackageModel instantiated");
         $this->db = new DatabaseClass();
     }
 
-    // Insert a new package
     public function insertPackage($packageName, $description, $location, $price, $imageUrl) {
-        // Validate package data
-        if (empty($packageName) || empty($description) || empty($location) || empty($price)) {
-            return ["success" => false, "message" => "All fields are required"];
+        Logger::log("insertPackage started - name: $packageName, location: $location, price: $price");
+        if (empty($packageName) || empty($description) || empty($location) || empty($price) || !is_numeric($price) || $price <= 0) {
+            Logger::log("insertPackage failed: Invalid fields");
+            return ["success" => false, "message" => "All fields are required and price must be a positive number"];
         }
 
-        // Prepare SQL query to insert package into the database
-        $query = "INSERT INTO packages (name, description, location, price, image_url) 
-                  VALUES (?, ?, ?, ?, ?)";
+        $query = "INSERT INTO packages (name, description, location, price, image_url) VALUES (?, ?, ?, ?, ?)";
         $types = "sssds";
-
-        // Execute the query
         $result = $this->db->executeQuery($query, $types, $packageName, $description, $location, $price, $imageUrl);
 
-        // Check the execution result
-        if ($result) {
+        if ($result['success']) {
+            Logger::log("insertPackage succeeded");
             return ["success" => true, "message" => "Package inserted successfully"];
-        } else {
-            return ["success" => false, "message" => "Failed to insert package"];
         }
+        Logger::log("insertPackage failed: " . ($result['message'] ?? "Unknown error"));
+        return ["success" => false, "message" => $result['message'] ?? "Failed to insert package"];
     }
 
-    // Fetch all packages (View All Packages)
     public function viewAllPackages() {
-        // Prepare SQL query to fetch all packages
-        $query = "SELECT * FROM packages";
+        Logger::log("viewAllPackages started");
+        $query = "SELECT id, name, description, location, price, image_url FROM packages";
         $types = "";
-
-        // Execute the query
         $packages = $this->db->fetchQuery($query, $types);
 
         if ($packages) {
+            Logger::log("viewAllPackages retrieved " . count($packages) . " packages");
             return ["success" => true, "data" => $packages];
-        } else {
-            return ["success" => false, "message" => "No packages found"];
         }
+        Logger::log("viewAllPackages failed: No packages found");
+        return ["success" => false, "message" => "No packages found"];
     }
 
-    // Update package details (Edit Package)
-    public function editPackage($id, $packageName, $description, $location, $price, $imageUrl= NULL) {
-        // Ensure that all fields are provided
-        if (empty($id) || empty($packageName) || empty($description) || empty($location) || empty($price)) {
-            return ["success" => false, "message" => "All fields are required"];
+    public function editPackage($id, $packageName, $description, $location, $price, $imageUrl = null) {
+        Logger::log("editPackage started for id: $id, name: $packageName, location: $location, price: $price");
+        if (empty($id) || !is_numeric($id) || empty($packageName) || empty($description) || empty($location) || empty($price) || !is_numeric($price) || $price <= 0) {
+            Logger::log("editPackage failed: Invalid fields");
+            return ["success" => false, "message" => "All fields are required and price must be a positive number"];
         }
 
-        // Prepare SQL query to update package details
         $query = "UPDATE packages SET name = ?, description = ?, location = ?, price = ?, image_url = ? WHERE id = ?";
-        $types = "sssssd";
-
-        // Execute the query
+        $types = "sssdsd";
         $result = $this->db->executeQuery($query, $types, $packageName, $description, $location, $price, $imageUrl, $id);
 
-        if ($result) {
+        if ($result['success']) {
+            Logger::log("editPackage succeeded for id: $id");
             return ["success" => true, "message" => "Package updated successfully"];
-        } else {
-            return ["success" => false, "message" => "Failed to update package"];
         }
+        Logger::log("editPackage failed for id: $id - " . ($result['message'] ?? "Unknown error"));
+        return ["success" => false, "message" => $result['message'] ?? "Failed to update package"];
     }
 
-    // Delete a package (Delete Package)
     public function deletePackage($packageId) {
-        if (empty($packageId)) {
-            return ["success" => false, "message" => "Package ID is required"];
+        Logger::log("deletePackage started for package_id: $packageId");
+        if (empty($packageId) || !is_numeric($packageId)) {
+            Logger::log("deletePackage failed: Invalid package ID");
+            return ["success" => false, "message" => "Valid package ID is required"];
         }
-    
+
         $query = "DELETE FROM packages WHERE id = ?";
         $types = "i";
         $result = $this->db->executeQuery($query, $types, $packageId);
-    
+
         if ($result['success']) {
+            Logger::log("deletePackage succeeded for package_id: $packageId");
             return ["success" => true, "message" => "Package deleted successfully"];
-        } else {
-            return ["success" => false, "message" => "Failed to delete package"];
         }
+        Logger::log("deletePackage failed for package_id: $packageId - " . ($result['message'] ?? "Unknown error"));
+        return ["success" => false, "message" => $result['message'] ?? "Failed to delete package"];
     }
 }
 ?>

@@ -1,5 +1,6 @@
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
 import React, { useState } from 'react';
-import axios from 'axios';
+import $ from 'jquery';
 import { toast } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -12,34 +13,45 @@ const ForgotPassword = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleSubmitIdentifier = async (e) => {
+    const handleSubmitIdentifier = (e) => {
         e.preventDefault();
         setLoading(true);
         console.log('Sending OTP request for:', emailOrPhone); // Debug
 
-        try {
-            const response = await axios.post(
-                'http://localhost/WanderlustTrails/Backend/config/auth/forgotPassword.php',
-                { identifier: emailOrPhone },
-                { headers: { 'Content-Type': 'application/json' } }
-            );
-            console.log('Response:', response.data); // Debug
-            if (response.data.success) {
-                toast.success(response.data.message);
-                console.log('ShowVerification set to:', true); // Debug
-                setShowVerification(true);
-            } else {
-                toast.error(response.data.message);
+        $.ajax({
+            url: 'http://localhost/WanderlustTrails/Backend/config/auth/forgotPassword.php',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ identifier: emailOrPhone }),
+            dataType: 'json',
+            success: function (response) {
+                console.log('Response:', response); // Debug
+                if (response.success) {
+                    toast.success(response.message);
+                    console.log('ShowVerification set to:', true); // Debug
+                    setShowVerification(true);
+                } else {
+                    toast.error(response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX error:', xhr, status, error); // Debug
+                let errorMessage = 'Error during OTP request';
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    errorMessage = response.message || response.error || errorMessage;
+                } catch (e) {
+                    errorMessage = xhr.statusText || error;
+                }
+                toast.error('Error: ' + errorMessage);
+            },
+            complete: function () {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error('Axios error:', error); // Debug
-            toast.error('Error: ' + (error.response?.data?.message || error.message));
-        } finally {
-            setLoading(false);
-        }
+        });
     };
 
-    const handleVerifyOtp = async (e) => {
+    const handleVerifyOtp = (e) => {
         e.preventDefault();
         setLoading(true);
 
@@ -59,30 +71,41 @@ const ForgotPassword = () => {
             return;
         }
 
-        try {
-            const response = await axios.post(
-                'http://localhost/WanderlustTrails/Backend/config/auth/verifyOtp.php',
-                { identifier: emailOrPhone, otp, newPassword },
-                { headers: { 'Content-Type': 'application/json' } }
-            );
-            console.log('Verify response:', response.data); // Debug
-            if (response.data.success) {
-                toast.success(response.data.message);
-                setEmailOrPhone('');
-                setOtp('');
-                setNewPassword('');
-                setConfirmPassword('');
-                setShowVerification(false);
-                navigate('/login');
-            } else {
-                toast.error(response.data.message);
+        $.ajax({
+            url: 'http://localhost/WanderlustTrails/Backend/config/auth/verifyOtp.php',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ identifier: emailOrPhone, otp, newPassword }),
+            dataType: 'json',
+            success: function (response) {
+                console.log('Verify response:', response); // Debug
+                if (response.success) {
+                    toast.success(response.message);
+                    setEmailOrPhone('');
+                    setOtp('');
+                    setNewPassword('');
+                    setConfirmPassword('');
+                    setShowVerification(false);
+                    navigate('/login');
+                } else {
+                    toast.error(response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Verify error:', xhr, status, error); // Debug
+                let errorMessage = 'Error during OTP verification';
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    errorMessage = response.message || response.error || errorMessage;
+                } catch (e) {
+                    errorMessage = xhr.statusText || error;
+                }
+                toast.error('Error: ' + errorMessage);
+            },
+            complete: function () {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error('Verify error:', error); // Debug
-            toast.error('Error: ' + (error.response?.data?.message || error.message));
-        } finally {
-            setLoading(false);
-        }
+        });
     };
 
     return (

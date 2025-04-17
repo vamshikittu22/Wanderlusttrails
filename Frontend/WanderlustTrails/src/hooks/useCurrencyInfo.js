@@ -1,3 +1,5 @@
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+
 import { useEffect, useState } from "react";
 
 

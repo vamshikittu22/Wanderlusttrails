@@ -1,6 +1,7 @@
-// src/components/Signup.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+
 import React, { useState } from 'react';
-import axios from 'axios';
+import $ from 'jquery'; // Import jQuery
 import background from '../assets/Images/travel1.jpg';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -13,31 +14,57 @@ function Signup() {
     gender: '', nationality: '', phone: '', street: '', city: '', state: '', zip: ''
   });
 
-  const handleSubmit = async (e, updatedFormData) => {
-    try {
-      const response = await axios.post('http://localhost/WanderlustTrails/backend/config/auth/signupUser.php', updatedFormData);
-      toast.success(response.data.message || 'Signup successful! You can log in to your account now.', {
-        position: "top-center",
-        autoClose: 1000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
-      });
-      setFormData({
-        firstName: '', lastName: '', email: '', password: '', confirmPassword: '', dob: '',
-        gender: '', nationality: '', phone: '', street: '', city: '', state: '', zip: ''
-      });
-    } catch (error) {
-      toast.error('Error during signup: ' + (error.response?.data?.error || error.message), {
-        position: "top-center",
-        autoClose: 1000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
-      });
-    }
+  const handleSubmit = (e, updatedFormData) => {
+    e.preventDefault(); // Prevent default form submission
+    $.ajax({
+      url: 'http://localhost/WanderlustTrails/Backend/config/auth/signupuser.php',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(updatedFormData),
+      dataType: 'json',
+      success: function (response) {
+        if (response.success) {
+          toast.success(response.message || 'Signup successful! You can log in to your account now.', {
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true
+          });
+          setFormData({
+            firstName: '', lastName: '', email: '', password: '', confirmPassword: '', dob: '',
+            gender: '', nationality: '', phone: '', street: '', city: '', state: '', zip: ''
+          });
+        } else {
+          toast.error(response.message || 'Signup failed. Please try again.', {
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true
+          });
+        }
+      },
+      error: function (xhr, status, error) {
+        let errorMessage = 'Error during signup';
+        try {
+          const response = JSON.parse(xhr.responseText);
+          errorMessage = response.message || response.error || errorMessage;
+        } catch (e) {
+          errorMessage = xhr.statusText || error;
+        }
+        toast.error('Error during signup: ' + errorMessage, {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+      }
+    });
   };
 
   return (
@@ -53,7 +80,7 @@ function Signup() {
             submitLabel="Sign Up"
           />
           <p className="mt-4 text-center">
-            Already have an account ..? <a href="/login" className="py-2 px-3 rounded-md bg-gradient-to-r from-orange-500 to-red-700 text-white">Login Now</a>
+            Already have an account ..? <Link to="/login" className="py-2 px-3 rounded-md bg-gradient-to-r from-orange-500 to-red-700 text-white">Login Now</Link>
           </p>
         </div>
         <div className="hidden sm:block sm:w-2/3">

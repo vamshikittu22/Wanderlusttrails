@@ -1,62 +1,98 @@
-    <?php
-    // login.php
-    session_start();
+<?php
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+// This file handles user login by validating credentials and generating a JWT token.
+// It returns a JSON response with user details and token on success.
 
-    header("Access-Control-Allow-Origin: *"); // Enable CORS for development
-    header("Content-Type: application/json; charset=UTF-8");
-    header("Access-Control-Allow-Methods: POST");
-    header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 
-    // Include necessary files for JWT
-    include 'jwt_helper.php';  // A file that will handle JWT encoding and decoding
+require_once __DIR__ . "/../inc_logger.php";
+require_once __DIR__ . "/../inc_databaseClass.php";
+require_once __DIR__ . "/jwt_helper.php";
 
-   include('../../db/inc_dbconfig.php');
+Logger::log("login API Started - Method: {$_SERVER['REQUEST_METHOD']}");
 
-    $conn = new mysqli($host, $username, $password, $dbname);
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    Logger::log("Handling OPTIONS request for login");
+    http_response_code(200);
+    exit;
+}
 
-    if ($conn->connect_error) {
-        die(json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]));
-    }
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents("php://input"), true);
+    Logger::log("POST Data - Identifier: " . ($data['identifier'] ?? 'none'));
 
-    $identifier = $data['identifier'] ?? ''; // Can be email or phone
-    $password = $data['password'] ?? '';
-
-
-    // Prepare the SQL statement to prevent SQL injection
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? OR phone = ?");
-    $stmt->bind_param("ss", $identifier, $identifier); // Bind parameters to prevent SQL injection
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-
-        // Verify the password
-        if (password_verify($password, $row['password'])) {
-
-            // // Start session and store user info
-            $_SESSION['user_id'] = $row['id'] ?? null;
-            $_SESSION['role'] = $row['role'] ?? null; // Store role in session
-
-
-            // Generate a session token (JWT)
-            $token = generateJWT($row);  // Assuming generateJWT is a function to create a JWT
-
-        
-            echo json_encode(["success" => true, "message" => "Login successful!",
-             "firstname" => $row['firstName'],"lastname" => $row['lastName'],"role" => $row['role'],
-             "id" => $row['id'], 'token' => $token,
-             "email" => $row['email'],"phone" => $row['phone'], "dob" => $row['dob'],
-             "gender" => $row['gender'],"nationality" => $row['nationality'],
-             "street" => $row['street'],"city" => $row['city'],"state" => $row['state'],"zip" => $row['zip']]);
-        } else {
-            echo json_encode(["success" => false, "message" => "Incorrect password."]);
-        }
-    } else {
-        echo json_encode(["success" => false, "message" => "User not found."]);
+    if (!$data || !isset($data['identifier']) || !isset($data['password'])) {
+        Logger::log("Missing identifier or password");
+        http_response_code(400);
+        echo json_encode(["success" => false, "message" => "Identifier and password are required"]);
+        exit;
     }
 
-    $conn->close();
-    ?>  
+    $identifier = $data['identifier'];
+    $password = $data['password'];
+
+    $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+    $isPhone = preg_match('/^[0-9]{10}$/', $identifier);
+
+    if (!$isEmail && !$isPhone) {
+        Logger::log("Invalid email or phone format: $identifier");
+        http_response_code(400);
+        echo json_encode(["success" => false, "message" => "Invalid email or phone format"]);
+        exit;
+    }
+
+    $db = new DatabaseClass();
+
+    $query = "SELECT id, firstname, lastname, email, phone, password, role, dob, gender, nationality, street, city, state, zip 
+              FROM users WHERE " . ($isEmail ? "email = ?" : "phone = ?");
+    $result = $db->fetchQuery($query, "s", $identifier);
+
+    if (empty($result)) {
+        Logger::log("User not found for identifier: $identifier");
+        http_response_code(404);
+        echo json_encode(["success" => false, "message" => "User not found"]);
+        exit;
+    }
+
+    $user = $result[0];
+
+    if (!password_verify($password, $user['password'])) {
+        Logger::log("Incorrect password for identifier: $identifier");
+        http_response_code(401);
+        echo json_encode(["success" => false, "message" => "Incorrect password"]);
+        exit;
+    }
+
+    $token = generateJWT($user['id']);
+    Logger::log("Login successful for user_id: {$user['id']}");
+
+    http_response_code(200);
+    echo json_encode([
+        "success" => true,
+        "message" => "Login successful",
+        "token" => $token,
+        "id" => $user['id'],
+        "firstname" => $user['firstname'],
+        "lastname" => $user['lastname'],
+        "email" => $user['email'],
+        "phone" => $user['phone'],
+        "role" => $user['role'],
+        "dob" => $user['dob'],
+        "gender" => $user['gender'],
+        "nationality" => $user['nationality'],
+        "street" => $user['street'],
+        "city" => $user['city'],
+        "state" => $user['state'],
+        "zip" => $user['zip']
+    ]);
+    exit;
+}
+
+Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
+http_response_code(405);
+echo json_encode(["success" => false, "message" => "Method not allowed"]);
+exit;
+?>

@@ -12,15 +12,24 @@
   "dependencies": {
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
+    "csv-parse": "^5.6.0",
+    "html2pdf.js": "^0.10.3",
+    "jquery": "^3.7.1",
+    "jspdf": "^3.0.1",
     "postcss": "^8.4.47",
     "react": "^18.3.1",
+    "react-barcode": "^1.6.1",
     "react-bootstrap": "^2.10.5",
     "react-calendar": "^5.0.0",
     "react-card-flip": "^1.2.3",
     "react-datepicker": "^7.4.0",
     "react-dom": "^18.3.1",
+    "react-icons": "^5.5.0",
+    "react-quill": "^2.0.0",
     "react-router-dom": "^6.26.2",
-    "react-toastify": "^10.0.6"
+    "react-to-print": "^3.0.6",
+    "react-toastify": "^11.0.5",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",

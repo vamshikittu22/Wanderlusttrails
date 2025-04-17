@@ -1,3 +1,5 @@
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+
 import React, { useState } from "react";
 import axios from 'axios';
 import { Link, NavLink, useNavigate } from "react-router-dom";

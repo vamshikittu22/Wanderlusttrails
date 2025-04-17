@@ -1,3 +1,4 @@
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/About.jsx
 import React, { useEffect } from 'react'
 import { useLoaderData } from 'react-router-dom'
 

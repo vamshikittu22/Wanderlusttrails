@@ -50,8 +50,8 @@ const UserForm = ({
     if (!formData.firstName) newErrors.firstName = "*First Name is required";
     if (!formData.lastName) newErrors.lastName = "*Last Name is required";
     if (!emailPattern.test(formData.email)) newErrors.email = "*Invalid email format correct Email required";
-    if ((includePassword || includeChangePassword) && formData.password && formData.password.length < 6)
-      newErrors.password = "*Password must be at least 6 characters";
+    if ((includePassword || includeChangePassword) && formData.password && formData.password.length < 8)
+      newErrors.password = "*Password must be at least 8 characters";
     if ((includePassword || includeChangePassword) && formData.password && formData.password !== formData.confirmPassword)
       newErrors.confirmPassword = "*Passwords do not match";
     if (!formData.dob) newErrors.dob = "*Date of Birth is required";

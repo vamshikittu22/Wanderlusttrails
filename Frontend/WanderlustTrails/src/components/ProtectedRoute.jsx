@@ -1,25 +1,29 @@
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useUser } from '../context/UserContext.jsx';
 import { toast } from 'react-toastify';
 
-const ProtectedRoute = ({  children, requiredRole }) => {
-    const { user, isAuthenticated } = useUser();
+const ProtectedRoute = ({ children, requiredRole }) => {
+  const { user, isAuthenticated, isLoading } = useUser();
 
-    if (!isAuthenticated) {
-        // Redirect to login if not authenticated
-        toast.error('You are not authorized. Please log in.');
-        return <Navigate to="/login" />;
-    }
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-    if (requiredRole && user.role !== requiredRole) {
-        // Redirect if role doesn't match
-        toast.error('You do not have permission to access this page.');
-        return <Navigate to="/login" />;
-    }
+  if (!isAuthenticated) {
+    console.log('Redirecting to login: Not authenticated', { isAuthenticated, user });
+    toast.error('You are not authorized. Please log in.');
+    return <Navigate to="/login" replace />;
+  }
 
-    
-    return <Outlet/>;
+  if (requiredRole && user.role !== requiredRole) {
+    console.log('Redirecting due to role mismatch', { userRole: user.role, requiredRole });
+    toast.error('You do not have permission to access this page.');
+    return <Navigate to="/" replace />;
+  }
 
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

@@ -1,3 +1,6 @@
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+
+
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const UserContext = createContext();
@@ -7,8 +10,6 @@ export function useUser() {
 }
 
 export function UserProvider({ children }) {
-
-    // Default empty user object
     const defaultUser = {
         firstname: null,
         lastname: null,
@@ -27,9 +28,8 @@ export function UserProvider({ children }) {
 
     const [user, setUser] = useState(() => {
         const storedUser = localStorage.getItem('user');
-        return storedUser ? JSON.parse(storedUser) : defaultUser ;
+        return storedUser ? JSON.parse(storedUser) : defaultUser;
     });
-
     const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('token'));
     const [token, setToken] = useState(() => localStorage.getItem('token') || null);
 
@@ -37,24 +37,57 @@ export function UserProvider({ children }) {
         const storedToken = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
 
+        console.log("Stored token:", storedToken);
+        console.log("Stored user:", storedUser);
+
         if (storedToken && storedUser) {
-            setUser(JSON.parse(storedUser));
+            const parsedUser = JSON.parse(storedUser);
+            // Ensure id is numeric when loading from localStorage
+            if (parsedUser.id && !isNaN(parseInt(parsedUser.id, 10))) {
+                parsedUser.id = parseInt(parsedUser.id, 10);
+            } else {
+                parsedUser.id = null;
+            }
+            setUser(parsedUser);
             setToken(storedToken);
             setIsAuthenticated(true);
         } else {
             setIsAuthenticated(false);
+            setUser(defaultUser);
+            setToken(null);
         }
     }, []);
 
     const login = (userData, userToken) => {
         try {
-            localStorage.setItem('user', JSON.stringify(userData));
+            console.log('Login userData:', userData);
+            // Validate and normalize user.id
+            const normalizedUser = { ...userData };
+            if (normalizedUser.id) {
+                const numericId = parseInt(normalizedUser.id, 10);
+                if (isNaN(numericId)) {
+                    console.error('Invalid user ID in login data:', normalizedUser.id);
+                    throw new Error('User ID must be a valid number');
+                }
+                normalizedUser.id = numericId;
+            } else {
+                console.error('Missing user ID in login data');
+                throw new Error('User ID is required');
+            }
+
+            localStorage.setItem('user', JSON.stringify(normalizedUser));
             localStorage.setItem('token', userToken);
-            setUser(userData);
+            setUser(normalizedUser);
             setToken(userToken);
             setIsAuthenticated(true);
         } catch (error) {
             console.error("Error storing user data in localStorage:", error);
+            setUser(defaultUser);
+            setToken(null);
+            setIsAuthenticated(false);
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            throw error; // Let the caller handle the error
         }
     };
 

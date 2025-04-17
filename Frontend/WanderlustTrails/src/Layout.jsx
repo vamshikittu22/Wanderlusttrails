@@ -1,3 +1,5 @@
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+
 import React from 'react'
 import { Outlet } from 'react-router-dom'
 import Header from './components/Header/Header'

@@ -1,4 +1,4 @@
-// Main.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -18,7 +18,6 @@ import Help from './pages/Help.jsx';
 import Admin from './pages/Admin.jsx';
 import User from './pages/User.jsx';
 import Login from './pages/Login.jsx';
-import Review from './pages/Review.jsx';
 import NeedAssist from './pages/NeedAssist.jsx';
 import CurrencyConverter from './pages/CurrencyConverter.jsx';
 import Destination from './pages/Destination.jsx';
@@ -31,14 +30,15 @@ import ForgotPassword from './pages/ForgotPassword.jsx';
 import ContactUs from './pages/ContactUs.jsx';
 import Test from './components/test.jsx';
 import { UserProvider, useUser } from './context/UserContext.jsx';
-import BookingDetails from './pages/BookingDetails.jsx';
+import PackageBookingDetails from './pages/PackageBookingDetails.jsx';
 import Todolist from './pages/Todolist.jsx';
 import AdminDashboard from './pages/Dashboard/AdminDashboard.jsx';
 import UserDashboard from './pages/Dashboard/UserDashboard.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Unauthorized from './pages/Unauthorised.jsx';
 import Payment from './pages/Payment.jsx';
-import Test2 from './pages/test2.jsx';
+import Test2 from './pages/Test2.jsx';
+import Reviews from './pages/Reviews.jsx';
 
 
 const router = createBrowserRouter(
@@ -61,7 +61,7 @@ const router = createBrowserRouter(
         <Route path="about" element={<About />} />
         <Route path="blogs" element={<Blogs />} />
         <Route path="help" element={<Help />} />
-        <Route path="review" element={<Review />} />
+        <Route path="reviews" element={<Reviews />} />
         <Route path="needassist" element={<NeedAssist />} />
         <Route path="todolist" element={<Todolist />} />
         <Route path="currencyconverter" element={<CurrencyConverter />} />
@@ -69,7 +69,7 @@ const router = createBrowserRouter(
         <Route path="flightandhotel" element={<FlightAndHotel />} />
         <Route path="travelinsurance" element={<TravelInsurance />} />
         <Route path="travelpackages" element={<TravelPackages />} />
-        <Route path="Bookingdetails" element={<BookingDetails />} />
+        <Route path="PackageBookingdetails" element={<PackageBookingDetails />} />
         <Route path="contactus" element={<ContactUs />} />
         <Route path="Payment" element={<Payment />} />
         <Route path="test" element={<Test />} />

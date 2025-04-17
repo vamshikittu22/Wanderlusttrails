@@ -1,6 +1,7 @@
-// src/components/UserProfile.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import $ from "jquery"; 
 import { toast } from "react-toastify";
 import UserForm from "./../forms/UserForm.jsx";
 
@@ -32,99 +33,144 @@ const UserProfile = () => {
 
   // Fetch user profile on mount
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    const fetchUserProfile = () => {
       const userId = localStorage.getItem("userId");
       if (!userId) {
         toast.error("Please log in to view your profile.");
         return;
       }
 
-      try {
-        const response = await axios.get(
-          `http://localhost/WanderlustTrails/backend/config/UserDashboard/manageUserProfile/viewProfile.php?userID=${userId}`
-        );
-        if (response.data.success) {
-          const userData = response.data.data[0];
-          console.log("Fetched user data:", userData);
-          setUser(userData);
-          setProfileData(userData);
-        } else {
-          toast.error("Failed to fetch profile: " + response.data.message);
-        }
-      } catch (error) {
-        toast.error("Error fetching profile: " + (error.response?.data?.message || "Server error"));
-      }
+      $.ajax({
+        url: `http://localhost/WanderlustTrails/Backend/config/UserDashboard/manageUserProfile/viewProfile.php?userID=${userId}`,
+        type: "GET",
+        dataType: "json",
+        success: function (response) {
+          console.log("Fetched user data:", response);
+          if (response.success) {
+            const userData = response.data[0];
+            setUser(userData);
+            setProfileData(userData);
+          } else {
+            toast.error("Failed to fetch profile: " + response.message);
+          }
+        },
+        error: function (xhr) {
+          console.error("Error fetching profile:", xhr);
+          let errorMessage = "Error fetching profile: Server error";
+          try {
+            const response = JSON.parse(xhr.responseText);
+            errorMessage = "Error fetching profile: " + (response.message || "Server error");
+          } catch (e) {
+            errorMessage = xhr.statusText || "Server error";
+          }
+          toast.error(errorMessage);
+        },
+      });
     };
 
     fetchUserProfile();
   }, []);
 
   // Handle profile update submission
-  const handleProfileSubmit = async (e, updatedProfileData) => {
+  const handleProfileSubmit = (e, updatedProfileData) => {
     e.preventDefault();
     const userId = localStorage.getItem("userId");
 
-    try {
-      console.log("Submitting profile data:", updatedProfileData);
-      const response = await axios.post(
-        "http://localhost/WanderlustTrails/backend/config/UserDashboard/manageUserProfile/editProfile.php",
-        { userID: userId, ...updatedProfileData },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      console.log("Edit response:", response.data);
-
-      if (response.data.success) {
-        setUser({ ...user, ...updatedProfileData });
-        setIsEditing(false);
-        toast.success("Profile updated successfully!");
-      } else {
-        toast.error("Failed to update profile: " + response.data.message);
-      }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("Error updating profile: " + (error.response?.data?.message || "Server error"));
-    }
+    console.log("Submitting profile data:", updatedProfileData);
+    $.ajax({
+      url: "http://localhost/WanderlustTrails/Backend/config/UserDashboard/manageUserProfile/editProfile.php",
+      type: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({ userID: userId, ...updatedProfileData }),
+      dataType: "json",
+      success: function (response) {
+        console.log("Edit response:", response);
+        if (response.success) {
+          setUser({ ...user, ...updatedProfileData });
+          setIsEditing(false);
+          toast.success("Profile updated successfully!");
+        } else {
+          toast.error("Failed to update profile: " + response.message);
+        }
+      },
+      error: function (xhr) {
+        console.error("Error updating profile:", xhr);
+        let errorMessage = "Error updating profile: Server error";
+        try {
+          const response = JSON.parse(xhr.responseText);
+          errorMessage = "Error updating profile: " + (response.message || "Server error");
+        } catch (e) {
+          errorMessage = xhr.statusText || "Server error";
+        }
+        toast.error(errorMessage);
+      },
+    });
   };
 
   // Verify current password and send OTP
-  const handlePasswordVerification = async (e) => {
+  const handlePasswordVerification = (e) => {
     e.preventDefault();
     if (!passwordData.currentPassword) {
       toast.error("Current password is required");
       return;
     }
 
-    try {
-      const verifyResponse = await axios.post(
-        "http://localhost/WanderlustTrails/backend/config/auth/verifyPassword.php",
-        { identifier: user.email, currentPassword: passwordData.currentPassword },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      console.log("Verification response:", verifyResponse.data);
-
-      if (verifyResponse.data.success) {
-        const otpResponse = await axios.post(
-          "http://localhost/WanderlustTrails/backend/config/auth/forgotPassword.php",
-          { identifier: user.email },
-          { headers: { "Content-Type": "application/json" } }
-        );
-        if (otpResponse.data.success) {
-          setOtpSent(true);
-          toast.success("OTP sent to your email!");
+    $.ajax({
+      url: "http://localhost/WanderlustTrails/Backend/config/auth/verifyPassword.php",
+      type: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({ identifier: user.email, currentPassword: passwordData.currentPassword }),
+      dataType: "json",
+      success: function (verifyResponse) {
+        console.log("Verification response:", verifyResponse);
+        if (verifyResponse.success) {
+          $.ajax({
+            url: "http://localhost/WanderlustTrails/Backend/config/auth/forgotPassword.php",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ identifier: user.email }),
+            dataType: "json",
+            success: function (otpResponse) {
+              console.log("OTP response:", otpResponse);
+              if (otpResponse.success) {
+                setOtpSent(true);
+                toast.success("OTP sent to your email!");
+              } else {
+                toast.error("Failed to send OTP: " + otpResponse.message);
+              }
+            },
+            error: function (xhr) {
+              console.error("Error sending OTP:", xhr);
+              let errorMessage = "Error sending OTP: Server error";
+              try {
+                const response = JSON.parse(xhr.responseText);
+                errorMessage = "Error sending OTP: " + (response.message || "Server error");
+              } catch (e) {
+                errorMessage = xhr.statusText || "Server error";
+              }
+              toast.error(errorMessage);
+            },
+          });
         } else {
-          toast.error("Failed to send OTP: " + otpResponse.data.message);
+          toast.error("Verification failed: " + verifyResponse.message);
         }
-      } else {
-        toast.error("Verification failed: " + verifyResponse.data.message);
-      }
-    } catch (error) {
-      console.error("Error verifying password:", error);
-      toast.error("Error verifying password: " + (error.response?.data?.message || "Server error"));
-    }
+      },
+      error: function (xhr) {
+        console.error("Error verifying password:", xhr);
+        let errorMessage = "Error verifying password: Server error";
+        try {
+          const response = JSON.parse(xhr.responseText);
+          errorMessage = "Error verifying password: " + (response.message || "Server error");
+        } catch (e) {
+          errorMessage = xhr.statusText || "Server error";
+        }
+        toast.error(errorMessage);
+      },
+    });
   };
 
   // Handle password change submission with OTP verification
-  const handlePasswordSubmit = async (e) => {
+  const handlePasswordSubmit = (e) => {
     e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
@@ -140,30 +186,39 @@ const UserProfile = () => {
       return;
     }
 
-    try {
-      const response = await axios.post(
-        "http://localhost/WanderlustTrails/backend/config/auth/verifyOtp.php",
-        {
-          identifier: user.email,
-          otp: passwordData.otp,
-          newPassword: passwordData.newPassword,
-        },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      console.log("Verify response:", response.data);
-
-      if (response.data.success) {
-        setIsChangingPassword(false);
-        setOtpSent(false);
-        setPasswordData({ currentPassword: "", newPassword: "", confirmNewPassword: "", otp: "" });
-        toast.success("Password changed successfully!");
-      } else {
-        toast.error("Failed to change password: " + response.data.message);
-      }
-    } catch (error) {
-      console.error("Error changing password:", error);
-      toast.error("Error changing password: " + (error.response?.data?.message || "Server error"));
-    }
+    $.ajax({
+      url: "http://localhost/WanderlustTrails/Backend/config/auth/verifyOtp.php",
+      type: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({
+        identifier: user.email,
+        otp: passwordData.otp,
+        newPassword: passwordData.newPassword,
+      }),
+      dataType: "json",
+      success: function (response) {
+        console.log("Verify response:", response);
+        if (response.success) {
+          setIsChangingPassword(false);
+          setOtpSent(false);
+          setPasswordData({ currentPassword: "", newPassword: "", confirmNewPassword: "", otp: "" });
+          toast.success("Password changed successfully!");
+        } else {
+          toast.error("Failed to change password: " + response.message);
+        }
+      },
+      error: function (xhr) {
+        console.error("Error changing password:", xhr);
+        let errorMessage = "Error changing password: Server error";
+        try {
+          const response = JSON.parse(xhr.responseText);
+          errorMessage = "Error changing password: " + (response.message || "Server error");
+        } catch (e) {
+          errorMessage = xhr.statusText || "Server error";
+        }
+        toast.error(errorMessage);
+      },
+    });
   };
 
   // Handle input changes for password fields

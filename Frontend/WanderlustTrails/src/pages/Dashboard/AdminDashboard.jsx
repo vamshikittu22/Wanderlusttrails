@@ -1,7 +1,10 @@
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+
 import React, { useState } from "react";
 import ManageDestinations from "../../components/adminDashboard/manageDestinations";
 import ManageUsers from "../../components/adminDashboard/manageUsers";
 import ManageBookings from "../../components/adminDashboard/manageBookings";
+import UserViewBookings from "../../components/userDashboard/userViewBookings";
 
 const AdminDashboard = () => {
     const [activeSection, setActiveSection] = useState("destinations");
@@ -15,6 +18,8 @@ const AdminDashboard = () => {
                 return <ManageUsers />;
             case "bookings":
                 return <ManageBookings />;
+            case "Mybooking":
+                return <UserViewBookings/>;    
             default:
                 return <ManageDestinations />;
         }
@@ -43,6 +48,12 @@ const AdminDashboard = () => {
                         className={`py-2 px-4 rounded-lg text-left ${activeSection === "bookings" ? "bg-gray-700" : "hover:bg-gray-700"}`}
                     >
                         Bookings
+                    </button>
+                    <button
+                        onClick={() => setActiveSection("Mybooking")}
+                        className={`py-2 px-4 rounded-lg text-left ${activeSection === "Mybooking" ? "bg-gray-700" : "hover:bg-gray-700"}`}
+                    >       
+                        My Bookings
                     </button>
                 </nav>
             </aside>
