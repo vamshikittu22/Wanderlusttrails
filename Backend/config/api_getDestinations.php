@@ -1,5 +1,5 @@
 <?php 
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/api_getDestinations.php
 
 /*******
  * API Endpoint for fetching destination data

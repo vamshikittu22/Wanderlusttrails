@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/auth/verifyOtp.php
 // This file verifies the OTP and resets the user's password.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");

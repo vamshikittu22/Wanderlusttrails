@@ -1,4 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/Todolist.jsx
 
 import React from 'react'
 import { useState, useEffect} from 'react'

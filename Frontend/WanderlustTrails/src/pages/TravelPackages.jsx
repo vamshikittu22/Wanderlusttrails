@@ -1,13 +1,16 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
-
+// path: Frontend/WanderlustTrails/src/pages/TravelPackages.jsx
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import $ from "jquery";
 import { Dropdown, DropdownButton } from "react-bootstrap";
 import ReactCardFlip from "react-card-flip";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useUser } from "../context/UserContext";
 
 const TravelPackages = () => {
+    const navigate = useNavigate();
+    const { isAuthenticated, user } = useUser();
     const [packages, setPackages] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [packagesPerPage] = useState(9);
@@ -21,17 +24,18 @@ const TravelPackages = () => {
     ];
 
     useEffect(() => {
+        console.log('[TravelPackages] Component mounted:', { isAuthenticated, userId: user?.id });
         const fetchPackages = () => {
             const url = `http://localhost/WanderlustTrails/backend/config/travelPackages.php?sort=${sortBy}`;
-            console.log("Fetching packages from:", url);
+            console.log('[TravelPackages] Fetching packages:', url);
             $.ajax({
                 url: url,
                 type: "GET",
                 dataType: "json",
-                timeout: 5000, // 5-second timeout
+                timeout: 5000,
                 crossDomain: true,
                 success: function (response) {
-                    console.log("Packages response:", response);
+                    console.log('[TravelPackages] Packages response:', response);
                     if (Array.isArray(response)) {
                         setPackages(
                             response.map(item => ({
@@ -51,7 +55,7 @@ const TravelPackages = () => {
                     }
                 },
                 error: function (xhr, textStatus, errorThrown) {
-                    console.error("Error fetching packages:", { xhr, textStatus, errorThrown });
+                    console.error('[TravelPackages] Error fetching packages:', { xhr, textStatus, errorThrown });
                     let errorMessage = "Error fetching packages: Server error";
                     if (xhr.status === 0) {
                         errorMessage = "Error fetching packages: Server unreachable or CORS issue";
@@ -67,16 +71,15 @@ const TravelPackages = () => {
                 },
             });
         };
-
-        fetchPackages(sortBy);
+        fetchPackages();
     }, [sortBy]);
 
     const handleSortChange = selectedSortBy => setSortBy(selectedSortBy);
 
     const handleBooking = pkg => {
+        console.log('[TravelPackages] handleBooking:', { pkg, isAuthenticated, userId: user?.id });
         sessionStorage.setItem("selectedPackage", JSON.stringify(pkg));
-        console.log("Selected Package:", pkg);
-        window.location.href = "/PackageBookingDetails";
+        navigate("/PackageBookingDetails");
     };
 
     const loadImage = imageName => {
@@ -86,7 +89,6 @@ const TravelPackages = () => {
 
     const defaultImage = "http://localhost/WanderlustTrails/Assets/Images/packages/default.jpg";
 
-    // Pagination logic
     const indexOfLastPackage = currentPage * packagesPerPage;
     const indexOfFirstPackage = indexOfLastPackage - packagesPerPage;
     const currentPackages = packages.slice(indexOfFirstPackage, indexOfLastPackage);

@@ -1,13 +1,16 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
-
+//path: Frontend/WanderlustTrails/src/pages/Reviews.jsx
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import $ from "jquery";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useUser } from '../context/UserContext'; // Import useUser to access user role
 
 function Reviews() {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+    const { user } = useUser(); // Access user from context
 
     useEffect(() => {
         const fetchReviews = () => {
@@ -47,6 +50,13 @@ function Reviews() {
 
         fetchReviews();
     }, []);
+
+    const handleWriteReview = () => {
+        // Navigate to dashboard based on user role
+        const dashboardPath = user?.role === 'admin' ? '/AdminDashboard' : '/UserDashboard';
+        console.log('Navigating to dashboard for writing review:', dashboardPath, { userRole: user?.role });
+        navigate(dashboardPath);
+    };
 
     return (
         <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -123,8 +133,11 @@ function Reviews() {
                 )}
             </div>
             <div className="flex justify-center mt-10">
-                <button className="bg-indigo-700 hover:bg-purple-800 text-gray-300 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105 shadow-lg">
-                    <a href="/UserDashboard">Write a Review</a>
+                <button
+                    onClick={handleWriteReview}
+                    className="bg-indigo-700 hover:bg-purple-800 text-gray-300 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
+                >
+                    Write a Review
                 </button>
             </div>
 

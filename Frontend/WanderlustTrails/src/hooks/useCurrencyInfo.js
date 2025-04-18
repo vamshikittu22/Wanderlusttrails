@@ -1,4 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/hooks/useCurrencyInfo.js
 
 import { useEffect, useState } from "react";
 

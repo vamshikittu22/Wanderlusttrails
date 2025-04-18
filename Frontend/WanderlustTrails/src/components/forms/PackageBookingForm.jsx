@@ -1,4 +1,4 @@
-// src/components/forms/PackageBookingForm.jsx
+//path: Frontend/WanderlustTrails/src/components/forms/PackageBookingForm.jsx
 import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';

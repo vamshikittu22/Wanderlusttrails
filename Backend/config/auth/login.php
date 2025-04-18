@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/auth/login.php
 // This file handles user login by validating credentials and generating a JWT token.
 // It returns a JSON response with user details and token on success.
 

@@ -1,6 +1,6 @@
 <?php
 
-// inc_TodoModel.php
+//path: Wanderlusttrails/Backend/config/todo/inc_TodoModel.php
 
 include("inc_databaseClass.php");
 

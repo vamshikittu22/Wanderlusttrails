@@ -1,4 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/components/userDashboard/UserProfile.jsx
 
 import React, { useState, useEffect } from "react";
 import $ from "jquery"; 

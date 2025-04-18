@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/api/travelPackages.php
 // Fetches travel packages with optional sorting, returns JSON response.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");

@@ -1,6 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
-
+//path: Backend/config/inc_databaseClass.php
 /********
  * DATABASE CONNECTION CLASS FOR WANDERLUSTTRAILS
  *********/

@@ -1,4 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/components/Footer/Footer.jsx
 
 import React, {useState, useEffect} from "react";
 import { Link } from "react-router-dom";

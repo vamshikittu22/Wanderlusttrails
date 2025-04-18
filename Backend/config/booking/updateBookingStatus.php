@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/api_updateBookingStatus.php
 // Handles booking updates by storing changes in pending_changes for admin review.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");

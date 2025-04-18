@@ -92,7 +92,7 @@ function Payment() {
 
       if (bookingData) {
         const price = parseFloat(bookingData.total_price) || 0;
-        console.log('Booking totalPrice:', bookingData.totalPrice, 'Parsed price:', price);
+        console.log('Booking totalPrice:', bookingData.total_price, 'Parsed price:', price);
         if (price <= 0) {
           setTimeout(() => {
             if (isMounted) {

@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/auth/forgotPassword.php
 // This file handles forgot password requests by sending an OTP to the user's email or phone.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");

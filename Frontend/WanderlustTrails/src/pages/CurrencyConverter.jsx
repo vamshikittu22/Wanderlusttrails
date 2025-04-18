@@ -1,4 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ContactUs.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/currencyConverter.jsx
 import { useState } from 'react'
 import useCurrencyInfo from '../hooks/useCurrencyInfo.js'
 import {InputBox} from '../components/currencyconverter/index.js'

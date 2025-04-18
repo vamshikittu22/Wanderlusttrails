@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/auth/inc_userModel.php
 // This file contains the UserModel class which handles user registration, email validation, OTP sending, password verification, and reset.
 
 include("../inc_databaseClass.php");

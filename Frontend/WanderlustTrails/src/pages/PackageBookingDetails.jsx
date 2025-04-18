@@ -1,5 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
-
+// path: Frontend/WanderlustTrails/src/pages/PackageBookingDetails.jsx
 import { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
 import axios from 'axios';
@@ -8,15 +7,16 @@ import { toast } from 'react-toastify';
 import BookingForm from '../components/forms/BookingDetailsForm';
 import UserDetails from '../components/UserDetails';
 
-
 function PackageBookingDetails() {
-    const { user } = useUser();
-        const navigate = useNavigate();
+    const { user, isAuthenticated } = useUser();
+    const navigate = useNavigate();
     
-    const [packageDetails, setPackageDetails] = useState({ id: '',name: '', location: '', price: '', imageUrl: '' });
+    const [packageDetails, setPackageDetails] = useState({ id: '', name: '', location: '', price: '', imageUrl: '' });
 
     useEffect(() => {
+        console.log('[PackageBookingDetails] useEffect:', { isAuthenticated, userId: user?.id });
         const storedPackage = JSON.parse(sessionStorage.getItem('selectedPackage'));
+        console.log('[PackageBookingDetails] storedPackage:', storedPackage);
         if (storedPackage) {
             setPackageDetails({
                 id: storedPackage.id, 
@@ -25,10 +25,15 @@ function PackageBookingDetails() {
                 price: parseFloat(storedPackage.price),
                 imageUrl: storedPackage.imageUrl
             });
+        } else {
+            console.log('[PackageBookingDetails] No package selected, redirecting to /TravelPackages');
+            toast.error('No package selected. Please choose a package.');
+            navigate('/TravelPackages');
         }
-    }, []);
+    }, [navigate]);
 
     const handleBookingSubmit = async (formData) => {
+        console.log('[PackageBookingDetails] handleBookingSubmit:', { formData, userId: user?.id });
         const payload = {
             user_id: user.id,
             booking_type: 'package',
@@ -38,37 +43,33 @@ function PackageBookingDetails() {
             end_date: formData.endDate.toISOString().split('T')[0],
             persons: formData.persons,
             total_price: formData.totalPrice
-            // Add any other necessary fields from formData
         };
-        console.log("Booking data being sent:", payload);
+        console.log('[PackageBookingDetails] Booking data being sent:', payload);
         try {
             const response = await axios.post(
                 'http://localhost/WanderlustTrails/backend/config/booking/createBooking.php',
                 payload,
                 { headers: { 'Content-Type': 'application/json' } }
             );
-            console.log("Booking response:", response.data);
+            console.log('[PackageBookingDetails] Booking response:', response.data);
             if (response.data.success) {
                 const updatedBookingData = { ...payload, booking_id: response.data.booking_id };
                 sessionStorage.setItem('bookingData', JSON.stringify(updatedBookingData));
-                console.log("Booking data stored in sessionStorage:", sessionStorage.getItem('bookingData'));
+                console.log('[PackageBookingDetails] Booking data stored:', sessionStorage.getItem('bookingData'));
                 toast.success('Booking saved! Proceed to payment.', { position: 'top-center', autoClose: 1000 });
                 navigate('/Payment');
-              } else {
+            } else {
                 toast.error(response.data.message);
-              }
-            
+            }
         } catch (error) {
-            console.error("Error details:", {
+            console.error('[PackageBookingDetails] Error:', {
                 message: error.message,
                 response: error.response?.data,
                 status: error.response?.status,
-                headers: error.response?.headers
             });
             toast.error('Error saving booking: ' + (error.response?.data?.message || error.message));
-            return false; 
+            return false;
         }
-       
     };
 
     return (
@@ -84,9 +85,7 @@ function PackageBookingDetails() {
                 <div className="w-full md:w-2/3 h-64 bg-cover bg-center rounded-lg" style={{ backgroundImage: `url(/assets/Images/packages/${packageDetails.imageUrl}.jpg)` }}></div>
                 <BookingForm pricePerPerson={packageDetails.price} onSubmit={handleBookingSubmit} />
             </div>
-
-            {/* User Details */}
-//         <UserDetails user={user} />
+            <UserDetails user={user} />
         </div>
     );
 }

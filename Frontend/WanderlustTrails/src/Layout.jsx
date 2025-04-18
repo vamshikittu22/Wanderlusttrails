@@ -1,4 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Frontend/WanderlustTrails/src/Layout.jsx
 
 import React from 'react'
 import { Outlet } from 'react-router-dom'

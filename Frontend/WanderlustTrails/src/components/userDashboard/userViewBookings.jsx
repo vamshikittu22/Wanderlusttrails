@@ -1,3 +1,4 @@
+//path: Frontend/WanderlustTrails/src/components/userDashboard/userViewBookings.jsx
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
@@ -10,36 +11,63 @@ import { useUser } from '../../context/UserContext';
 import EditBookingForm from './../forms/EditBookingForm';
 import logo from './../../assets/Images/wanderlusttrails.jpg'; // Import logo image
 
-// Print-specific styles for the popup, including watermark for print
+// Print-specific styles for the popup component
 const printStyles = `
   @media print {
+    body > * {
+      display: none !important;
+    }
     .popup-overlay {
+      display: block !important;
       background: none !important;
-      position: absolute !important;
+      position: static !important;
+      width: 100% !important;
+      height: auto !important;
     }
     .popup-content {
-      position: absolute !important;
-      top: 0 !important;
-      left: 0 !important;
+      display: block !important;
+      position: static !important;
       width: 100% !important;
+      max-width: none !important;
+      height: auto !important;
+      max-height: none !important;
+      overflow: visible !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: none !important;
       box-shadow: none !important;
     }
-    body > *:not(.popup-overlay),
-    .popup-overlay > *:not(.popup-content) {
-      display: none !important;
+    .ticket-container {
+      display: block !important;
+      position: static !important;
+      width: 100% !important;
+      border: 2px solid #000 !important;
+      box-shadow: none !important;
     }
     .watermark {
       display: block !important;
       position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) rotate(-45deg) !important;
       opacity: 0.1 !important;
       font-size: 60px !important;
       color: #000000 !important;
-      transform: rotate(-45deg) !important;
       z-index: 0 !important;
     }
-    .ticket-container {
-      border: 2px solid #000 !important;
-      box-shadow: none !important;
+    .barcode-container {
+      display: block !important;
+      overflow: visible !important;
+    }
+    .barcode-container svg {
+      display: block !important;
+      width: 100% !important;
+      height: auto !important;
+    }
+    * {
+      color: #000 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
   }
 `;
@@ -83,9 +111,41 @@ const StyledTicket = ({ booking, paymentDetails, paymentLoading }) => {
   const ticketRef = React.useRef();
 
   const handlePrint = () => {
-    window.print();
+    const element = ticketRef.current;
+    const opt = {
+      margin: 0.5,
+      filename: `Booking_${booking.id}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+    };
+
+    // Generate the PDF and trigger print
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .toPdf()
+      .get('pdf')
+      .then((pdf) => {
+        const blob = pdf.output('blob');
+        const url = URL.createObjectURL(blob);
+        const printWindow = window.open(url, '_blank');
+        printWindow.onload = () => {
+          printWindow.print();
+          // Cleanup the URL object after printing
+          printWindow.onafterprint = () => {
+            printWindow.close();
+            URL.revokeObjectURL(url);
+          };
+        };
+      })
+      .catch((error) => {
+        console.error('Error generating PDF for printing:', error);
+        toast.error('Failed to generate ticket for printing. Please try again.');
+      });
   };
 
+  // Function to handle PDF download
   const handleDownload = () => {
     const element = ticketRef.current;
     const opt = {
@@ -95,7 +155,17 @@ const StyledTicket = ({ booking, paymentDetails, paymentLoading }) => {
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
     };
-    html2pdf().set(opt).from(element).save();
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .save()
+      .then(() => {
+        toast.success('Ticket downloaded successfully!');
+      })
+      .catch((error) => {
+        console.error('Error downloading PDF:', error);
+        toast.error('Failed to download ticket. Please try again.');
+      });
   };
 
   // Access payment details for the specific booking
@@ -117,16 +187,13 @@ const StyledTicket = ({ booking, paymentDetails, paymentLoading }) => {
 
   return (
     <div ref={ticketRef} className="relative ticket-container">
-   
-
-      {/* Ticket Content */}
-      <div className="relative bg-white p-8 rounded-xl shadow-2xl z-10 border border-gray-200">
-
-           {/* Watermark */}
+      {/* Watermark */}
       <div className="watermark absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-[-45deg] opacity-10 text-[60px] text-gray-800 font-bold pointer-events-none z-0">
         WanderlustTrails
       </div>
 
+      {/* Ticket Content */}
+      <div className="relative bg-white p-8 rounded-xl shadow-2xl z-10 border border-gray-200">
         {/* Header with Logo and Gradient */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-400 p-4 rounded-t-xl flex items-center justify-between">
           <div>
@@ -146,7 +213,7 @@ const StyledTicket = ({ booking, paymentDetails, paymentLoading }) => {
               <strong>Ticket Number:</strong> {ticketNumber}
             </p>
           </div>
-          <div className="flex justify-center">
+          <div className="barcode-container flex justify-center">
             <Barcode
               value={ticketNumber}
               format="CODE128"
@@ -255,9 +322,6 @@ const StyledTicket = ({ booking, paymentDetails, paymentLoading }) => {
                   <strong>Transaction ID:</strong> {payment.transaction_id || 'N/A'}
                 </p>
                 <p className="text-gray-700">
-                  <strong>Amount:</strong> ${payment.amount ? parseFloat(payment.amount).toFixed(2) : '0.00'}
-                </p>
-                <p className="text-gray-700">
                   <strong>Payment Method:</strong> {payment.payment_method || 'N/A'}
                 </p>
                 <p className="text-gray-700">
@@ -353,7 +417,7 @@ const CancelConfirmationPopup = ({ isOpen, onClose, onConfirm, bookingId }) => {
     </div>
   );
 };
-
+/// Main UserViewBookings component
 const UserViewBookings = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useUser();
@@ -375,6 +439,7 @@ const UserViewBookings = () => {
     return null;
   }
 
+  
   const {
     bookings,
     filteredBookings,
@@ -386,6 +451,7 @@ const UserViewBookings = () => {
     fetchBookings,
   } = useBookings(user, isAuthenticated);
 
+  // Function to handle booking cancellation
   const handleCancelBooking = (bookingId) => {
     console.log('Cancel booking initiated for booking ID:', bookingId);
     $.ajax({
@@ -435,6 +501,7 @@ const UserViewBookings = () => {
     setIsEditPopupOpen(true);
   };
 
+  // Function to handle form submission from EditBookingForm
   const handleEditSubmit = (bookingId, payload) => {
     console.log('Received payload from EditBookingForm:', payload);
     if (!payload || !payload.booking_id || !payload.user_id || !payload.changes || Object.keys(payload.changes).length === 0) {
@@ -497,18 +564,18 @@ const UserViewBookings = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-4 bg-slate-600 shadow-md rounded-lg">
+    <div className="max-w-6xl mx-auto p-4 bg-gray-700 shadow-md rounded-lg">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-4">
           <h1 className="text-3xl font-semibold text-orange-600">Your Bookings</h1>
         </div>
         <div className="flex items-center space-x-4 mb-4">
           <div className="flex items-center">
-            <label className="text-gray-700 font-semibold">Filter by Status:</label>
+            <label className="text-gray-200 font-semibold mr-2">Filter by Status:</label>
             <select
               value={statusFilter}
               onChange={handleStatusFilterChange}
-              className="bg-white border border-gray-300 rounded px-3 py-1 text-gray-700 focus:outline-none focus:border-blue-500"
+              className="bg-gray-700 border border-gray-300 rounded px-3 py-1 text-white focus:outline-none focus:border-blue-500"
             >
               <option value="all">All</option>
               <option value="pending">Pending</option>
@@ -517,7 +584,7 @@ const UserViewBookings = () => {
             </select>
           </div>
           <div>
-            <label className="text-gray-700 font-semibold mr-2">Total Bookings:</label>
+            <label className="text-gray-200 font-semibold mr-2">Total Bookings:</label>
             <span className="text-orange-500 font-bold w-full">{filteredBookings.length}</span>
           </div>
         </div>

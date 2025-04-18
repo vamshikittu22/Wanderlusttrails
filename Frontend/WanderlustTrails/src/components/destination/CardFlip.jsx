@@ -1,4 +1,4 @@
-
+//path: Frontend/WanderlustTrails/src/components/destination/CardFlip.jsx
 import React, { useState } from 'react';
 
 const CardFlip = ({ frontContent, backContent }) => {

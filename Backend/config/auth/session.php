@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/auth/session.php
 // This file checks if a user is logged in by verifying the session data.
 // It returns a JSON response indicating the login status and user information if logged in.
 

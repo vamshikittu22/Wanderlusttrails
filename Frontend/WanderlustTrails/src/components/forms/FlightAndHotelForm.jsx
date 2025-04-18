@@ -1,5 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
-
+//path: Frontend/WanderlustTrails/src/components/forms/FlightAndHotelForm.jsx
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { FaPlaneDeparture, FaHotel, FaUsers, FaStar, FaCar, FaShieldAlt, FaSwimmingPool, FaWifi, FaPlaneArrival } from 'react-icons/fa';
@@ -89,6 +88,7 @@ function FlightAndHotelForm({ initialData = {}, isEditMode = false, onSubmit, on
 
       if (fromCity && toCity) {
         const distance = calculateDistance(fromCity.lat, fromCity.lon, toCity.lat, toCity.lon);
+        console.log('fromCity:',fromCity, fromCity.lat, fromCity.lon, 'toCity:', toCity, toCity.lat, toCity.lon, 'distance:', distance);
         const avgSpeed = 550; // mph
         const hours = distance / avgSpeed;
         const minutes = Math.round(hours * 60);

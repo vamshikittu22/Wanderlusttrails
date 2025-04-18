@@ -1,69 +1,62 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+// path: Backend/config/blogs/updateBlog.php
+// Updates an existing blog in the database via POST request, expects FormData.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-file_put_contents(__DIR__ . "/../logs/debug.log", "updateBlog API Started - Method: " . $_SERVER['REQUEST_METHOD'] . " at " . date('Y-m-d H:i:s') . "\n", FILE_APPEND);
+require_once __DIR__ . "/../inc_logger.php";
+
+Logger::log("updateBlog API Started - Method: {$_SERVER['REQUEST_METHOD']}");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    file_put_contents(__DIR__ . "/../logs/debug.log", "Handling OPTIONS request\n", FILE_APPEND);
+    Logger::log("Handling OPTIONS request for updateBlog");
     http_response_code(200);
     echo json_encode(["message" => "OPTIONS request successful"]);
     exit;
 }
 
 try {
-    require_once __DIR__ . "/../blogs/inc_blogsModel.php";
+    require_once __DIR__ . "/inc_blogModel.php";
 } catch (Exception $e) {
-    file_put_contents(__DIR__ . "/../logs/debug.log", "Error loading inc_blogsModel.php: " . $e->getMessage() . "\n", FILE_APPEND);
+    Logger::log("Error loading inc_blogModel.php: {$e->getMessage()}");
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => "Server error: Unable to load blogs model"]);
+    echo json_encode(["success" => false, "message" => "Server error: Unable to load blog model"]);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $blogId = $_POST['blogId'] ?? '';
-    $userId = $_POST['userId'] ?? '';
-    $title = $_POST['title'] ?? '';
-    $content = $_POST['content'] ?? '';
-    $status = $_POST['status'] ?? 'draft';
-    $existingMedia = json_decode($_POST['existing_media'] ?? '[]', true);
-
-    file_put_contents(__DIR__ . "/../logs/debug.log", "Received data: blogId=$blogId, userId=$userId, title=$title, status=$status\n", FILE_APPEND);
-
-    try {
-        $blogsModel = new BlogsModel();
-        $mediaUrls = is_array($existingMedia) ? $existingMedia : [];
-        if (!empty($_FILES['media'])) {
-            file_put_contents(__DIR__ . "/../logs/debug.log", "Processing media uploads\n", FILE_APPEND);
-            $newMedia = $blogsModel->uploadMedia($_FILES['media']);
-            $mediaUrls = array_merge($mediaUrls, $newMedia);
-        }
-
-        $result = $blogsModel->updateBlog($blogId, $userId, $title, $content, $mediaUrls, $status);
-
-        file_put_contents(__DIR__ . "/../logs/debug.log", "updateBlog result: " . json_encode($result) . "\n", FILE_APPEND);
-
-        if ($result['success']) {
-            http_response_code(200);
-            echo json_encode($result);
-        } else {
-            http_response_code(400);
-            echo json_encode($result);
-        }
-    } catch (Exception $e) {
-        file_put_contents(__DIR__ . "/../logs/debug.log", "Exception in updateBlog: " . $e->getMessage() . "\n", FILE_APPEND);
-        http_response_code(500);
-        echo json_encode(["success" => false, "message" => "Server error: " . $e->getMessage()]);
-    }
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
+    http_response_code(405);
+    echo json_encode(["success" => false, "message" => "Method not allowed"]);
     exit;
 }
 
-file_put_contents(__DIR__ . "/../logs/debug.log", "Invalid Method: " . $_SERVER['REQUEST_METHOD'] . "\n", FILE_APPEND);
-http_response_code(405);
-echo json_encode(["success" => false, "message" => "Method not allowed"]);
+// Extract data from FormData using $_POST and $_FILES
+$blogId = isset($_POST['blogId']) ? $_POST['blogId'] : '';
+$userId = isset($_POST['userId']) ? $_POST['userId'] : '';
+$title = isset($_POST['title']) ? trim($_POST['title']) : '';
+$content = isset($_POST['content']) ? trim($_POST['content']) : '';
+$status = isset($_POST['status']) ? trim($_POST['status']) : 'draft';
+$mediaFiles = isset($_FILES['media']) ? $_FILES['media'] : [];
+$existingMedia = isset($_POST['existing_media']) ? json_decode($_POST['existing_media'], true) : [];
+
+Logger::log("Received data - blogId: $blogId, userId: $userId, title: " . substr($title, 0, 50) . ", content: " . substr($content, 0, 100) . ", media_files: " . count($mediaFiles['name'] ?? []));
+
+try {
+    $blogModel = new BlogModel();
+    $result = $blogModel->updateBlog($blogId, $userId, $title, $content, $status, $mediaFiles, $existingMedia);
+
+    Logger::log("updateBlog result: " . json_encode($result));
+
+    http_response_code($result['success'] ? 200 : 400);
+    echo json_encode($result);
+} catch (Exception $e) {
+    Logger::log("Exception in updateBlog: {$e->getMessage()}");
+    http_response_code(500);
+    echo json_encode(["success" => false, "message" => "Server error: {$e->getMessage()}"]);
+}
 exit;
 ?>

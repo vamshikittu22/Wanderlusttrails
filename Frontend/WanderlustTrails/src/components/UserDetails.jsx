@@ -1,5 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
-
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src//components/UserDetails.jsx
 import { useState } from "react";
 
 const UserDetails = ({ user }) => {

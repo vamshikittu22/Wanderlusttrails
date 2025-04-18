@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/booking/inc_bookingModel.php
 // This file contains the BookingModel class, which handles booking-related operations such as creating, updating, and fetching bookings.
 // It interacts with the database to perform these operations and includes validation for input data.
 

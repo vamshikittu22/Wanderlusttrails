@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Backend/config/reviews/inc_reviewModel.php
 // Handles database operations for reviews (write, get user reviews, get all reviews).
 
 require_once __DIR__ . "/../inc_databaseClass.php";

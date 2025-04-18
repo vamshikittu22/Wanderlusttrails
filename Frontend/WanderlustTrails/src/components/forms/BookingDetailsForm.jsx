@@ -1,5 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
-
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/components/forms/BookingDetailsForm.jsx
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';

@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/auth/authorization.php
 
 require_once __DIR__ . "/../inc_logger.php";
 include 'jwt_helper.php';

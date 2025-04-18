@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/AdminDashboard/manageDestinations/inc_PackageModel.php
 // Handles package operations for admin.
 
 require_once __DIR__ . "/../../inc_logger.php";

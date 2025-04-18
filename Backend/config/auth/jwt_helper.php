@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/auth/jwt_helper.php
 // This file handles JWT generation and validation for user authentication.
 // It uses the Firebase JWT library to create and verify tokens.
 
@@ -15,7 +15,7 @@ function generateJWT($userId) {
     global $key;
 
     $issuedAt = time();
-    $expirationTime = $issuedAt + 900;  // Token expires in 1 hour
+    $expirationTime = $issuedAt + 9000; // Token valid for 2.5 hours
     $payload = array(
         "iat" => $issuedAt,
         "exp" => $expirationTime,

@@ -1,5 +1,5 @@
 <?php 
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/inc_intermediaryClass.php
 
 /*******
  * PHP Intermediary Class for Wanderlust Database

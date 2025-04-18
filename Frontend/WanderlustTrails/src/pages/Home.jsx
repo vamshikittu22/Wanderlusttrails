@@ -1,5 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
-
+//PATH: Frontend/WanderlustTrails/src/pages/Home.jsx
 import React from 'react';
 import { useUser } from '../context/UserContext.jsx';
 import { Link, Navigate } from 'react-router-dom';

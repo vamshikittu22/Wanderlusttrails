@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/AdminDashboard/manageDestinations/insertPackage.php
 // Inserts a new package for admin.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");

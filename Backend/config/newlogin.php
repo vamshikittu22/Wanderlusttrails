@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/newlogin.php
 
 header("Access-Control-Allow-Origin: *"); // Enable CORS for development
 header("Content-Type: application/json; charset=UTF-8");

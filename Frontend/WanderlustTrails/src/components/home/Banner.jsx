@@ -1,4 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/components/home/Banner.jsx
 
 import Carousel from 'react-bootstrap/Carousel';
 import  Image1 from '../../assets/Images/travel1.jpg';

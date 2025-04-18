@@ -1,4 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ContactUs.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ErrorNotFound.jsx
 import React from 'react'
 
 function ErrorNotFound() {

@@ -1,375 +1,335 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/Blogs.jsx
+//path: Frontend/WanderlustTrails/src/pages/Blogs.jsx
 import React, { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
-import { useUser } from '../context/UserContext.jsx';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import { FiEdit, FiTrash2, FiUpload } from 'react-icons/fi';
-import $ from 'jquery';
+import BlogForm from './../components/forms/BlogForm';
 
-function Blogs() {
-    const { user, isAuthenticated } = useUser();
-    const [blogs, setBlogs] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [form, setForm] = useState({
-        title: '',
-        content: '',
-        status: 'draft',
-        media: [],
-        existing_media: [],
-    });
-    const [editBlogId, setEditBlogId] = useState(null);
-    const [mediaPreview, setMediaPreview] = useState([]);
+const Blogs = () => {
+  // State for blogs, form data, and popups
+  const [blogs, setBlogs] = useState([]);
+  const [error, setError] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(localStorage.getItem('userId') || '1');
+  const [formData, setFormData] = useState({
+    blogId: null,
+    title: '',
+    content: '',
+    status: 'draft',
+    existing_media: [],
+    files: [],
+  });
+  const [popup, setPopup] = useState(null);
+  const [selectedBlog, setSelectedBlog] = useState(null);
 
-    useEffect(() => {
-        fetchBlogs();
-    }, []);
-
-    // const fetchBlogs = () => {
-    //     const url = isAuthenticated && user?.id
-    //         ? `http://localhost/Wanderlusttrails/Backend/config/blogs/getBlogs.php?userId=${user.id}`
-    //         : `http://localhost/Wanderlusttrails/Backend/config/blogs/getBlogs.php`;
-
-    //     $.ajax({
-    //         url,
-    //         type: 'GET',
-    //         dataType: 'json',
-    //         success: (response) => {
-    //             console.log('Fetched blogs:', response);
-    //             if (response.success) {
-    //                 setBlogs(response.data);
-    //             } else {
-    //                 toast.error(response.message || 'Failed to fetch blogs');
-    //             }
-    //             setLoading(false);
-    //         },
-    //         error: (xhr, status, error) => {
-    //             console.error('Fetch blogs error:', { status, error, response: xhr.responseText });
-    //             toast.error('Error fetching blogs: ' + (xhr.responseJSON?.message || error));
-    //             setLoading(false);
-    //         },
-    //     });
-    // };
-
+  // Fetch blogs on component mount
+  useEffect(() => {
     const fetchBlogs = async () => {
-        try {
-            const response = await $.ajax({
-                url: 'http://localhost/Wanderlusttrails/Backend/config/blogs/getBlogs.php',
-                method: 'GET',
-                data: { userId: user?.id },
-                dataType: 'json'
-            });
-            console.log("Fetched blogs:", response);
-            if (response.success) {
-                setBlogs(response.data);
-            } else {
-                toast.error(response.message || "Failed to fetch blogs");
-            }
-        } catch (error) {
-            console.error("Fetch blogs error:", error);
-            toast.error("Failed to fetch blogs");
+      try {
+        const response = await fetch('http://localhost/Wanderlusttrails/Backend/config/blogs/getBlogs.php', {
+          method: 'GET',
+        });
+        const result = await response.json();
+        if (result.success) {
+          setBlogs(result.data);
+        } else {
+          setError(result.message || 'Failed to fetch blogs');
         }
-    };
-    
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
+      } catch (err) {
+        setError('Error fetching blogs: ' + err.message);
+      }
     };
 
-    const handleContentChange = (value) => {
-        setForm((prev) => ({ ...prev, content: value }));
-    };
+    fetchBlogs();
+  }, []);
 
-    const handleMediaChange = (e) => {
-        const files = Array.from(e.target.files);
-        setForm((prev) => ({ ...prev, media: files }));
-        const previews = files.map((file) => ({
-            url: URL.createObjectURL(file),
-            type: file.type.startsWith('image') ? 'image' : 'video',
-        }));
-        setMediaPreview((prev) => [...prev, ...previews]);
-    };
+  // Filter blogs based on status and user
+  const filteredBlogs = blogs.filter((blog) => {
+    const isOwner = Number(blog.userId) === Number(currentUserId);
+    if (blog.status === 'published') return true;
+    if (blog.status === 'draft' && isOwner) return true;
+    return false;
+  });
 
-    const removeMedia = (index) => {
-        setForm((prev) => ({
-            ...prev,
-            existing_media: prev.existing_media.filter((_, i) => i !== index),
-        }));
-        setMediaPreview((prev) => prev.filter((_, i) => i !== index));
-    };
+  // Handle Quill content change
+  const handleQuillChange = (value) => {
+    setFormData((prev) => ({ ...prev, content: value }));
+  };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!isAuthenticated || !user?.id) {
-            toast.error('Please log in to create a blog');
-            return;
+  // Handle form submission (create or update blog)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    const data = new FormData();
+    if (formData.blogId) data.append('blogId', formData.blogId);
+    data.append('userId', currentUserId);
+    data.append('title', formData.title);
+    data.append('content', formData.content);
+    data.append('status', formData.status);
+    if (formData.existing_media.length > 0) {
+      data.append('existing_media', JSON.stringify(formData.existing_media));
+    }
+    formData.files.forEach((file) => {
+      data.append('media[]', file);
+    });
+
+    try {
+      const url = formData.blogId
+        ? 'http://localhost/Wanderlusttrails/Backend/config/blogs/updateBlog.php'
+        : 'http://localhost/Wanderlusttrails/Backend/config/blogs/createBlog.php';
+      const response = await fetch(url, {
+        method: 'POST',
+        body: data,
+      });
+      const result = await response.json();
+      if (result.success) {
+        const fetchResponse = await fetch('http://localhost/Wanderlusttrails/Backend/config/blogs/getBlogs.php');
+        const fetchResult = await fetchResponse.json();
+        if (fetchResult.success) {
+          setBlogs(fetchResult.data);
         }
-
-        const formData = new FormData();
-        formData.append('userId', user.id);
-        formData.append('title', form.title);
-        formData.append('content', form.content);
-        formData.append('status', form.status);
-        formData.append('existing_media', JSON.stringify(form.existing_media));
-        form.media.forEach((file) => formData.append('media[]', file));
-
-        if (editBlogId) {
-            formData.append('blogId', editBlogId);
-        }
-
-        $.ajax({
-            url: editBlogId
-                ? 'http://localhost/Wanderlusttrails/Backend/config/blogs/updateBlog.php'
-                : 'http://localhost/Wanderlusttrails/Backend/config/blogs/createBlog.php',
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            dataType: 'json',
-            success: (response) => {
-                console.log('Save blog response:', response);
-                if (response.success) {
-                    toast.success(editBlogId ? 'Blog updated successfully!' : 'Blog created successfully!');
-                    resetForm();
-                    fetchBlogs();
-                } else {
-                    toast.error(response.message || 'Failed to save blog');
-                }
-            },
-            error: (xhr, status, error) => {
-                console.error('Save blog error:', { status, error, response: xhr.responseText });
-                toast.error('Error saving blog: ' + (xhr.responseJSON?.message || error));
-            },
+        setPopup(null);
+        setFormData({
+          blogId: null,
+          title: '',
+          content: '',
+          status: 'draft',
+          existing_media: [],
+          files: [],
         });
-    };
+      } else {
+        setError('Error saving blog: ' + result.message);
+      }
+    } catch (err) {
+      setError('Error saving blog: ' + err.message);
+    }
+  };
 
-    const handleEdit = (blog) => {
-        setEditBlogId(blog.id);
-        setForm({
-            title: blog.title,
-            content: blog.content,
-            status: blog.status,
-            media: [],
-            existing_media: blog.media_urls || [],
-        });
-        setMediaPreview((blog.media_urls || []).map((url) => ({
-            url,
-            type: url.match(/\.(mp4|webm|ogg)$/) ? 'video' : 'image',
-        })));
-    };
+  // Handle delete blog
+  const handleDelete = async () => {
+    try {
+      const response = await fetch('http://localhost/Wanderlusttrails/Backend/config/blogs/deleteBlog.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blogId: selectedBlog.id, userId: currentUserId }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setBlogs(blogs.filter((blog) => blog.id !== selectedBlog.id));
+        setPopup(null);
+        setSelectedBlog(null);
+      } else {
+        setError('Error deleting blog: ' + result.message);
+      }
+    } catch (err) {
+      setError('Error deleting blog: ' + err.message);
+    }
+  };
 
-    const handleDelete = (blogId) => {
-        if (!window.confirm('Are you sure you want to delete this blog?')) return;
+  return (
+    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold text-indigo-300 mb-8 text-center">
+          Blogs
+        </h1>
 
-        $.ajax({
-            url: 'http://localhost/Wanderlusttrails/Backend/config/blogs/deleteBlog.php',
-            type: 'POST',
-            data: JSON.stringify({ blogId, userId: user.id }),
-            contentType: 'application/json',
-            dataType: 'json',
-            success: (response) => {
-                console.log('Delete blog response:', response);
-                if (response.success) {
-                    toast.success('Blog deleted successfully!');
-                    fetchBlogs();
-                } else {
-                    toast.error(response.message || 'Failed to delete blog');
-                }
-            },
-            error: (xhr, status, error) => {
-                console.error('Delete blog error:', { status, error, response: xhr.responseText });
-                toast.error('Error deleting blog: ' + (xhr.responseJSON?.message || error));
-            },
-        });
-    };
+        {/* Display error message if any */}
+        {error && (
+          <p className="text-red-400 text-center mb-8">
+            {error}
+          </p>
+        )}
 
-    const resetForm = () => {
-        setForm({
-            title: '',
-            content: '',
-            status: 'draft',
-            media: [],
-            existing_media: [],
-        });
-        setEditBlogId(null);
-        setMediaPreview([]);
-    };
-
-    if (loading) return <div className="text-center p-4 text-white">Loading blogs...</div>;
-
-    return (
-        <div className="max-w-7xl mx-auto p-6 bg-gray-100 min-h-screen">
-            <h2 className="text-3xl font-bold text-blue-800 mb-8">Travel Stories</h2>
-
-            {isAuthenticated && (
-                <div className="bg-white rounded-lg shadow-xl p-6 mb-8 max-w-2xl mx-auto">
-                    <h3 className="text-xl font-semibold text-blue-800 mb-4">
-                        {editBlogId ? 'Edit Your Story' : 'Share Your Travel Story'}
-                    </h3>
-                    <form onSubmit={handleSubmit}>
-                        <div className="mb-4">
-                            <label className="block text-gray-600 font-semibold mb-2">Title</label>
-                            <input
-                                type="text"
-                                name="title"
-                                value={form.title}
-                                onChange={handleInputChange}
-                                className="w-full bg-gray-50 text-gray-800 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-600"
-                                required
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-600 font-semibold mb-2">Story</label>
-                            <ReactQuill
-                                value={form.content}
-                                onChange={handleContentChange}
-                                className="bg-gray-50 text-gray-800"
-                                theme="snow"
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-600 font-semibold mb-2">Media (Images/Videos)</label>
-                            <div className="flex items-center space-x-4">
-                                <label className="flex items-center bg-blue-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-700">
-                                    <FiUpload className="mr-2" />
-                                    Upload
-                                    <input
-                                        type="file"
-                                        multiple
-                                        accept="image/*,video/*"
-                                        onChange={handleMediaChange}
-                                        className="hidden"
-                                    />
-                                </label>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4 mt-4">
-                                {mediaPreview.map((media, index) => (
-                                    <div key={index} className="relative">
-                                        {media.type === 'image' ? (
-                                            <img src={media.url} alt="Preview" className="w-full h-24 object-cover rounded" />
-                                        ) : (
-                                            <video src={media.url} controls className="w-full h-24 object-cover rounded" />
-                                        )}
-                                        <button
-                                            type="button"
-                                            onClick={() => removeMedia(index)}
-                                            className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1"
-                                        >
-                                            X
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-600 font-semibold mb-2">Status</label>
-                            <select
-                                name="status"
-                                value={form.status}
-                                onChange={handleInputChange}
-                                className="w-full bg-gray-50 text-gray-800 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-600"
-                            >
-                                <option value="draft">Draft</option>
-                                <option value="published">Published</option>
-                            </select>
-                        </div>
-                        <div className="flex space-x-4">
-                            <button
-                                type="submit"
-                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
-                            >
-                                {editBlogId ? 'Update Story' : 'Share Story'}
-                            </button>
-                            {(form.title || form.content || form.media.length > 0) && (
-                                <button
-                                    type="button"
-                                    onClick={resetForm}
-                                    className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                            )}
-                        </div>
-                    </form>
-                </div>
-            )}
-
-            <div className="space-y-8">
-                {blogs.length === 0 ? (
-                    <p className="text-center text-gray-600 text-lg">No stories to display.</p>
-                ) : (
-                    blogs.map((blog) => (
-                        <div
-                            key={blog.id}
-                            className="relative bg-white text-gray-800 rounded-lg shadow-xl max-w-md mx-auto overflow-hidden border border-gray-200"
+        {/* Blog tiles container */}
+        <div className="bg-gray-700 rounded-xl p-6 shadow-lg mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredBlogs.length > 0 ? (
+              filteredBlogs.map((blog) => (
+                <div
+                  key={blog.id}
+                  className="bg-gray-800 rounded-lg p-4 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 border border-red-900"
+                >
+                  <h3 className="text-lg font-medium text-gray-200 mb-2">
+                    {blog.title}
+                  </h3>
+                  <p className="text-gray-400 text-sm mb-3">
+                    By: {blog.firstName} {blog.lastName}
+                  </p>
+                  {blog.media_urls && blog.media_urls.length > 0 && (
+                    <div className="mb-3">
+                      {blog.media_urls[0].match(/\.(jpeg|jpg|png|gif)$/i) ? (
+                        <img
+                          src={blog.media_urls[0]}
+                          alt="Thumbnail"
+                          className="w-full h-40 object-cover rounded-lg shadow-md"
+                        />
+                      ) : (
+                        <video
+                          src={blog.media_urls[0]}
+                          className="w-full h-40 rounded-lg shadow-md"
+                        />
+                      )}
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {Number(blog.userId) === Number(currentUserId) ? (
+                      <>
+                        <button
+                          onClick={() => {
+                            setSelectedBlog(blog);
+                            setFormData({
+                              blogId: blog.id,
+                              title: blog.title,
+                              content: blog.content,
+                              status: blog.status,
+                              existing_media: blog.media_urls || [],
+                              files: [],
+                            });
+                            setPopup('edit');
+                          }}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
                         >
-                            <div className="bg-blue-800 text-white p-4 flex items-center space-x-4 relative">
-                                <img
-                                    src={blog.media_urls?.[0] || 'https://source.unsplash.com/random/100x100/?travel'}
-                                    alt={blog.title}
-                                    className="w-12 h-12 rounded-full object-cover border-2 border-white"
-                                />
-                                <div>
-                                    <h3 className="text-lg font-bold">{blog.title}</h3>
-                                    <p className="text-sm">
-                                        By {blog.firstName} {blog.lastName}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="p-6 relative">
-                                <div
-                                    className="absolute left-0 top-0 bottom-0 w-2 bg-gray-200"
-                                    style={{ background: 'radial-gradient(circle, transparent 50%, #e5e7eb 50%) 0 0 / 10px 10px' }}
-                                ></div>
-                                <div
-                                    className="absolute right-0 top-0 bottom-0 w-2 bg-gray-200"
-                                    style={{ background: 'radial-gradient(circle, transparent 50%, #e5e7eb 50%) 0 0 / 10px 10px' }}
-                                ></div>
-                                <div className="ml-4 mr-4 font-mono text-sm">
-                                    <div
-                                        className="prose prose-sm max-w-none"
-                                        dangerouslySetInnerHTML={{ __html: blog.content.substring(0, 200) + (blog.content.length > 200 ? '...' : '') }}
-                                    />
-                                    {blog.media_urls?.length > 0 && (
-                                        <div className="grid grid-cols-2 gap-4 mt-4">
-                                            {blog.media_urls.map((url, index) => (
-                                                <div key={index}>
-                                                    {url.match(/\.(mp4|webm|ogg)$/) ? (
-                                                        <video src={url} controls className="w-full h-32 object-cover rounded" />
-                                                    ) : (
-                                                        <img src={url} alt="Blog media" className="w-full h-32 object-cover rounded" />
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    <p className="text-xs text-gray-500 mt-2">Posted on {new Date(blog.createdAt).toLocaleDateString()}</p>
-                                </div>
-                            </div>
-                            <div className="bg-gray-100 p-4 border-t border-dashed border-gray-400 flex justify-between items-center">
-                                {isAuthenticated && user.id === blog.userId && (
-                                    <div className="flex space-x-2">
-                                        <button
-                                            onClick={() => handleEdit(blog)}
-                                            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors text-xs font-mono uppercase flex items-center"
-                                        >
-                                            <FiEdit className="mr-1" /> Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(blog.id)}
-                                            className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors text-xs font-mono uppercase flex items-center"
-                                        >
-                                            <FiTrash2 className="mr-1" /> Delete
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    ))
-                )}
-            </div>
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedBlog(blog);
+                            setPopup('delete');
+                          }}
+                          className="bg-red-600 hover:bg-red-700 text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setSelectedBlog(blog);
+                          setPopup('view');
+                        }}
+                        className="bg-green-600 hover:bg-green-700 text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                      >
+                        View
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-300 text-center col-span-full">
+                No blogs available.
+              </p>
+            )}
+          </div>
         </div>
-    );
-}
+
+        {/* Write Your Blog button container */}
+        <div className="bg-gray-700 rounded-xl p-4 shadow-lg text-center">
+          <button
+            onClick={() => {
+              setFormData({
+                blogId: null,
+                title: '',
+                content: '',
+                status: 'draft',
+                existing_media: [],
+                files: [],
+              });
+              setPopup('create');
+            }}
+            className="bg-indigo-600 hover:bg-indigo-700 text-gray-200 font-medium py-3 px-6 rounded-lg transition-colors duration-200"
+          >
+            Write Your Blog
+          </button>
+        </div>
+
+        {/* Popups */}
+        {popup === 'view' && selectedBlog && (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="absolute inset-0 bg-black bg-opacity-80" onClick={() => setPopup(null)}></div>
+            <div className="relative w-full max-w-3xl bg-gray-800 rounded-xl p-6 space-y-4 z-50 max-h-[90vh] overflow-y-auto">
+              <h2 className="text-2xl font-bold text-indigo-300 mb-2">
+                {selectedBlog.title}
+              </h2>
+              <p className="text-gray-400 text-sm mb-4">
+                By: {selectedBlog.firstName} {selectedBlog.lastName} | Posted on: {new Date(selectedBlog.createdAt).toLocaleDateString()}
+              </p>
+              <div
+                className="text-gray-200 prose prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: selectedBlog.content }}
+              />
+              {selectedBlog.media_urls && selectedBlog.media_urls.length > 0 && (
+                <div className="flex flex-wrap gap-4 mb-4">
+                  {selectedBlog.media_urls.map((url, index) => (
+                    <div key={index}>
+                      {url.match(/\.(jpeg|jpg|png|gif)$/i) ? (
+                        <img
+                          src={url}
+                          alt={`Media ${index}`}
+                          className="max-w-[250px] rounded-lg shadow-md"
+                        />
+                      ) : (
+                        <video
+                          src={url}
+                          controls
+                          className="max-w-[250px] rounded-lg shadow-md"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setPopup(null)}
+                  className="bg-gray-600 hover:bg-gray-700 text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {(popup === 'edit' || popup === 'create') && (
+          <BlogForm
+            formData={formData}
+            setFormData={setFormData}
+            error={error}
+            handleSubmit={handleSubmit}
+            setPopup={setPopup}
+            isEdit={popup === 'edit'}
+            handleQuillChange={handleQuillChange}
+          />
+        )}
+
+        {popup === 'delete' && selectedBlog && (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="absolute inset-0 bg-black bg-opacity-80" onClick={() => setPopup(null)}></div>
+            <div className="relative w-full max-w-md bg-gray-800 rounded-xl p-6 space-y-4 z-50">
+              <h2 className="text-2xl font-bold text-indigo-300 mb-2">
+                Confirm Delete
+              </h2>
+              <p className="text-gray-200">
+                Are you sure you want to delete "{selectedBlog.title}"?
+              </p>
+              <div className="flex space-x-4">
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-gray-200 font-medium py-2 rounded-lg transition-colors duration-200"
+                >
+                  Yes, Delete
+                </button>
+                <button
+                  onClick={() => setPopup(null)}
+                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-gray-200 font-medium py-2 rounded-lg transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default Blogs;

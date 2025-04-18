@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/signupUser.php
 // This file handles user registration by accepting POST requests with user data.
 // It validates the data, encrypts the password, and stores the user information in the database.
 

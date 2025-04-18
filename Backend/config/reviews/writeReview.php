@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Backend/config/reviews/writeReview.php
 // Writes a review to the database via POST request, expects JSON data.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");

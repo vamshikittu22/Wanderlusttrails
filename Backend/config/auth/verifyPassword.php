@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/auth/verifyPassword.php
 // This file verifies the user's current password.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");

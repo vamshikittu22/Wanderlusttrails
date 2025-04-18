@@ -1,5 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
-
+//path: Frontend/WanderlustTrails/src/components/Header/SearchBar.jsx
 import React, { useState } from 'react'
 import { Button, Form } from 'react-bootstrap'
 

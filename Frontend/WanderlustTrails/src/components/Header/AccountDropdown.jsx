@@ -1,4 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/components/Header/AccountDropdown.jsx
 import React, { useState } from "react";
 import { NavDropdown, NavLink } from "react-bootstrap";
 import { useUser } from "../../context/UserContext";

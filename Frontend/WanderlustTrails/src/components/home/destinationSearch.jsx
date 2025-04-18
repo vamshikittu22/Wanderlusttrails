@@ -1,4 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src/components/home/AdvanceSearch.jsx
 
 import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';

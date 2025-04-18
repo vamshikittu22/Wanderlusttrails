@@ -1,5 +1,5 @@
 
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Frontend/WanderlustTrails/src.components/Todo/index.js
 
 import TodoForm from "./TodoForm";  
 import TodoItem from "./Todoitem";

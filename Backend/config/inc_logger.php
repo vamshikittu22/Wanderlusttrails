@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Backend/config/inc_logger.php
 // Centralized logging utility for Wanderlusttrails
 
 class Logger {

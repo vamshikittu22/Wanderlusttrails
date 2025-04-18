@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/auth/logout.php
 // This file handles user logout by destroying the session.
 // It returns a JSON response indicating the logout status.
 

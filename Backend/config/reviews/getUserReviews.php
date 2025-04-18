@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Backend/config/reviews/getAllReviews.php
 // Retrieves user reviews from the database via GET request, returns JSON response.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");

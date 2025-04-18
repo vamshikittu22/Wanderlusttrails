@@ -39,6 +39,10 @@ import Unauthorized from './pages/Unauthorised.jsx';
 import Payment from './pages/Payment.jsx';
 import Test2 from './pages/Test2.jsx';
 import Reviews from './pages/Reviews.jsx';
+import LanguageAndTouristAssist from './pages/NeedAssist.jsx';
+import LearnCultureAndHistory from './pages/CultureAndHistory.jsx';
+import CustomizedItinerary from './pages/CustomizedIternerary.jsx';
+import HelpAndSupport from './pages/Help.jsx';
 
 
 const router = createBrowserRouter(
@@ -49,6 +53,10 @@ const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgotpassword" element={<ForgotPassword />} />
+      <Route path="needassist" element={<LanguageAndTouristAssist />} />
+      <Route path="About" element={<About />} />
+      <Route path="contactus" element={<ContactUs />} />
+      <Route path="help" element={<HelpAndSupport/>} />
       <Route path="test2" element={<Test2 />} />
 
 
@@ -60,21 +68,20 @@ const router = createBrowserRouter(
         <Route index element={<Home />} />
         <Route path="about" element={<About />} />
         <Route path="blogs" element={<Blogs />} />
-        <Route path="help" element={<Help />} />
         <Route path="reviews" element={<Reviews />} />
-        <Route path="needassist" element={<NeedAssist />} />
         <Route path="todolist" element={<Todolist />} />
         <Route path="currencyconverter" element={<CurrencyConverter />} />
         <Route path="destination" element={<Destination />} />
         <Route path="flightandhotel" element={<FlightAndHotel />} />
-        <Route path="travelinsurance" element={<TravelInsurance />} />
+        {/* <Route path="travelinsurance" element={<TravelInsurance />} /> */}
         <Route path="travelpackages" element={<TravelPackages />} />
         <Route path="PackageBookingdetails" element={<PackageBookingDetails />} />
-        <Route path="contactus" element={<ContactUs />} />
+        <Route path="CustomizedItinerary" element={<CustomizedItinerary />} />
+        <Route path="cultureandhistory" element={<LearnCultureAndHistory />} />
+        <Route path="travelinsurance" element={<TravelInsurance />} />
+
         <Route path="Payment" element={<Payment />} />
         <Route path="test" element={<Test />} />
-    
-
         <Route path="unauthorized" element={<Unauthorized />} />
       </Route>
 

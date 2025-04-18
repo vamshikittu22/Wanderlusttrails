@@ -1,4 +1,4 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Frontend/WanderlustTrails/src/pages/Unauthorised.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
