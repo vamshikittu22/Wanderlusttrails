@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/booking/editBooking.php
 // Submits booking changes for admin approval.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");
@@ -9,6 +9,7 @@ header("Access-Control-Allow-Headers: Content-Type");
 header("Access-Control-Max-Age: 86400");
 
 require_once __DIR__ . "/../inc_logger.php";
+require_once __DIR__ . "/../inc_validationClass.php";
 require_once __DIR__ . "/inc_bookingModel.php";
 
 Logger::log("editBooking API Started - Method: {$_SERVER['REQUEST_METHOD']}");
@@ -28,10 +29,40 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $data = json_decode(file_get_contents("php://input"), true);
-if (!$data || !isset($data['booking_id']) || !isset($data['user_id']) || !isset($data['changes']) || empty($data['changes'])) {
-    Logger::log("Missing or invalid parameters: " . json_encode($data));
+$validator = new ValidationClass();
+
+// Validate required fields
+$requiredFields = ['booking_id', 'user_id', 'changes'];
+$result = $validator->validateRequiredFields($data, $requiredFields);
+if (!$result['success']) {
+    Logger::log($result['message']);
     http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Valid numeric booking_id, user_id, and non-empty changes are required"]);
+    echo json_encode($result);
+    exit;
+}
+
+if (empty($data['changes'])) {
+    Logger::log("Changes cannot be empty");
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Changes cannot be empty"]);
+    exit;
+}
+
+// Validate booking_id
+$result = $validator->validateNumeric($data['booking_id'], 'booking_id');
+if (!$result['success']) {
+    Logger::log($result['message']);
+    http_response_code(400);
+    echo json_encode($result);
+    exit;
+}
+
+// Validate user_id
+$result = $validator->validateNumeric($data['user_id'], 'user_id');
+if (!$result['success']) {
+    Logger::log($result['message']);
+    http_response_code(400);
+    echo json_encode($result);
     exit;
 }
 

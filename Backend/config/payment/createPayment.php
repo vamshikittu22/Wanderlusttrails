@@ -1,11 +1,12 @@
 <?php
-//path: Wanderlusttrails/Backend/config/api_updatePaymentStatus.php
 header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 require_once __DIR__ . "/../inc_logger.php";
+require_once __DIR__ . "/inc_paymentModel.php";
+
 Logger::log("createPayment API Started - Method: {$_SERVER['REQUEST_METHOD']}");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -14,8 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     echo json_encode(["message" => "OPTIONS request successful"]);
     exit;
 }
-
-require_once __DIR__ . "/../inc_databaseClass.php";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
@@ -43,43 +42,14 @@ $paymentDate = $data['payment_date'] ?? null;
 
 Logger::log("Parsed: booking_id=$bookingId, user_id=$userId, amount=$amount, method=$paymentMethod, transaction_id=$transactionId");
 
-$validMethods = ['credit_card', 'debit_card', 'paypal', 'bank_transfer'];
-if (!$bookingId || !$userId || !$amount || !$paymentMethod || !in_array($paymentMethod, $validMethods)) {
-    Logger::log("Validation failed: Missing fields");
-    http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Missing or invalid fields"]);
-    exit;
-}
-
 try {
-    $db = new DatabaseClass();
-    Logger::log("DB connected");
-
-    $query = "INSERT INTO payments (booking_id, user_id, amount, payment_method, transaction_id, payment_status, payment_date) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $status = 'completed';
-    $types = "iidssss";
-    $params = [$bookingId, $userId, $amount, $paymentMethod, $transactionId, $status, $paymentDate ?: date('Y-m-d H:i:s')];
-    Logger::log("Query: $query, Status: $status, Params: " . json_encode($params));
-    $result = $db->executeQuery($query, $types, ...$params);
-
-    Logger::log("Result: " . json_encode($result));
-
-    if ($result['success']) {
-        Logger::log("Payment recorded, ID: " . $result['insert_id']);
-        http_response_code(201);
-        echo json_encode([
-            "success" => true,
-            "message" => "Payment recorded successfully",
-            "payment_id" => $result['insert_id']
-        ]);
-    } else {
-        Logger::log("Insert failed: " . json_encode($result));
-        http_response_code(500);
-        echo json_encode(["success" => false, "message" => "Failed to record payment"]);
-    }
+    $paymentClass = new PaymentClass();
+    $result = $paymentClass->createPayment($bookingId, $userId, $amount, $paymentMethod, $transactionId, $paymentDate);
+    http_response_code(201);
+    echo json_encode($result);
 } catch (Exception $e) {
     Logger::log("Exception: " . $e->getMessage());
-    http_response_code(500);
+    http_response_code($e->getCode() >= 400 && $e->getCode() < 600 ? $e->getCode() : 500);
     echo json_encode(["success" => false, "message" => "Server error: " . $e->getMessage()]);
 }
 

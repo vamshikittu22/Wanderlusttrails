@@ -5,7 +5,9 @@ import $ from "jquery";
 import { toast } from "react-toastify";
 import UserForm from "./../forms/UserForm.jsx";
 
+
 const UserProfile = () => {
+  // State to manage user data and form visibility
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -54,6 +56,7 @@ const UserProfile = () => {
             toast.error("Failed to fetch profile: " + response.message);
           }
         },
+        // Handle error response
         error: function (xhr) {
           console.error("Error fetching profile:", xhr);
           let errorMessage = "Error fetching profile: Server error";
@@ -93,6 +96,7 @@ const UserProfile = () => {
           toast.error("Failed to update profile: " + response.message);
         }
       },
+      // Handle error response
       error: function (xhr) {
         console.error("Error updating profile:", xhr);
         let errorMessage = "Error updating profile: Server error";
@@ -139,6 +143,7 @@ const UserProfile = () => {
                 toast.error("Failed to send OTP: " + otpResponse.message);
               }
             },
+            // Handle error response
             error: function (xhr) {
               console.error("Error sending OTP:", xhr);
               let errorMessage = "Error sending OTP: Server error";
@@ -155,6 +160,7 @@ const UserProfile = () => {
           toast.error("Verification failed: " + verifyResponse.message);
         }
       },
+      // Handle error response
       error: function (xhr) {
         console.error("Error verifying password:", xhr);
         let errorMessage = "Error verifying password: Server error";
@@ -207,6 +213,7 @@ const UserProfile = () => {
           toast.error("Failed to change password: " + response.message);
         }
       },
+      // Handle error response
       error: function (xhr) {
         console.error("Error changing password:", xhr);
         let errorMessage = "Error changing password: Server error";

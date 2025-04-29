@@ -28,7 +28,12 @@ class BlogModel {
                   FROM blogs b 
                   JOIN users u ON b.userId = u.id 
                   ORDER BY b.createdAt DESC";
-        $blogs = $this->db->fetchQuery($query, "");
+        $blogs = $this->db->query($query);
+
+        if (isset($blogs['success']) && !$blogs['success']) {
+            Logger::log("getAllBlogs failed: " . $blogs['message']);
+            return ["success" => false, "message" => $blogs['message']];
+        }
 
         foreach ($blogs as &$blog) {
             $blog['media_urls'] = json_decode($blog['media_urls'], true) ?: [];

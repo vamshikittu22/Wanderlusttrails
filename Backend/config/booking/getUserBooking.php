@@ -8,6 +8,7 @@ header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 require_once __DIR__ . "/../inc_logger.php";
+require_once __DIR__ . "/../inc_validationClass.php";
 require_once __DIR__ . "/inc_bookingModel.php";
 
 Logger::log("getUserBooking API Started - Method: {$_SERVER['REQUEST_METHOD']}");
@@ -27,10 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 $userId = isset($_GET['user_id']) ? trim($_GET['user_id']) : '';
-if (empty($userId) || !is_numeric($userId)) {
-    Logger::log("Invalid or missing user_id: '$userId'");
+$validator = new ValidationClass();
+$result = $validator->validateNumeric($userId, 'user_id');
+if (!$result['success']) {
+    Logger::log($result['message']);
     http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Valid numeric user_id is required"]);
+    echo json_encode($result);
     exit;
 }
 

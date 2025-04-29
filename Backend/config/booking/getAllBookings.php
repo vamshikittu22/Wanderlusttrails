@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
+//path: Wanderlusttrails/Backend/config/booking/getAllBookings.php
 // Fetches all bookings for admin.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");
@@ -9,6 +9,7 @@ header("Access-Control-Allow-Headers: Content-Type");
 header("Access-Control-Max-Age: 86400");
 
 require_once __DIR__ . "/../inc_logger.php";
+require_once __DIR__ . "/../inc_validationClass.php";
 require_once __DIR__ . "/inc_bookingModel.php";
 
 Logger::log("getAllBookings API Started - Method: {$_SERVER['REQUEST_METHOD']}");

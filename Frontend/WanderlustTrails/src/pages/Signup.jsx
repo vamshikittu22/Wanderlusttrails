@@ -8,12 +8,15 @@ import 'react-toastify/dist/ReactToastify.css';
 import UserForm from './../components/forms/UserForm.jsx';
 import { Link } from 'react-router-dom';
 
+
 function Signup() {
+  // State to manage form data
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', password: '', confirmPassword: '', dob: '',
     gender: '', nationality: '', phone: '', street: '', city: '', state: '', zip: ''
   });
 
+  // Function to handle form submission
   const handleSubmit = (e, updatedFormData) => {
     e.preventDefault(); // Prevent default form submission
     $.ajax({
@@ -47,6 +50,7 @@ function Signup() {
           });
         }
       },
+      // Handle error response
       error: function (xhr, status, error) {
         let errorMessage = 'Error during signup';
         try {

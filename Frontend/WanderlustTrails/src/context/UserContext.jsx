@@ -30,7 +30,7 @@ export function UserProvider({ children }) {
     const [user, setUser] = useState(() => {
         const storedUser = localStorage.getItem('user');
         console.log('[UserContext] Initial user from localStorage:', storedUser);
-        return storedUser ? JSON.parse(storedUser) : defaultUser;
+        return storedUser ? JSON.parse(storedUser) : null; // Set to null initially
     });
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [token, setToken] = useState(null);
@@ -125,7 +125,7 @@ export function UserProvider({ children }) {
         } else {
             console.log('[UserContext] No token or user, setting defaults');
             setIsAuthenticated(false);
-            setUser(defaultUser);
+            setUser(null); // Set to null
             setToken(null);
         }
 
@@ -168,7 +168,7 @@ export function UserProvider({ children }) {
             toast.success('Logged in successfully!');
         } catch (error) {
             console.error('[UserContext] login error:', error);
-            setUser(defaultUser);
+            setUser(null); // Set to null
             setToken(null);
             setIsAuthenticated(false);
             localStorage.removeItem('user');
@@ -191,10 +191,10 @@ export function UserProvider({ children }) {
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
             localStorage.removeItem('userName');
-            setUser(defaultUser);
+            setUser(null); // Set to null
             setToken(null);
             setIsAuthenticated(false);
-            console.log('[UserContext] logout completed:', { user: defaultUser, isAuthenticated: false });
+            console.log('[UserContext] logout completed:', { user: null, isAuthenticated: false });
         });
     };
 

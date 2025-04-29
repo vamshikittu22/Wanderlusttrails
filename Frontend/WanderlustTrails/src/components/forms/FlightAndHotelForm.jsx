@@ -1,43 +1,31 @@
-//path: Frontend/WanderlustTrails/src/components/forms/FlightAndHotelForm.jsx
-import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
-import { FaPlaneDeparture, FaHotel, FaUsers, FaStar, FaCar, FaShieldAlt, FaSwimmingPool, FaWifi, FaPlaneArrival } from 'react-icons/fa';
+// FlightAndHotelForm.jsx
+import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import airportData from '../airports.json';
+import FormWrapper from './FormWrapper';
+import { FaPlaneDeparture, FaPlaneArrival, FaUsers, FaStar, FaCar, FaShieldAlt, FaSwimmingPool, FaWifi } from 'react-icons/fa';
 
-function FlightAndHotelForm({ initialData = {}, isEditMode = false, onSubmit, onCancel, fullWidth = false, relativePosition = false, onChange }) {
-  console.log('FlightAndHotelForm: isEditMode =', isEditMode);
-
-  const [formData, setFormData] = useState({
-    from: '',
-    to: '',
-    startDate: null,
-    endDate: null,
-    airline: 'any',
-    persons: 1,
-    flightClass: 'economy',
-    hotelStars: '3',
-    roundTrip: true,
-    insurance: false,
-    carRental: false,
-    flightTime: 'any',
-    amenities: { pool: false, wifi: false },
-    pending_changes: initialData.pending_changes || null,
-  });
-
-  const [errors, setErrors] = useState({});
-  const [estimatedPrice, setEstimatedPrice] = useState(0);
-  const [flightDuration, setFlightDuration] = useState(null);
+const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, onCancel }) => {
+  const [from, setFrom] = useState(initialData.from || '');
+  const [to, setTo] = useState(initialData.to || '');
+  const [startDate, setStartDate] = useState(initialData.startDate ? new Date(initialData.startDate) : null);
+  const [endDate, setEndDate] = useState(initialData.endDate ? new Date(initialData.endDate) : null);
+  const [roundTrip, setRoundTrip] = useState(initialData.roundTrip !== undefined ? initialData.roundTrip : true);
+  const [persons, setPersons] = useState(initialData.persons || 1);
+  const [flightClass, setFlightClass] = useState(initialData.flightClass || 'economy');
+  const [hotelStars, setHotelStars] = useState(initialData.hotelStars || '3');
+  const [airline, setAirline] = useState(initialData.airline || 'any');
+  const [flightTime, setFlightTime] = useState(initialData.flightTime || 'any');
+  const [insurance, setInsurance] = useState(initialData.insurance || false);
+  const [carRental, setCarRental] = useState(initialData.carRental || false);
+  const [pool, setPool] = useState(initialData.amenities?.pool || false);
+  const [wifi, setWifi] = useState(initialData.amenities?.wifi || false);
   const [fromSuggestions, setFromSuggestions] = useState([]);
   const [toSuggestions, setToSuggestions] = useState([]);
   const [showFromSuggestions, setShowFromSuggestions] = useState(false);
   const [showToSuggestions, setShowToSuggestions] = useState(false);
-
-  const airlines = [
-    'Any Airline', 'Delta', 'American Airlines', 'United', 'British Airways',
-    'Emirates', 'Qantas', 'Air France', 'Japan Airlines', 'Lufthansa'
-  ];
+  const [totalPrice, setTotalPrice] = useState(initialData.totalPrice || 0);
 
   const cityData = airportData
     .filter(airport => ['large_airport', 'medium_airport'].includes(airport.type) && airport.iata_code)
@@ -47,318 +35,289 @@ function FlightAndHotelForm({ initialData = {}, isEditMode = false, onSubmit, on
       lon: parseFloat(airport.longitude_deg),
     }));
 
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 3958.8; // Earth's radius in miles
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+  const airlines = [
+    'Any Airline', 'Delta', 'American Airlines', 'United', 'British Airways',
+    'Emirates', 'Qantas', 'Air France', 'Japan Airlines', 'Lufthansa',
+  ];
+
+  const distance = () => {
+    const fromCity = cityData.find(city => city.name === from);
+    const toCity = cityData.find(city => city.name === to);
+    if (fromCity && toCity) {
+      const R = 3958.8;
+      const dLat = (toCity.lat - fromCity.lat) * Math.PI / 180;
+      const dLon = (toCity.lon - fromCity.lon) * Math.PI / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(fromCity.lat * Math.PI / 180) * Math.cos(toCity.lat * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+    return 0;
   };
 
+  const flightDuration = () => {
+    const dist = distance();
+    if (dist) {
+      const avgSpeed = 550;
+      const hours = dist / avgSpeed;
+      const minutes = Math.round(hours * 60);
+      const durationHours = Math.floor(minutes / 60);
+      const durationMinutes = minutes % 60;
+      return `${durationHours}h ${durationMinutes}m`;
+    }
+    return 'N/A';
+  };
+
+  const calculateTotalPrice = () => {
+    const basePrice = 100;
+    const dist = distance();
+    const distanceCost = dist * 0.10;
+    const classMultipliers = { economy: 1, premium_economy: 1.5, business: 2.5, first: 4 };
+    const nights = roundTrip && startDate && endDate
+      ? Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24))
+      : 1;
+    let price = (basePrice + distanceCost) * persons * nights * classMultipliers[flightClass] * (parseInt(hotelStars) / 3);
+    if (insurance) price += 50;
+    if (carRental) price += 30 * nights;
+    if (pool) price += 20;
+    if (wifi) price += 10;
+    return price > 0 ? price.toFixed(2) : '0.00';
+  };
+
+  // Recalculate total price whenever dependencies change
   useEffect(() => {
-    const preloadedData = {
-      from: initialData.from || initialData.flight_details?.from || '',
-      to: initialData.to || initialData.flight_details?.to || '',
-      startDate: initialData.startDate || (initialData.start_date ? new Date(initialData.start_date) : null),
-      endDate: initialData.endDate || (initialData.end_date ? new Date(initialData.end_date) : null),
-      airline: initialData.airline || initialData.flight_details?.airline || 'any',
-      persons: initialData.persons || 1,
-      flightClass: initialData.flightClass || initialData.flight_details?.flightClass || 'economy',
-      hotelStars: initialData.hotelStars || initialData.hotel_details?.hotelStars || '3',
-      roundTrip: initialData.roundTrip !== undefined ? initialData.roundTrip : true,
-      insurance: initialData.insurance !== undefined ? initialData.insurance : false,
-      carRental: initialData.carRental !== undefined ? initialData.carRental : false,
-      flightTime: initialData.flightTime || initialData.flight_details?.flightTime || 'any',
-      amenities: {
-        pool: initialData.amenities?.pool !== undefined ? initialData.amenities.pool : false,
-        wifi: initialData.amenities?.wifi !== undefined ? initialData.amenities.wifi : false,
-      },
-      totalPrice: initialData.totalPrice || 0,
-      pending_changes: initialData.pending_changes || null,
-    };
-    setFormData(prev => ({ ...prev, ...preloadedData }));
-
-    const calculateFlightDetails = () => {
-      const fromCity = cityData.find(city => city.name === preloadedData.from);
-      const toCity = cityData.find(city => city.name === preloadedData.to);
-
-      if (fromCity && toCity) {
-        const distance = calculateDistance(fromCity.lat, fromCity.lon, toCity.lat, toCity.lon);
-        console.log('fromCity:',fromCity, fromCity.lat, fromCity.lon, 'toCity:', toCity, toCity.lat, toCity.lon, 'distance:', distance);
-        const avgSpeed = 550; // mph
-        const hours = distance / avgSpeed;
-        const minutes = Math.round(hours * 60);
-        const durationHours = Math.floor(minutes / 60);
-        const durationMinutes = minutes % 60;
-        setFlightDuration(`${durationHours}h ${durationMinutes}m`);
-      } else {
-        setFlightDuration(null);
-      }
-
-      const basePrice = 100;
-      const classMultipliers = { economy: 1, premium_economy: 1.5, business: 2.5, first: 4 };
-      const nights = preloadedData.roundTrip && preloadedData.startDate && preloadedData.endDate
-        ? Math.ceil((preloadedData.endDate - preloadedData.startDate) / (1000 * 60 * 60 * 24))
-        : 1;
-      let price = basePrice * preloadedData.persons * nights * classMultipliers[preloadedData.flightClass] * (parseInt(preloadedData.hotelStars) / 3);
-      if (preloadedData.insurance) price += 50;
-      if (preloadedData.carRental) price += 30 * nights;
-      if (preloadedData.amenities.pool) price += 20;
-      if (preloadedData.amenities.wifi) price += 10;
-      setEstimatedPrice(price > 0 ? price : 0);
-    };
-    calculateFlightDetails();
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-      ...(name === 'roundTrip' && !checked ? { endDate: null } : {})
-    }));
-    if (errors[name]) setErrors({ ...errors, [name]: '' });
-
-    if (!isEditMode && (name === 'from' || name === 'to')) {
-      if (value && typeof value === 'string' && value.trim().length > 0) {
-        const filtered = cityData.filter(city =>
-          city.name.toLowerCase().includes(value.toLowerCase())
-        );
-        if (name === 'from') {
-          setFromSuggestions(filtered);
-          setShowFromSuggestions(true);
-        } else {
-          setToSuggestions(filtered);
-          setShowToSuggestions(true);
-        }
-      } else {
-        if (name === 'from') {
-          setFromSuggestions([]);
-          setShowFromSuggestions(false);
-        } else {
-          setToSuggestions([]);
-          setShowToSuggestions(false);
-        }
-      }
-    }
-
-    if (onChange) {
-      onChange(formData);
-    }
-  };
-
-  const handleAmenityChange = (e) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      amenities: { ...prev.amenities, [name]: checked }
-    }));
-  };
-
-  const handleDateChange = (date, name) => {
-    setFormData(prev => ({ ...prev, [name]: date }));
-    if (errors[name]) setErrors({ ...errors, [name]: '' });
-  };
-
-  const handleSuggestionClick = (name, suggestion) => {
-    setFormData(prev => ({ ...prev, [name]: suggestion.name }));
-    if (name === 'from') setShowFromSuggestions(false);
-    else setShowToSuggestions(false);
-    setErrors({ ...errors, [name]: '' });
-  };
-
-  const resetForm = () => {
-    setFormData({
-      from: '',
-      to: '',
-      startDate: null,
-      endDate: null,
-      airline: 'any',
-      persons: 1,
-      flightClass: 'economy',
-      hotelStars: '3',
-      roundTrip: true,
-      insurance: false,
-      carRental: false,
-      flightTime: 'any',
-      amenities: { pool: false, wifi: false },
-      pending_changes: null,
-    });
-    setErrors({});
-    setEstimatedPrice(0);
-    setFlightDuration(null);
-  };
+    const price = calculateTotalPrice();
+    setTotalPrice(price);
+  }, [from, to, startDate, endDate, roundTrip, persons, flightClass, hotelStars, insurance, carRental, pool, wifi]);
 
   const validateForm = () => {
-    const newErrors = {};
-    if (!formData.from) newErrors.from = 'Departure city is required';
-    if (!formData.to) newErrors.to = 'Destination city is required';
-    if (!formData.startDate) newErrors.startDate = 'Start date is required';
-    if (formData.roundTrip && !formData.endDate) {
-      newErrors.endDate = 'End date is required for round-trip';
+    const errors = {};
+    if (!from) errors.from = 'Departure city is required';
+    if (!to) errors.to = 'Destination city is required';
+    if (!startDate) errors.startDate = 'Start date is required';
+    if (roundTrip && !endDate) errors.endDate = 'End date is required for round-trip';
+    if (roundTrip && startDate && endDate && startDate >= endDate) {
+      errors.endDate = 'End date must be after start date';
     }
-    if (formData.roundTrip && formData.startDate && formData.endDate) {
-      const start = new Date(formData.startDate.setHours(0, 0, 0, 0));
-      const end = new Date(formData.endDate.setHours(0, 0, 0, 0));
-      if (start >= end) {
-        newErrors.endDate = 'End date must be after start date for round-trip';
-      }
-    }
-    if (formData.persons < 1) newErrors.persons = 'Persons must be at least 1';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (persons < 1) errors.persons = 'Number of travelers must be at least 1';
+    return errors;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      toast.error('Please fix the errors in the form.');
+  const summary = {
+    from: from || 'N/A',
+    to: to || 'N/A',
+    startDate: startDate ? startDate.toLocaleDateString() : 'N/A',
+    endDate: roundTrip && endDate ? endDate.toLocaleDateString() : null,
+    tripType: roundTrip ? 'Round-Trip' : 'One-Way',
+    flightDuration: flightDuration(),
+    airline: airline === 'any' ? 'Any Airline' : airline,
+    persons: persons,
+    flightClass: flightClass,
+    flightTime: flightTime,
+    hotelStars: hotelStars,
+    amenities: `${pool ? 'Pool ' : ''}${wifi ? 'Wi-Fi' : ''}`,
+    addOns: `${insurance ? 'Insurance ' : ''}${carRental ? 'Car Rental' : ''}`,
+    totalPrice: totalPrice,
+  };
+
+  const handleSubmit = () => {
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      alert('Please fix the errors in the form.');
       return;
     }
-    onSubmit({ ...formData, totalPrice: estimatedPrice });
+    const formData = {
+      from,
+      to,
+      startDate,
+      endDate,
+      roundTrip,
+      airline,
+      persons,
+      flightClass,
+      hotelStars,
+      flightTime,
+      insurance,
+      carRental,
+      amenities: { pool, wifi },
+      totalPrice,
+    };
+    onSubmit(formData);
   };
 
-  const formBgClass = isEditMode ? 'bg-gray-500' : 'bg-gray-800';
-  const textClass = 'text-gray-200';
-  const inputBgClass = 'bg-orange-50';
-  const inputTextClass = 'text-gray-800';
-  const borderClass = 'border-red-900';
-  const summaryBgClass = isEditMode ? 'bg-gray-100' : 'bg-gray-700';
-  const summaryTextClass = isEditMode ? 'text-gray-800' : 'text-gray-200';
-  const errorTextClass = 'text-red-400';
-  const iconClass = 'text-gray-400';
-  const headingClass = 'text-orange-700';
+  const handleFromChange = (e) => {
+    const value = e.target.value;
+    setFrom(value);
+    if (value.trim().length > 0) {
+      const filtered = cityData.filter(city =>
+        city.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setFromSuggestions(filtered);
+      setShowFromSuggestions(true);
+    } else {
+      setFromSuggestions([]);
+      setShowFromSuggestions(false);
+    }
+  };
+
+  const handleToChange = (e) => {
+    const value = e.target.value;
+    setTo(value);
+    if (value.trim().length > 0) {
+      const filtered = cityData.filter(city =>
+        city.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setToSuggestions(filtered);
+      setShowToSuggestions(true);
+    } else {
+      setToSuggestions([]);
+      setShowToSuggestions(false);
+    }
+  };
 
   return (
-    <form onSubmit={handleSubmit} className={`w-full shadow-lg rounded-xl p-6 space-y-6 py-4 ${formBgClass}`}>
-      <div className="flex items-center justify-between">
-        <label className={`${textClass} font-medium`}>Round-Trip</label>
+    <FormWrapper
+      onSubmit={handleSubmit}
+      onCancel={onCancel}
+      summary={summary}
+      isEditMode={isEditMode}
+      bookingType="flight_hotel"
+    >
+      <h2 className="text-3xl font-bold text-indigo-800 mb-4 text-center">
+        {isEditMode ? 'Edit Your Flight & Hotel' : 'Book Flight & Hotel'}
+      </h2>
+      <div className="flex items-center bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-lg">
+        <span className="text-2xl mr-3">📅</span>
+        <p className="text-blue-700 text-sm">
+          <strong>Note:</strong> Your trip must start tomorrow or later, and for round-trips, the end date must be after the start date.
+        </p>
+      </div>
+
+      <div className="flex items-center justify-between mb-6">
+        <label className="text-indigo-700 font-semibold">Round-Trip</label>
         <input
           type="checkbox"
-          name="roundTrip"
-          checked={formData.roundTrip}
-          onChange={handleChange}
-          className={`h-5 w-5 text-indigo-600 ${inputBgClass} ${borderClass} rounded focus:ring-indigo-500`}
+          checked={roundTrip}
+          onChange={(e) => setRoundTrip(e.target.checked)}
+          className="h-5 w-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-400"
         />
       </div>
 
-      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${relativePosition ? 'relative' : ''}`}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="relative">
-          <label className={`block ${textClass} font-medium mb-1`}>From</label>
-          <input
-            type="text"
-            name="from"
-            value={formData.from}
-            onChange={handleChange}
-            className={`w-full pl-10 p-3 ${inputBgClass} ${inputTextClass} border ${borderClass} rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-            placeholder="Departure City (e.g., London, UK (LHR))"
-          />
-          <FaPlaneDeparture className={`absolute right-5 top-10 ${iconClass}`} />
-          {!isEditMode && showFromSuggestions && fromSuggestions.length > 0 && (
-            <ul className={`absolute z-10 w-full ${inputBgClass} border ${borderClass} rounded-lg mt-1 max-h-40 overflow-y-auto`}>
+          <label className="block text-indigo-700 font-semibold mb-2">From</label>
+          <div className="relative">
+            <input
+              type="text"
+              value={from}
+              onChange={handleFromChange}
+              className="w-full pl-10 p-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400"
+              placeholder="Departure City (e.g., London, UK (LHR))"
+            />
+            <FaPlaneDeparture className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+          {showFromSuggestions && fromSuggestions.length > 0 && (
+            <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto shadow-md">
               {fromSuggestions.map((suggestion) => (
                 <li
                   key={suggestion.name}
-                  onClick={() => handleSuggestionClick('from', suggestion)}
-                  className={`p-2 ${inputTextClass} hover:bg-indigo-600 hover:text-white cursor-pointer`}
+                  onClick={() => {
+                    setFrom(suggestion.name);
+                    setShowFromSuggestions(false);
+                  }}
+                  className="p-2 text-gray-700 hover:bg-indigo-600 hover:text-white cursor-pointer"
                 >
                   {suggestion.name}
                 </li>
               ))}
             </ul>
           )}
-          {errors.from && <p className={`${errorTextClass} text-sm mt-1`}>{errors.from}</p>}
         </div>
 
         <div className="relative">
-          <label className={`block ${textClass} font-medium mb-1`}>To</label>
-          <input
-            type="text"
-            name="to"
-            value={formData.to}
-            onChange={handleChange}
-            className={`w-full pl-10 p-3 ${inputBgClass} ${inputTextClass} border ${borderClass} rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-            placeholder="Destination City (e.g., New York, USA (JFK))"
-          />
-          <FaPlaneArrival className={`absolute right-5 top-10 ${iconClass}`} />
-          {!isEditMode && showToSuggestions && toSuggestions.length > 0 && (
-            <ul className={`absolute z-10 w-full ${inputBgClass} border ${borderClass} rounded-lg mt-1 max-h-40 overflow-y-auto`}>
+          <label className="block text-indigo-700 font-semibold mb-2">To</label>
+          <div className="relative">
+            <input
+              type="text"
+              value={to}
+              onChange={handleToChange}
+              className="w-full pl-10 p-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400"
+              placeholder="Destination City (e.g., New York, USA (JFK))"
+            />
+            <FaPlaneArrival className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+          {showToSuggestions && toSuggestions.length > 0 && (
+            <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto shadow-md">
               {toSuggestions.map((suggestion) => (
                 <li
                   key={suggestion.name}
-                  onClick={() => handleSuggestionClick('to', suggestion)}
-                  className={`p-2 ${inputTextClass} hover:bg-indigo-600 hover:text-white cursor-pointer`}
+                  onClick={() => {
+                    setTo(suggestion.name);
+                    setShowToSuggestions(false);
+                  }}
+                  className="p-2 text-gray-700 hover:bg-indigo-600 hover:text-white cursor-pointer"
                 >
                   {suggestion.name}
                 </li>
               ))}
             </ul>
           )}
-          {errors.to && <p className={`${errorTextClass} text-sm mt-1`}>{errors.to}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="relative">
-            <label className={`block ${textClass} font-medium mb-1`}>Start Date</label>
+          <div>
+            <label className="block text-indigo-700 font-semibold mb-2">Start Date</label>
             <DatePicker
-              selected={formData.startDate}
-              onChange={(date) => handleDateChange(date, 'startDate')}
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
               minDate={new Date()}
-              className={`w-full p-3 ${inputBgClass} ${inputTextClass} border ${borderClass} rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+              className="w-full p-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400"
               dateFormat="yyyy-MM-dd"
               placeholderText="Select start date"
             />
-            {errors.startDate && <p className={`${errorTextClass} text-sm mt-1`}>{errors.startDate}</p>}
           </div>
-          <div className="relative">
-            <label className={`block ${textClass} font-medium mb-1`}>End Date</label>
+          <div>
+            <label className="block text-indigo-700 font-semibold mb-2">End Date</label>
             <DatePicker
-              selected={formData.endDate}
-              onChange={(date) => handleDateChange(date, 'endDate')}
-              minDate={formData.startDate || new Date()}
-              disabled={!formData.roundTrip}
-              className={`w-full p-3 ${inputBgClass} ${inputTextClass} border ${borderClass} rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${!formData.roundTrip ? 'opacity-50 cursor-not-allowed' : ''}`}
+              selected={endDate}
+              onChange={(date) => setEndDate(date)}
+              minDate={startDate || new Date()}
+              disabled={!roundTrip}
+              className={`w-full p-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400 ${!roundTrip ? 'opacity-50 cursor-not-allowed' : ''}`}
               dateFormat="yyyy-MM-dd"
               placeholderText="Select end date"
             />
-            {errors.endDate && <p className={`${errorTextClass} text-sm mt-1`}>{errors.endDate}</p>}
           </div>
         </div>
 
         <div>
-          <div>
-            <label className={`block ${textClass} font-medium mb-1`}>Preferred Flight Time</label>
-            <select
-              name="flightTime"
-              value={formData.flightTime}
-              onChange={handleChange}
-              className={`w-full p-3 ${inputBgClass} ${inputTextClass} border ${borderClass} rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-            >
-              <option value="any">Any Time</option>
-              <option value="morning">Morning (6 AM - 12 PM)</option>
-              <option value="afternoon">Afternoon (12 PM - 6 PM)</option>
-              <option value="evening">Evening (6 PM - 12 AM)</option>
-            </select>
-          </div>
+          <label className="block text-indigo-700 font-semibold mb-2">Preferred Flight Time</label>
+          <select
+            value={flightTime}
+            onChange={(e) => setFlightTime(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400"
+          >
+            <option value="any">Any Time</option>
+            <option value="morning">Morning (6 AM - 12 PM)</option>
+            <option value="afternoon">Afternoon (12 PM - 6 PM)</option>
+            <option value="evening">Evening (6 PM - 12 AM)</option>
+          </select>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="relative">
-          <label className={`block ${textClass} font-medium mb-1`}>Preferred Airline</label>
+        <div>
+          <label className="block text-indigo-700 font-semibold mb-2">Preferred Airline</label>
           <select
-            name="airline"
-            value={formData.airline}
-            onChange={handleChange}
-            className={`w-full p-3 ${inputBgClass} ${inputTextClass} border ${borderClass} rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            value={airline}
+            onChange={(e) => setAirline(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400"
           >
-            {airlines.map(airline => (
+            {airlines.map((airline) => (
               <option key={airline} value={airline.toLowerCase().replace(' ', '_')}>
                 {airline}
               </option>
@@ -366,13 +325,12 @@ function FlightAndHotelForm({ initialData = {}, isEditMode = false, onSubmit, on
           </select>
         </div>
 
-        <div className="relative">
-          <label className={`block ${textClass} font-medium mb-1`}>Flight Class</label>
+        <div>
+          <label className="block text-indigo-700 font-semibold mb-2">Flight Class</label>
           <select
-            name="flightClass"
-            value={formData.flightClass}
-            onChange={handleChange}
-            className={`w-full p-3 ${inputBgClass} ${inputTextClass} border ${borderClass} rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            value={flightClass}
+            onChange={(e) => setFlightClass(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400"
           >
             <option value="economy">Economy</option>
             <option value="premium_economy">Premium Economy</option>
@@ -384,145 +342,87 @@ function FlightAndHotelForm({ initialData = {}, isEditMode = false, onSubmit, on
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="relative">
-          <label className={`block ${textClass} font-medium mb-1`}>Hotel Star Rating</label>
-          <FaStar className={`absolute right-5 top-10 ${iconClass}`} />
-          <select
-            name="hotelStars"
-            value={formData.hotelStars}
-            onChange={handleChange}
-            className={`w-full pl-10 p-3 ${inputBgClass} ${inputTextClass} border ${borderClass} rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-          >
-            <option value="3">3 Stars</option>
-            <option value="4">4 Stars</option>
-            <option value="5">5 Stars</option>
-          </select>
+          <label className="block text-indigo-700 font-semibold mb-2">Hotel Star Rating</label>
+          <div className="relative">
+            <select
+              value={hotelStars}
+              onChange={(e) => setHotelStars(e.target.value)}
+              className="w-full pl-10 p-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400"
+            >
+              <option value="3">3 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="5">5 Stars</option>
+            </select>
+            <FaStar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
         </div>
 
         <div className="relative">
-          <label className={`block ${textClass} font-medium mb-1`}>Persons</label>
-          <input
-            type="number"
-            name="persons"
-            value={formData.persons}
-            onChange={handleChange}
-            min="1"
-            className={`w-full pl-10 p-3 ${inputBgClass} ${inputTextClass} border ${borderClass} rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-          />
-          <FaUsers className={`absolute right-5 top-10 ${iconClass}`} />
-          {errors.persons && <p className={`${errorTextClass} text-sm mt-1`}>{errors.persons}</p>}
+          <label className="block text-indigo-700 font-semibold mb-2">Number of Travelers</label>
+          <div className="relative">
+            <input
+              type="number"
+              value={persons}
+              onChange={(e) => setPersons(Number(e.target.value))}
+              min="1"
+              className="w-full pl-10 p-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400"
+            />
+            <FaUsers className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-4">
-          <h3 className={`text-lg font-medium ${headingClass}`}>Hotel Amenities</h3>
+          <h3 className="text-xl font-semibold text-indigo-800 mb-3">Hotel Amenities</h3>
           <div className="flex items-center">
-            <FaSwimmingPool className={`${iconClass} mr-2`} />
-            <label className={`${textClass} font-medium`}>Pool ($20)</label>
+            <FaSwimmingPool className="text-gray-400 mr-2" />
+            <label className="text-indigo-700 font-semibold">Pool ($20)</label>
             <input
               type="checkbox"
-              name="pool"
-              checked={formData.amenities.pool}
-              onChange={handleAmenityChange}
-              className={`ml-2 h-5 w-5 text-indigo-600 ${inputBgClass} ${borderClass} rounded focus:ring-indigo-500`}
+              checked={pool}
+              onChange={(e) => setPool(e.target.checked)}
+              className="ml-2 h-5 w-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-400"
             />
           </div>
           <div className="flex items-center">
-            <FaWifi className={`${iconClass} mr-2`} />
-            <label className={`${textClass} font-medium`}>Wi-Fi ($10)</label>
+            <FaWifi className="text-gray-400 mr-2" />
+            <label className="text-indigo-700 font-semibold">Wi-Fi ($10)</label>
             <input
               type="checkbox"
-              name="wifi"
-              checked={formData.amenities.wifi}
-              onChange={handleAmenityChange}
-              className={`ml-2 h-5 w-5 text-indigo-600 ${inputBgClass} ${borderClass} rounded focus:ring-indigo-500`}
+              checked={wifi}
+              onChange={(e) => setWifi(e.target.checked)}
+              className="ml-2 h-5 w-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-400"
             />
           </div>
         </div>
 
         <div className="space-y-4">
-          <h3 className={`text-lg font-medium ${headingClass}`}>Add-ons</h3>
+          <h3 className="text-xl font-semibold text-indigo-800 mb-3">Add-ons</h3>
           <div className="flex items-center">
-            <FaShieldAlt className={`${iconClass} mr-2`} />
-            <label className={`${textClass} font-medium`}>Travel Insurance ($50)</label>
+            <FaShieldAlt className="text-gray-400 mr-2" />
+            <label className="text-indigo-700 font-semibold">Travel Insurance ($50)</label>
             <input
               type="checkbox"
-              name="insurance"
-              checked={formData.insurance}
-              onChange={handleChange}
-              className={`ml-2 h-5 w-5 text-indigo-600 ${inputBgClass} ${borderClass} rounded focus:ring-indigo-500`}
+              checked={insurance}
+              onChange={(e) => setInsurance(e.target.checked)}
+              className="ml-2 h-5 w-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-400"
             />
           </div>
           <div className="flex items-center">
-            <FaCar className={`${iconClass} mr-2`} />
-            <label className={`${textClass} font-medium`}>Car Rental ($30/night)</label>
+            <FaCar className="text-gray-400 mr-2" />
+            <label className="text-indigo-700 font-semibold">Car Rental ($30/night)</label>
             <input
               type="checkbox"
-              name="carRental"
-              checked={formData.carRental}
-              onChange={handleChange}
-              className={`ml-2 h-5 w-5 text-indigo-600 ${inputBgClass} ${borderClass} rounded focus:ring-indigo-500`}
+              checked={carRental}
+              onChange={(e) => setCarRental(e.target.checked)}
+              className="ml-2 h-5 w-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-400"
             />
           </div>
         </div>
       </div>
-
-      <div className={`${summaryBgClass} p-4 rounded-lg`}>
-        <h3 className={`text-lg font-semibold ${headingClass} mb-2`}>Booking Summary</h3>
-        <p className={`${summaryTextClass}`}><strong>From:</strong> {formData.from || 'N/A'}</p>
-        <p className={`${summaryTextClass}`}><strong>To:</strong> {formData.to || 'N/A'}</p>
-        <p className={`${summaryTextClass}`}>
-          <strong>Dates:</strong> {formData.startDate?.toLocaleDateString() || 'N/A'}
-          {formData.roundTrip && formData.endDate ? ` to ${formData.endDate.toLocaleDateString()}` : ' (One-way)'}
-        </p>
-        <p className={`${summaryTextClass}`}><strong>Flight Duration:</strong> {flightDuration || 'N/A'}</p>
-        <p className={`${summaryTextClass}`}><strong>Airline:</strong> {formData.airline === 'any' ? 'Any Airline' : formData.airline.replace('_', ' ')}</p>
-        <p className={`${summaryTextClass}`}><strong>Persons:</strong> {formData.persons}</p>
-        <p className={`${summaryTextClass}`}><strong>Flight Class:</strong> {formData.flightClass}</p>
-        <p className={`${summaryTextClass}`}><strong>Flight Time:</strong> {formData.flightTime}</p>
-        <p className={`${summaryTextClass}`}><strong>Hotel Stars:</strong> {formData.hotelStars}</p>
-        <p className={`${summaryTextClass}`}><strong>Amenities:</strong> {formData.amenities.pool ? 'Pool ' : ''}{formData.amenities.wifi ? 'Wi-Fi' : ''}</p>
-        <p className={`${summaryTextClass}`}><strong>Add-ons:</strong> {formData.insurance ? 'Insurance ' : ''}{formData.carRental ? 'Car Rental' : ''}</p>
-        <p className={`${summaryTextClass} mt-2`}><strong>Estimated Price:</strong> <span className={`font-bold ${headingClass}`}>${estimatedPrice.toFixed(2)}</span></p>
-        {formData.pending_changes && (
-          <div className="mt-2">
-            <p className={`${summaryTextClass}`}><strong>Pending Changes:</strong></p>
-            <ul className={`list-disc pl-5 ${summaryTextClass}`}>
-              {Object.entries(formData.pending_changes).map(([key, value]) => (
-                <li key={key}>{`${key}: ${JSON.stringify(value)}`}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-
-      <div className="flex space-x-4">
-        <button
-          type="submit"
-          className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-gray-200 font-medium py-3 rounded-lg transition-colors duration-200"
-        >
-          {isEditMode ? 'Save Changes' : 'Book Now'}
-        </button>
-        {isEditMode ? (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="flex-1 bg-gray-600 hover:bg-gray-700 text-gray-200 font-medium py-3 rounded-lg transition-colors duration-200"
-          >
-            Cancel Edit
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={resetForm}
-            className="flex-1 bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium py-3 rounded-lg transition-colors duration-200"
-          >
-            Reset Form
-          </button>
-        )}
-      </div>
-    </form>
+    </FormWrapper>
   );
-}
+};
 
 export default FlightAndHotelForm;

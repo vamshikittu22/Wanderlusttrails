@@ -1,4 +1,3 @@
-// path: Frontend/WanderlustTrails/src/components/Header/Header.jsx
 import React, { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Nav, Navbar, Container } from 'react-bootstrap';
@@ -8,7 +7,7 @@ import SearchBar from './SearchBar';
 import CustomDropdown from './CustomDropdown';
 
 export default function Header() {
-    const { user, logout } = useUser();
+    const { user, isAuthenticated, logout } = useUser();
     const navigate = useNavigate();
     const [expanded, setExpanded] = useState(false);
 
@@ -22,6 +21,7 @@ export default function Header() {
     const bookItems = [
         { label: "Flight & Hotel", path: "/FlightAndHotel" },
         { label: "Travel Packages", path: "/TravelPackages" },
+        { label: "Customized Itinerary", path: "/CustomizedItinerary" },
     ];
 
     const planItems = [
@@ -35,7 +35,7 @@ export default function Header() {
         { label: "Reviews", path: "/Reviews" },
         { label: "Blogs", path: "/Blogs" },
         { label: "Culture & History", path: "/CultureAndHistory" },
-        { label: "Customized Itinerary", path: "/CustomizedItinerary" },
+        
     ];
 
     const aboutItems = [
@@ -44,16 +44,21 @@ export default function Header() {
         { label: "Contact", path: "/ContactUs" },
     ];
 
-    const accountItems = !user
+    const accountItems = !isAuthenticated
         ? [
             { label: "Login", path: "/Login" },
             { label: "Signup", path: "/Signup" },
             { label: "Forgot Password", path: "/ForgotPassword" },
         ]
-        : [
-            { label: user?.role === 'admin' ? "Admin Dashboard" : "User Dashboard", path: user?.role === 'admin' ? "/AdminDashboard" : "/Userdashboard" },
+        : user?.role === 'admin'
+        ? [
+            { label: "Admin Dashboard", path: "/AdminDashboard" },
             { label: "Logout", path: "", onClick: handleLogout },
-        ];
+          ]
+        : [
+            { label: "User Dashboard", path: "/Userdashboard" },
+            { label: "Logout", path: "", onClick: handleLogout },
+          ];
 
     console.log('[Header] Rendering CustomDropdown for Book:', { bookItems, expanded });
 
@@ -88,7 +93,9 @@ export default function Header() {
                                         >
                                             Home
                                         </NavLink>
-                                        <CustomDropdown title="Book" items={bookItems} />
+                                        {user?.role !== 'admin' && (
+                                            <CustomDropdown title="Book" items={bookItems} />
+                                        )}
                                         <CustomDropdown title="Plan" items={planItems} />
                                         <CustomDropdown title="View" items={viewItems} />
                                         <CustomDropdown title="About" items={aboutItems} />

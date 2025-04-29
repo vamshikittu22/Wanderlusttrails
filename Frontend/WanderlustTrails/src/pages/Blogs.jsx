@@ -1,9 +1,10 @@
-//path: Frontend/WanderlustTrails/src/pages/Blogs.jsx
 import React, { useState, useEffect } from 'react';
 import BlogForm from './../components/forms/BlogForm';
+import FilterSortBar from '../components/FilterSortBar';
+import Pagination from '../components/Pagination';
 
 const Blogs = () => {
-  // State for blogs, form data, and popups
+  // State for blogs, form data, popups, sorting, and pagination
   const [blogs, setBlogs] = useState([]);
   const [error, setError] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(localStorage.getItem('userId') || '1');
@@ -17,6 +18,9 @@ const Blogs = () => {
   });
   const [popup, setPopup] = useState(null);
   const [selectedBlog, setSelectedBlog] = useState(null);
+  const [filteredBlogs, setFilteredBlogs] = useState([]); // For filtered and sorted blogs
+  const [currentPage, setCurrentPage] = useState(1);
+  const [blogsPerPage] = useState(6); // Number of blogs per page
 
   // Fetch blogs on component mount
   useEffect(() => {
@@ -39,13 +43,16 @@ const Blogs = () => {
     fetchBlogs();
   }, []);
 
-  // Filter blogs based on status and user
-  const filteredBlogs = blogs.filter((blog) => {
-    const isOwner = Number(blog.userId) === Number(currentUserId);
-    if (blog.status === 'published') return true;
-    if (blog.status === 'draft' && isOwner) return true;
-    return false;
-  });
+  // Filter blogs based on status and user, then apply sorting
+  useEffect(() => {
+    const filtered = blogs.filter((blog) => {
+      const isOwner = Number(blog.userId) === Number(currentUserId);
+      if (blog.status === 'published') return true;
+      if (blog.status === 'draft' && isOwner) return true;
+      return false;
+    });
+    setFilteredBlogs(filtered);
+  }, [blogs, currentUserId]);
 
   // Handle Quill content change
   const handleQuillChange = (value) => {
@@ -123,6 +130,20 @@ const Blogs = () => {
     }
   };
 
+  // Define sort options (no filter options since we only need sorting)
+  const sortOptions = [
+    { key: "none", label: "No Sorting", sortFunction: () => 0 },
+    { key: "title_asc", label: "Title (A-Z)", sortFunction: (a, b) => a.title.localeCompare(b.title) },
+    { key: "title_desc", label: "Title (Z-A)", sortFunction: (a, b) => b.title.localeCompare(a.title) },
+    { key: "date_newest", label: "Newest First", sortFunction: (a, b) => new Date(b.createdAt) - new Date(a.createdAt) },
+    { key: "date_oldest", label: "Oldest First", sortFunction: (a, b) => new Date(a.createdAt) - new Date(b.createdAt) },
+  ];
+
+  // Pagination logic
+  const indexOfLastBlog = currentPage * blogsPerPage;
+  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
+  const currentBlogs = filteredBlogs.slice(indexOfFirstBlog, indexOfLastBlog);
+
   return (
     <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -139,85 +160,101 @@ const Blogs = () => {
 
         {/* Blog tiles container */}
         <div className="bg-gray-700 rounded-xl p-6 shadow-lg mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredBlogs.length > 0 ? (
-              filteredBlogs.map((blog) => (
-                <div
-                  key={blog.id}
-                  className="bg-gray-800 rounded-lg p-4 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 border border-red-900"
-                >
-                  <h3 className="text-lg font-medium text-gray-200 mb-2">
-                    {blog.title}
-                  </h3>
-                  <p className="text-gray-400 text-sm mb-3">
-                    By: {blog.firstName} {blog.lastName}
-                  </p>
-                  {blog.media_urls && blog.media_urls.length > 0 && (
-                    <div className="mb-3">
-                      {blog.media_urls[0].match(/\.(jpeg|jpg|png|gif)$/i) ? (
-                        <img
-                          src={blog.media_urls[0]}
-                          alt="Thumbnail"
-                          className="w-full h-40 object-cover rounded-lg shadow-md"
-                        />
+          <FilterSortBar
+            items={filteredBlogs}
+            setFilteredItems={setFilteredBlogs}
+            filterOptions={[]} // Empty array to hide filter section
+            sortOptions={sortOptions}
+          />
+
+          {filteredBlogs.length === 0 ? (
+            <p className="text-gray-300 text-center col-span-full">
+              No blogs available.
+            </p>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {currentBlogs.map((blog) => (
+                  <div
+                    key={blog.id}
+                    className="bg-gray-800 rounded-lg p-4 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 border border-red-900"
+                  >
+                    <h3 className="text-lg font-medium text-gray-200 mb-2">
+                      {blog.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm mb-3">
+                      By: {blog.firstName} {blog.lastName}
+                    </p>
+                    {blog.media_urls && blog.media_urls.length > 0 && (
+                      <div className="mb-3">
+                        {blog.media_urls[0].match(/\.(jpeg|jpg|png|gif)$/i) ? (
+                          <img
+                            src={blog.media_urls[0]}
+                            alt="Thumbnail"
+                            className="w-full h-40 object-cover rounded-lg shadow-md"
+                          />
+                        ) : (
+                          <video
+                            src={blog.media_urls[0]}
+                            className="w-full h-40 rounded-lg shadow-md"
+                          />
+                        )}
+                      </div>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {Number(blog.userId) === Number(currentUserId) ? (
+                        <>
+                          <button
+                            onClick={() => {
+                              setSelectedBlog(blog);
+                              setFormData({
+                                blogId: blog.id,
+                                title: blog.title,
+                                content: blog.content,
+                                status: blog.status,
+                                existing_media: blog.media_urls || [],
+                                files: [],
+                              });
+                              setPopup('edit');
+                            }}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedBlog(blog);
+                              setPopup('delete');
+                            }}
+                            className="bg-red-600 hover:bg-red-700 text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                          >
+                            Delete
+                          </button>
+                        </>
                       ) : (
-                        <video
-                          src={blog.media_urls[0]}
-                          className="w-full h-40 rounded-lg shadow-md"
-                        />
+                        <button
+                          onClick={() => {
+                            setSelectedBlog(blog);
+                            setPopup('view');
+                          }}
+                          className="bg-green-600 hover:bg-green-700 text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                        >
+                          View
+                        </button>
                       )}
                     </div>
-                  )}
-                  <div className="flex flex-wrap gap-2">
-                    {Number(blog.userId) === Number(currentUserId) ? (
-                      <>
-                        <button
-                          onClick={() => {
-                            setSelectedBlog(blog);
-                            setFormData({
-                              blogId: blog.id,
-                              title: blog.title,
-                              content: blog.content,
-                              status: blog.status,
-                              existing_media: blog.media_urls || [],
-                              files: [],
-                            });
-                            setPopup('edit');
-                          }}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedBlog(blog);
-                            setPopup('delete');
-                          }}
-                          className="bg-red-600 hover:bg-red-700 text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-                        >
-                          Delete
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setSelectedBlog(blog);
-                          setPopup('view');
-                        }}
-                        className="bg-green-600 hover:bg-green-700 text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-                      >
-                        View
-                      </button>
-                    )}
                   </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-300 text-center col-span-full">
-                No blogs available.
-              </p>
-            )}
-          </div>
+                ))}
+              </div>
+
+              <Pagination
+                totalItems={filteredBlogs.length}
+                itemsPerPage={blogsPerPage}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+              />
+            </>
+          )}
         </div>
 
         {/* Write Your Blog button container */}

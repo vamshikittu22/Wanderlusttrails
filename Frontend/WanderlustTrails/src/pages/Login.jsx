@@ -7,6 +7,7 @@ import { useUser } from '../context/UserContext';
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
 
+//login component
 function Login() {
     const [loginData, setLoginData] = useState({
         identifier: '',
@@ -17,6 +18,7 @@ function Login() {
     const { login, logout, token, isAuthenticated, user } = useUser();
     const navigate = useNavigate();
 
+    // Validate login data
     const validate = () => {
         const newErrors = {};
         if (!loginData.identifier) newErrors.identifier = 'Please enter your email or phone number.';
@@ -25,19 +27,23 @@ function Login() {
         return Object.keys(newErrors).length === 0;
     };
 
+    // Handle input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
         setLoginData({ ...loginData, [name]: value });
     };
 
+    // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
         setMessage('');
         setErrors({});
         if (!validate()) return;
 
+        // Prepare login data
         console.log('[Login] Submitting:', loginData);
 
+        // Check if token exists and is valid
         if (token) {
             try {
                 const decoded = jwtDecode(token);
@@ -57,6 +63,7 @@ function Login() {
             }
         }
 
+        // Send login request to backend
         $.ajax({
             url: 'http://localhost/WanderlustTrails/Backend/config/auth/login.php',
             type: 'POST',
@@ -82,6 +89,7 @@ function Login() {
 
                         localStorage.setItem("userId", id);
                         localStorage.setItem("userName", `${firstname} ${lastname}`);
+
                     } catch (error) {
                         console.error('[Login] Error processing response:', error);
                         setMessage('Login failed: ' + error.message);
@@ -93,6 +101,7 @@ function Login() {
                     toast.error(response.message || 'Login failed. Please check your credentials.');
                 }
             },
+            // Handle AJAX error
             error: function (xhr, status, error) {
                 console.error('[Login] AJAX error:', { xhr, status, error });
                 let errorMessage = 'Error during login';
@@ -108,6 +117,7 @@ function Login() {
         });
     };
 
+    // Check if user is already authenticated and redirect if necessary
     useEffect(() => {
         console.log('[Login] isAuthenticated changed:', { isAuthenticated, userId: user?.id });
         if (isAuthenticated && user?.id) {

@@ -1,5 +1,5 @@
 <?php
-//path: Backend/config/reviews/inc_reviewModel.php
+// Path: Wanderlusttrails/Backend/config/reviews/inc_reviewModel.php
 // Handles database operations for reviews (write, get user reviews, get all reviews).
 
 require_once __DIR__ . "/../inc_databaseClass.php";
@@ -102,7 +102,12 @@ class ReviewModel {
                   FROM reviews r 
                   JOIN users u ON r.userId = u.id 
                   JOIN bookings b ON r.bookingId = b.id";
-        $reviews = $this->db->fetchQuery($query, "");
+        $reviews = $this->db->query($query); // Use query() since there are no parameters
+
+        if (isset($reviews['success']) && !$reviews['success']) {
+            Logger::log("Error fetching all reviews: " . $reviews['message']);
+            return ["success" => false, "message" => $reviews['message']];
+        }
 
         foreach ($reviews as &$review) {
             if ($review['flight_details']) {

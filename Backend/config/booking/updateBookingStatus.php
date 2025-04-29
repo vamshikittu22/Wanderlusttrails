@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Backend/config/api_updateBookingStatus.php
+//path: Wanderlusttrails/Backend/config/booking/updateBookingStatus.php
 // Handles booking updates by storing changes in pending_changes for admin review.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");
@@ -9,6 +9,7 @@ header("Access-Control-Allow-Headers: Content-Type");
 header("Access-Control-Max-Age: 86400");
 
 require_once __DIR__ . "/../inc_logger.php";
+require_once __DIR__ . "/../inc_validationClass.php";
 require_once __DIR__ . "/inc_bookingModel.php";
 
 Logger::log("updateBookingStatus API Started - Method: {$_SERVER['REQUEST_METHOD']}");
@@ -29,31 +30,49 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $data = json_decode(file_get_contents("php://input"), true);
 Logger::log("Raw input: " . json_encode($data));
-if (!$data || !isset($data['booking_id']) || !is_numeric($data['booking_id'])) {
-    Logger::log("Invalid JSON or missing/invalid booking_id: " . json_encode($data));
+
+$validator = new ValidationClass();
+
+// Validate required fields
+$requiredFields = ['booking_id', 'user_id', 'status'];
+$result = $validator->validateRequiredFields($data, $requiredFields);
+if (!$result['success']) {
+    Logger::log($result['message']);
     http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Valid numeric booking_id is required"]);
+    echo json_encode($result);
     exit;
 }
 
-// Extract booking_id and user_id
+// Validate booking_id
+$result = $validator->validateNumeric($data['booking_id'], 'booking_id');
+if (!$result['success']) {
+    Logger::log($result['message']);
+    http_response_code(400);
+    echo json_encode($result);
+    exit;
+}
+
+// Validate user_id
+$result = $validator->validateNumeric($data['user_id'], 'user_id');
+if (!$result['success']) {
+    Logger::log($result['message']);
+    http_response_code(400);
+    echo json_encode($result);
+    exit;
+}
+
+// Validate status
+$result = $validator->validateStatus($data['status']);
+if (!$result['success']) {
+    Logger::log($result['message']);
+    http_response_code(400);
+    echo json_encode($result);
+    exit;
+}
+
 $bookingId = (int)$data['booking_id'];
-if (!isset($data['user_id']) || !is_numeric($data['user_id'])) {
-    Logger::log("Missing or invalid user_id: " . json_encode($data));
-    http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Valid numeric user_id is required"]);
-    exit;
-}
 $userId = (int)$data['user_id'];
-
-// Extract status (default to null if not provided)
-$status = isset($data['status']) ? (string)$data['status'] : null;
-if ($status === null) {
-    Logger::log("Missing status in input: " . json_encode($data));
-    http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Status is required"]);
-    exit;
-}
+$status = (string)$data['status'];
 
 Logger::log("Processing update for booking_id: $bookingId, user_id: $userId, status: '$status' (type: " . gettype($status) . ")");
 

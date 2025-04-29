@@ -1,210 +1,149 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/components/forms/EditBookingForm.jsx
-
 import React, { useState, useEffect } from 'react';
 import BookingDetailsForm from './BookingDetailsForm';
 import FlightAndHotelForm from './FlightAndHotelForm';
+import ItineraryForm from './ItineraryForm';
 
-const EditBookingForm = ({ booking, user, navigate, onSubmit, onCancel, fullWidth, relativePosition }) => {
-    const [isEditMode, setIsEditMode] = useState(true);
-    const [pendingChanges, setPendingChanges] = useState({});
-    const [localSummary, setLocalSummary] = useState({});
-    const [initialData, setInitialData] = useState({});
+const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
+  const [isEditMode] = useState(true);
+  const [packages, setPackages] = useState([]);
+  const [loadingPackages, setLoadingPackages] = useState(true);
+  const [packagesError, setPackagesError] = useState(null);
 
-    useEffect(() => {
-        // Initialize with booking data, converting dates to strings
-        const initialData = {
-            ...(booking.booking_type === 'package' ? {
-                package_id: booking.package_id || '',
-                persons: booking.persons || 1,
-                start_date: booking.start_date ? new Date(booking.start_date).toLocaleDateString() : '',
-                end_date: booking.end_date ? new Date(booking.end_date).toLocaleDateString() : '',
-                totalPrice: parseFloat(booking.total_price) || 0,
-            } : {
-                from: booking.flight_details?.from || '',
-                to: booking.flight_details?.to || '',
-                startDate: booking.start_date ? new Date(booking.start_date).toLocaleDateString() : '',
-                endDate: booking.end_date ? new Date(booking.end_date).toLocaleDateString() : '',
-                airline: booking.flight_details?.airline || 'any',
-                persons: booking.persons || 1,
-                flightClass: booking.flight_details?.flightClass || 'economy',
-                hotelStars: booking.hotel_details?.hotelStars || '3',
-                roundTrip: booking.flight_details?.roundTrip !== undefined ? booking.flight_details.roundTrip : true,
-                insurance: booking.flight_details?.insurance || false,
-                carRental: booking.hotel_details?.car_rental || false,
-                flightTime: booking.flight_details?.flightTime || 'any',
-                amenities: {
-                    pool: booking.hotel_details?.amenities?.pool || false,
-                    wifi: booking.hotel_details?.amenities?.wifi || false,
-                },
-                totalPrice: parseFloat(booking.total_price) || 0,
-            }),
-        };
-        setPendingChanges(initialData);
-        setLocalSummary(initialData);
-        setInitialData(initialData); // Store initial data for change detection
-    }, [booking.booking_type, booking.package_id, booking.persons, booking.start_date, booking.end_date, booking.total_price, booking.flight_details, booking.hotel_details]);
-
-    const handleSubmit = (formData) => {
-        // Detect changes by comparing with initial data
-        const changes = {};
-        Object.keys(formData).forEach((key) => {
-            if (formData[key] !== initialData[key] && formData[key] !== '' && formData[key] !== null) {
-                changes[key] = formData[key];
-            }
-        });
-
-        if (Object.keys(changes).length === 0) {
-            onCancel(); // No changes, just cancel
-            return;
+  useEffect(() => {
+    if (booking.booking_type === 'itinerary') {
+      const fetchPackages = async () => {
+        try {
+          const response = await fetch('http://localhost/Wanderlusttrails/Backend/config/AdminDashboard/manageDestinations/viewPackage.php');
+          if (!response.ok) {
+            throw new Error('Failed to fetch packages');
+          }
+          const data = await response.json();
+          setPackages(data);
+          setLoadingPackages(false);
+        } catch (err) {
+          console.error('Error fetching packages:', err);
+          setPackagesError(err.message);
+          setLoadingPackages(false);
         }
+      };
+      fetchPackages();
+    } else {
+      setLoadingPackages(false); // No packages needed for other booking types
+    }
+  }, [booking.booking_type]);
 
-        // Map amenities if present
-        if (changes.amenities && typeof changes.amenities === 'string') {
-            const amenities = {};
-            changes.amenities.split(' ').forEach(amenity => {
-                amenities[amenity.toLowerCase()] = true;
-            });
-            changes.amenities = amenities;
-        }
+  const getInitialData = () => {
+    if (booking.booking_type === 'package') {
+      const totalPrice = parseFloat(booking.total_price);
+      return {
+        package_id: booking.package_id || '',
+        persons: booking.persons || 1,
+        start_date: booking.start_date ? new Date(booking.start_date) : null,
+        end_date: booking.end_date ? new Date(booking.end_date) : null,
+        totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
+      };
+    } else if (booking.booking_type === 'itinerary') {
+      const selectedPackage = packages.find(pkg => pkg.id === booking.package_id) || null;
+      let itineraryDetails = [];
+      try {
+        itineraryDetails = typeof booking.itinerary_details === 'string'
+          ? JSON.parse(booking.itinerary_details)
+          : Array.isArray(booking.itinerary_details)
+          ? booking.itinerary_details
+          : [];
+      } catch (error) {
+        console.error('Error parsing itinerary_details:', error);
+        itineraryDetails = [];
+      }
+      const totalPrice = parseFloat(booking.total_price);
+      return {
+        id: booking.id,
+        package_id: booking.package_id || '',
+        selectedPackage,
+        itinerary_details: itineraryDetails,
+        persons: booking.persons || 1,
+        start_date: booking.start_date ? new Date(booking.start_date) : null,
+        end_date: booking.end_date ? new Date(booking.end_date) : null,
+        totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
+      };
+    } else {
+      const totalPrice = parseFloat(booking.total_price);
+      return {
+        from: booking.flight_details?.from || '',
+        to: booking.flight_details?.to || '',
+        startDate: booking.start_date ? new Date(booking.start_date) : null,
+        endDate: booking.end_date ? new Date(booking.end_date) : null,
+        airline: booking.flight_details?.airline || 'any',
+        persons: booking.persons || 1,
+        flightClass: booking.flight_details?.flightClass || 'economy',
+        hotelStars: booking.hotel_details?.hotelStars || '3',
+        roundTrip: booking.flight_details?.roundTrip !== undefined ? booking.flight_details.roundTrip : true,
+        insurance: booking.flight_details?.insurance || false,
+        carRental: booking.hotel_details?.car_rental || false,
+        flightTime: booking.flight_details?.flightTime || 'any',
+        amenities: {
+          pool: booking.hotel_details?.amenities?.pool || false,
+          wifi: booking.hotel_details?.amenities?.wifi || false,
+        },
+        totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
+      };
+    }
+  };
 
-        const payload = {
-            booking_id: booking.id,
-            user_id: user.id, // Assuming user object has an id property
-            changes: changes,
-        };
+  // Recompute initialData whenever packages changes
+  const initialData = getInitialData();
 
-        console.log('Submitting payload:', payload); // Debug payload
-        onSubmit(booking.id, payload); // Pass the structured payload to parent
-        onCancel();
+  const handleSubmit = (formData) => {
+    const payload = {
+      booking_id: booking.id,
+      user_id: user.id,
+      changes: formData,
     };
+    onSubmit(booking.id, payload);
+    onCancel();
+  };
 
-    const handleChange = (changes) => {
-        setPendingChanges(prev => {
-            const updated = { ...prev, ...changes };
-            const newSummary = calculateSummary(updated);
-            setLocalSummary(prevSummary => ({ ...prevSummary, ...newSummary }));
-            return updated;
-        });
+  const handleItinerarySubmit = (formData) => {
+    const changes = {
+      package_id: formData.package_id,
+      itinerary_details: formData.itinerary_details,
+      start_date: formData.start_date,
+      end_date: formData.end_date,
+      persons: formData.persons,
+      total_price: formData.total_price,
     };
+    handleSubmit(changes);
+  };
 
-    const calculateSummary = (data) => {
-        if (booking.booking_type === 'package') {
-            const start = data.start_date ? new Date(data.start_date) : booking.start_date ? new Date(booking.start_date) : new Date();
-            const end = data.end_date ? new Date(data.end_date) : booking.end_date ? new Date(booking.end_date) : new Date();
-            const nights = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
-            const pricePerPerson = booking.package_details?.price ? parseFloat(booking.package_details.price) : 100;
-            const total = pricePerPerson * (data.persons || booking.persons) * nights;
-            return {
-                package_id: data.package_id || booking.package_id || '',
-                persons: data.persons || booking.persons,
-                start_date: start.toLocaleDateString(),
-                end_date: end.toLocaleDateString(),
-                totalPrice: isNaN(total) ? parseFloat(booking.total_price) || 0 : total,
-            };
-        } else {
-            const basePrice = 100;
-            const classMultipliers = { economy: 1, premium_economy: 1.5, business: 2.5, first: 4 };
-            const nights = data.roundTrip && data.endDate && data.startDate
-                ? Math.ceil((new Date(data.endDate) - new Date(data.startDate)) / (1000 * 60 * 60 * 24))
-                : data.roundTrip && booking.end_date && booking.start_date
-                ? Math.ceil((new Date(booking.end_date) - new Date(booking.start_date)) / (1000 * 60 * 60 * 24))
-                : 1;
-            let price = basePrice * (data.persons || booking.persons) * nights * (classMultipliers[data.flightClass || booking.flight_details?.flightClass || 'economy'] || 1) * (parseInt(data.hotelStars || booking.hotel_details?.hotelStars || 3) / 3);
-            if (data.insurance || booking.flight_details?.insurance) price += 50;
-            if (data.carRental || booking.hotel_details?.car_rental) price += 30 * nights;
-            if (data.amenities?.pool || booking.hotel_details?.amenities?.pool) price += 20;
-            if (data.amenities?.wifi || booking.hotel_details?.amenities?.wifi) price += 10;
-            return {
-                from: data.from || booking.flight_details?.from || '',
-                to: data.to || booking.flight_details?.to || '',
-                startDate: data.startDate ? new Date(data.startDate).toLocaleDateString() : booking.start_date ? new Date(booking.start_date).toLocaleDateString() : '',
-                endDate: data.endDate ? new Date(data.endDate).toLocaleDateString() : booking.end_date ? new Date(booking.end_date).toLocaleDateString() : '',
-                persons: data.persons || booking.persons,
-                totalPrice: isNaN(price) ? parseFloat(booking.total_price) || 0 : price,
-            };
-        }
-    };
-
-    const renderSummary = () => {
-        if (booking.booking_type === 'package') {
-            return (
-                <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-                    <h3 className="text-lg font-semibold text-blue-900">Pending Changes Summary</h3>
-                    
-                    <p className="text-gray-800"><strong>Package ID:</strong> {localSummary.package_id || booking.package_id || 'N/A'}</p>
-                    <p className="text-gray-800"><strong>Persons:</strong> {localSummary.persons || booking.persons}</p>
-                    <p className="text-gray-800"><strong>Start Date:</strong> {localSummary.start_date || (booking.start_date ? new Date(booking.start_date).toLocaleDateString() : '')}</p>
-                    <p className="text-gray-800"><strong>End Date:</strong> {localSummary.end_date || (booking.end_date ? new Date(booking.end_date).toLocaleDateString() : '')}</p>
-                    <p className="text-gray-800"><strong>New Total Price:</strong> ${parseFloat(localSummary.totalPrice || booking.total_price || 0).toFixed(2)}</p>
-                    <p className="text-sm text-red-700">Note: Changes will be applied after admin confirmation.</p>
-                    
-                </div>
-            );
-        } else if (booking.booking_type === 'flight_hotel') {
-            return (
-                <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-                    <h3 className="text-lg font-semibold text-blue-900">Pending Changes Summary</h3>
-                    <p className="text-gray-800"><strong>From:</strong> {localSummary.from || booking.flight_details?.from || 'N/A'}</p>
-                    <p className="text-gray-800"><strong>To:</strong> {localSummary.to || booking.flight_details?.to || 'N/A'}</p>
-                    <p className="text-gray-800"><strong>Dates:</strong> {localSummary.startDate || (booking.start_date ? new Date(booking.start_date).toLocaleDateString() : '')} {localSummary.endDate ? `to ${localSummary.endDate}` : ' (One-way)'}</p>
-                    <p className="text-gray-800"><strong>Persons:</strong> {localSummary.persons || booking.persons}</p>
-                    <p className="text-gray-800"><strong>New Total Price:</strong> ${parseFloat(localSummary.totalPrice || booking.total_price || 0).toFixed(2)}</p>
-                    <p className="text-sm text-red-700">Note: Changes will be applied after admin confirmation.</p>
-                </div>
-            );
-        }
-        return null;
-    };
-
-    return (
-        <div className={`w-full ${fullWidth ? 'max-w-full' : 'max-w-2xl'} mx-auto ${relativePosition ? 'relative' : ''}`}>
-            {booking.booking_type === 'package' ? (
-                <BookingDetailsForm
-                    package={booking.package_details || {}}
-                    isEditMode={isEditMode}
-                    initialData={{
-                        package_id: booking.package_id || '',
-                        persons: booking.persons || 1,
-                        start_date: booking.start_date ? new Date(booking.start_date) : null,
-                        end_date: booking.end_date ? new Date(booking.end_date) : null,
-                        totalPrice: parseFloat(booking.total_price) || 0,
-                    }}
-                    onSubmit={handleSubmit}
-                    onCancel={onCancel}
-                    onChange={handleChange}
-                />
-            ) : (
-                <FlightAndHotelForm
-                    initialData={{
-                        from: booking.flight_details?.from || '',
-                        to: booking.flight_details?.to || '',
-                        startDate: booking.start_date ? new Date(booking.start_date) : null,
-                        endDate: booking.end_date ? new Date(booking.end_date) : null,
-                        airline: booking.flight_details?.airline || 'any',
-                        persons: booking.persons || 1,
-                        flightClass: booking.flight_details?.flightClass || 'economy',
-                        hotelStars: booking.hotel_details?.hotelStars || '3',
-                        roundTrip: booking.flight_details?.roundTrip || true,
-                        insurance: booking.flight_details?.insurance || false,
-                        carRental: booking.hotel_details?.car_rental || false,
-                        flightTime: booking.flight_details?.flightTime || 'any',
-                        amenities: {
-                            pool: booking.hotel_details?.amenities?.pool || false,
-                            wifi: booking.hotel_details?.amenities?.wifi || false,
-                        },
-                        totalPrice: parseFloat(booking.total_price) || 0,
-                    }}
-                    isEditMode={isEditMode}
-                    onSubmit={handleSubmit}
-                    onCancel={onCancel}
-                    onChange={handleChange}
-                    fullWidth={fullWidth}
-                    relativePosition={relativePosition}
-                />
-            )}
-            {renderSummary()}
-        </div>
-    );
+  return (
+    <div className="w-full max-w-2xl mx-auto">
+      {booking.booking_type === 'package' ? (
+        <BookingDetailsForm
+          package={booking.package_details || {}}
+          isEditMode={isEditMode}
+          initialData={initialData}
+          onSubmit={handleSubmit}
+          onCancel={onCancel}
+        />
+      ) : booking.booking_type === 'itinerary' ? (
+        <ItineraryForm
+          initialData={initialData}
+          onSubmit={handleItinerarySubmit}
+          onCancel={onCancel}
+          packages={packages}
+          loading={loadingPackages}
+          error={packagesError}
+        />
+      ) : (
+        <FlightAndHotelForm
+          initialData={initialData}
+          isEditMode={isEditMode}
+          onSubmit={handleSubmit}
+          onCancel={onCancel}
+        />
+      )}
+    </div>
+  );
 };
 
 export default EditBookingForm;

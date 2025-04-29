@@ -1,38 +1,92 @@
-//path: Frontend/WanderlustTrails/src/pages/CustomizedItinerary.jsx
-import React, { useState } from 'react';
-import mockData from '../data/mockData';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
+import { toast } from 'react-toastify';
+import ItineraryForm from '../components/forms/ItineraryForm.jsx';
+import mockData from '../data/mockData.js'; // Adjust the path as necessary
+import $ from 'jquery'; // Import jQuery if installed via npm; otherwise, ensure it's loaded via CDN
 
 const CustomizedItinerary = () => {
-  const [selectedDestination, setSelectedDestination] = useState(null);
-  const [selectedActivities, setSelectedActivities] = useState([]);
-  const [selectedAccommodation, setSelectedAccommodation] = useState(null);
+  const { user, isAuthenticated } = useUser();
+  const navigate = useNavigate();
+  const [packages, setPackages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  console.log('CustomizedItinerary rendered with mock data:', mockData.itinerary);
+  useEffect(() => {
+    const fetchPackages = () => {
+      $.ajax({
+        url: 'http://localhost/Wanderlusttrails/Backend/config/AdminDashboard/manageDestinations/viewPackage.php',
+        type: 'GET',
+        dataType: 'json',
+        success: (data) => {
+          console.log('Fetched packages:', data);
+          setPackages(data);
+          setLoading(false);
+        },
+        error: (xhr, status, err) => {
+          console.error('Error fetching packages:', err);
+          setError('Failed to fetch packages');
+          setLoading(false);
+        },
+      });
+    };
 
-  const handleDestinationSelect = (destination) => {
-    setSelectedDestination(destination);
-    setSelectedActivities([]);
-    setSelectedAccommodation(null);
-    console.log('Selected destination:', destination);
+    fetchPackages();
+  }, []);
+
+  const handleSubmit = (formData) => {
+    if (!isAuthenticated || !user?.id) {
+      toast.error('Please log in to proceed with booking.');
+      navigate('/Login');
+      return;
+    }
+
+    const bookingData = {
+      user_id: user.id,
+      booking_type: 'itinerary',
+      package_id: formData.package_id,
+      itinerary_details: formData.itinerary_details,
+      start_date: formData.start_date,
+      end_date: formData.end_date,
+      persons: formData.persons,
+      total_price: formData.total_price,
+    };
+
+    $.ajax({
+      url: 'http://localhost/Wanderlusttrails/Backend/config/booking/createBooking.php',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(bookingData),
+      dataType: 'json',
+      success: (response) => {
+        console.log('Booking response:', response);
+        if (response.success) {
+          const updatedBookingData = { ...bookingData, booking_id: response.booking_id };
+          sessionStorage.setItem('bookingData', JSON.stringify(updatedBookingData));
+          sessionStorage.setItem('selectedPackage', JSON.stringify(formData.selectedPackage));
+          toast.success('Itinerary saved! Proceeding to payment.', { position: 'top-center', autoClose: 1000 });
+          navigate('/Payment');
+        } else {
+          toast.error(response.message);
+        }
+      },
+      error: (xhr, status, error) => {
+        console.error('Error saving booking:', error);
+        let errorMessage = 'Error saving itinerary';
+        try {
+          const response = JSON.parse(xhr.responseText);
+          errorMessage = response.message || errorMessage;
+        } catch (e) {
+          errorMessage = xhr.responseText || error;
+        }
+        toast.error(errorMessage);
+      },
+    });
   };
 
-  const handleActivityToggle = (activity) => {
-    const updatedActivities = selectedActivities.includes(activity)
-      ? selectedActivities.filter((a) => a.id !== activity.id)
-      : [...selectedActivities, activity];
-    setSelectedActivities(updatedActivities);
-    console.log('Updated activities:', updatedActivities);
-  };
-
-  const handleAccommodationSelect = (accommodation) => {
-    setSelectedAccommodation(accommodation);
-    console.log('Selected accommodation:', accommodation);
-  };
-
-  const calculateTotalPrice = () => {
-    const activityPrice = selectedActivities.reduce((sum, a) => sum + a.price, 0);
-    const accommodationPrice = selectedAccommodation ? selectedAccommodation.pricePerNight : 0;
-    return activityPrice + accommodationPrice;
+  const handleCancel = () => {
+    navigate('/');
   };
 
   return (
@@ -41,92 +95,13 @@ const CustomizedItinerary = () => {
         <h1 className="text-3xl font-bold text-indigo-300 mb-8 text-center">
           Design Your Itinerary
         </h1>
-
-        {/* Destinations */}
-        <div className="bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
-          <h2 className="text-xl font-medium text-orange-700 mb-4">Choose a Destination</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {mockData.itinerary.destinations.map((destination) => (
-              <button
-                key={destination.id}
-                onClick={() => handleDestinationSelect(destination)}
-                className={`p-4 rounded-lg border border-red-900 text-gray-200 ${
-                  selectedDestination?.id === destination.id ? 'bg-indigo-600' : 'bg-gray-700'
-                } hover:bg-indigo-700 transition-colors duration-200`}
-              >
-                <h3 className="font-medium">{destination.name}</h3>
-                <p className="text-sm text-gray-400">{destination.description}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Activities */}
-        {selectedDestination && (
-          <div className="bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
-            <h2 className="text-xl font-medium text-orange-700 mb-4">Select Activities</h2>
-            <div className="space-y-4">
-              {mockData.itinerary.activities
-                .filter((activity) => activity.destinationId === selectedDestination.id)
-                .map((activity) => (
-                  <div key={activity.id} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedActivities.includes(activity)}
-                      onChange={() => handleActivityToggle(activity)}
-                      className="h-5 w-5 text-indigo-600 bg-orange-50 border border-red-900 rounded focus:ring-indigo-500"
-                    />
-                    <label className="ml-2 text-gray-200">
-                      {activity.name} (${activity.price})
-                    </label>
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
-
-        {/* Accommodations */}
-        {selectedDestination && (
-          <div className="bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
-            <h2 className="text-xl font-medium text-orange-700 mb-4">Choose Accommodation</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {mockData.itinerary.accommodations
-                .filter((acc) => acc.destinationId === selectedDestination.id)
-                .map((acc) => (
-                  <button
-                    key={acc.id}
-                    onClick={() => handleAccommodationSelect(acc)}
-                    className={`p-4 rounded-lg border border-red-900 text-gray-200 ${
-                      selectedAccommodation?.id === acc.id ? 'bg-indigo-600' : 'bg-gray-700'
-                    } hover:bg-indigo-700 transition-colors duration-200`}
-                  >
-                    <h3 className="font-medium">{acc.name}</h3>
-                    <p className="text-sm text-gray-400">{acc.stars} Stars - ${acc.pricePerNight}/night</p>
-                  </button>
-                ))}
-            </div>
-          </div>
-        )}
-
-        {/* Summary */}
-        {(selectedDestination || selectedActivities.length > 0 || selectedAccommodation) && (
-          <div className="bg-gray-700 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold text-orange-700 mb-2">Itinerary Summary</h3>
-            <p className="text-gray-200">
-              <strong>Destination:</strong> {selectedDestination?.name || 'None'}
-            </p>
-            <p className="text-gray-200">
-              <strong>Activities:</strong>{' '}
-              {selectedActivities.length > 0 ? selectedActivities.map((a) => a.name).join(', ') : 'None'}
-            </p>
-            <p className="text-gray-200">
-              <strong>Accommodation:</strong> {selectedAccommodation?.name || 'None'}
-            </p>
-            <p className="text-gray-200 mt-2">
-              <strong>Total Estimated Cost:</strong> ${calculateTotalPrice()}
-            </p>
-          </div>
-        )}
+        <ItineraryForm
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+          packages={packages}
+          loading={loading}
+          error={error}
+        />
       </div>
     </div>
   );
