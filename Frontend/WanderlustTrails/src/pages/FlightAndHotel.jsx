@@ -1,8 +1,8 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/FlightAndHotel.jsx
+// path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/FlightAndHotel.jsx
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import $ from 'jquery'; // Add jQuery import for $.ajax
 import FlightAndHotelForm from '../components/forms/FlightAndHotelForm';
 
 function FlightAndHotel() {
@@ -15,56 +15,77 @@ function FlightAndHotel() {
       navigate('/Login');
       return;
     }
-
+  
+    // Validate dates before accessing toISOString
+    const startDate = formData.start_date ? new Date(formData.start_date) : null;
+    const endDate = formData.end_date ? new Date(formData.end_date) : null;
+  
+    if (!startDate || isNaN(startDate.getTime())) {
+      toast.error('Invalid start date. Please select a valid date.');
+      return;
+    }
+  
+    if (formData.roundTrip && (!endDate || isNaN(endDate.getTime()))) {
+      toast.error('Invalid end date. Please select a valid date for round-trip.');
+      return;
+    }
+  
     const payload = {
       user_id: user.id,
       booking_type: 'flight_hotel',
       flight_details: {
-        from: formData.from,
-        to: formData.to,
-        class: formData.flightClass,
-        preferred_time: formData.flightTime,
-        airline: formData.airline === 'any' ? null : formData.airline,
-        duration: formData.flightDuration, // Set by form
+        from: formData.flight_details.from,
+        to: formData.flight_details.to,
+        class: formData.flight_details.flightClass,
+        preferred_time: formData.flight_details.flightTime,
+        airline: formData.flight_details.airline === 'any' ? null : formData.flight_details.airline,
+        duration: formData.flight_details.duration,
         insurance: formData.insurance,
       },
       hotel_details: {
-        destination: formData.to,
-        star_rating: parseInt(formData.hotelStars),
-        amenities: formData.amenities,
-        car_rental: formData.carRental,
+        destination: formData.flight_details.to,
+        star_rating: parseInt(formData.hotel_details.hotelStars),
+        amenities: formData.hotel_details.amenities,
+        car_rental: formData.hotel_details.car_rental,
       },
-      start_date: formData.startDate.toISOString().split('T')[0],
-      end_date: formData.roundTrip && formData.endDate
-        ? formData.endDate.toISOString().split('T')[0]
-        : null,
+      start_date: startDate.toISOString().split('T')[0],
+      end_date: formData.roundTrip && endDate ? endDate.toISOString().split('T')[0] : null,
       persons: parseInt(formData.persons),
-      total_price: formData.totalPrice,
+      total_price: formData.total_price,
     };
-
+  
     console.log('Payload:', payload);
+    
+    $.ajax({
+      url: 'http://localhost/WanderlustTrails/Backend/config/booking/createBooking.php',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(payload),
+      success: (response) => {
+        console.log('Booking response:', response);
 
-    try {
-      const response = await axios.post(
-        'http://localhost/WanderlustTrails/Backend/config/booking/createBooking.php',
-        payload,
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-
-      console.log('Booking response:', response.data);
-
-      if (response.data.success) {
-        const updatedBookingData = { ...payload, booking_id: response.data.booking_id, total_price: formData.totalPrice };
-        sessionStorage.setItem('bookingData', JSON.stringify(updatedBookingData));
-        toast.success('Booking saved! Proceed to payment.', { position: 'top-center', autoClose: 1000 });
-        navigate('/Payment');
-      } else {
-        toast.error('Error saving booking: ' + response.data.message);
-      }
-    } catch (error) {
-      console.error('Booking error:', error.response || error);
-      toast.error('Error saving booking: ' + (error.response?.data?.message || error.message));
-    }
+        if (response.success) {
+          const updatedBookingData = { ...payload, booking_id: response.booking_id, total_price: formData.total_price };
+          sessionStorage.setItem('bookingData', JSON.stringify(updatedBookingData));
+          toast.success('Booking saved! Proceed to payment.', { position: 'top-center', autoClose: 1000 });
+          navigate('/Payment');
+        } else {
+          toast.error('Error saving booking: ' + response.message);
+        }
+      },
+      error: (xhr, status, error) => {
+        console.error('Booking error:', { status, error, response: xhr.responseText });
+        // Attempt to parse the response text as JSON for a more detailed error message
+        let errorMessage = 'Error saving booking: ';
+        try {
+          const errorResponse = JSON.parse(xhr.responseText);
+          errorMessage += errorResponse.message || error;
+        } catch (e) {
+          errorMessage += error;
+        }
+        toast.error(errorMessage);
+      },
+    });
   };
 
   const handleCancel = () => {

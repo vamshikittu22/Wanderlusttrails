@@ -1,96 +1,75 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useUser } from "../../context/UserContext";
 import ManageDestinations from "../../components/adminDashboard/manageDestinations";
 import ManageUsers from "../../components/adminDashboard/manageUsers";
 import ManageBookings from "../../components/adminDashboard/manageBookings";
-import background from "./../../assets/Images/wanderlusttrails.jpg"; // Adjust the path as needed
+import Sidebar from "./../../components/SideBar.jsx"; // Adjust path as needed
+import MainContent from "./MainContent.jsx"; // Adjust path as needed
 
+// AdminDashboard component
 const AdminDashboard = () => {
-  const { user, isAuthenticated } = useUser();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [activeSection, setActiveSection] = useState(() => {
-    // Read the 'section' query parameter on mount, default to 'destinations' or 'Mybooking' based on role
-    const section = searchParams.get("section");
-    if (section && ["destinations", "users", "bookings", "Mybooking", "Reviews", "profile"].includes(section)) {
-      return section;
-    }
-    return user?.role === "admin" ? "destinations" : "Mybooking";
-  });
+    const navigate = useNavigate(); // Use useNavigate to navigate
+    const { user, isAuthenticated } = useUser(); // Get user and authentication status from context
+    const [searchParams, setSearchParams] = useSearchParams(); // Use useSearchParams to manage URL parameters
+    const isAdmin = isAuthenticated && user?.role === "admin";  // Check if the user is an admin
 
-  // Determine if the user is an admin
-  const isAdmin = isAuthenticated && user?.role === "admin";
+    const [activeSection, setActiveSection] = useState(() => {
+        const section = searchParams.get("section"); // Get the section from URL parameters
+        if (section && ["destinations", "users", "bookings"].includes(section)) {
+            return section;
+        }
+        return "destinations"; // Default to "destinations" for admins
+    });
 
-  // Update the URL query parameter when activeSection changes
-  useEffect(() => {
-    setSearchParams({ section: activeSection });
-  }, [activeSection, setSearchParams]);
+   
+    // useEffect(() => {
+    //     if (!isAdmin) {
+    //         navigate("/AdminDashboard"); //
+    //     }
+    // }, [isAdmin, navigate]); 
 
-  // Function to render content based on active section
-  const renderContent = () => {
-    switch (activeSection) {
-      case "destinations":
-        return <ManageDestinations />;
-      case "users":
-        return <ManageUsers />;
-      case "bookings":
-        return <ManageBookings />;
-      default:
-        return  <ManageDestinations /> 
-    }
-  };
 
-  return (
-    <div className="flex h-screen font-sans relative">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 text-white flex flex-col p-6 z-10">
-        <h2 className="text-2xl font-bold mb-6">
-          {isAdmin ? "Admin Dashboard" : "User Dashboard"}
-        </h2>
-        <nav className="flex flex-col space-y-4">
-          {/* Admin Sections (only for admins) */}
-          {isAdmin && (
-            <>
-              <button
-                onClick={() => setActiveSection("destinations")}
-                className={`py-2 px-4 rounded-lg text-left ${
-                  activeSection === "destinations" ? "bg-gray-700" : "hover:bg-gray-700"
-                }`}
-              >
-                Destinations
-              </button>
-              <button
-                onClick={() => setActiveSection("users")}
-                className={`py-2 px-4 rounded-lg text-left ${
-                  activeSection === "users" ? "bg-gray-700" : "hover:bg-gray-700"
-                }`}
-              >
-                Users
-              </button>
-              <button
-                onClick={() => setActiveSection("bookings")}
-                className={`py-2 px-4 rounded-lg text-left ${
-                  activeSection === "bookings" ? "bg-gray-700" : "hover:bg-gray-700"
-                }`}
-              >
-                Bookings
-              </button>
-            </>
-          )}
-        </nav>
-      </aside>
+    useEffect(() => {
+        if (isAdmin) {
+            setSearchParams({ section: activeSection });
+        }
+    }, [activeSection, setSearchParams, isAdmin]); // Update URL parameters when activeSection changes
 
-      {/* Main content area */}
-      <main className="flex-1 backdrop-blur p-8 overflow-y-auto relative">
-        <img
-          src={background}
-          alt="Dashboard Background"
-          className="absolute inset-0 h-full w-full object-cover opacity-20"
-        />
-        <div className="relative z-10">{renderContent()}</div>
-      </main>
-    </div>
-  );
+    const renderContent = () => {
+        switch (activeSection) {
+            case "destinations":
+                return <ManageDestinations />;
+            case "users":
+                return <ManageUsers />;
+            case "bookings":
+                return <ManageBookings />;
+            default:
+                return <ManageDestinations />;
+        }
+    };  // Render content based on the active section
+
+
+    // Define the sections for the sidebar
+    const adminSections = [
+        { key: "destinations", label: "Destinations" },
+        { key: "users", label: "Users" },
+        { key: "bookings", label: "Bookings" },
+    ]; 
+
+    return (
+        <div className="flex h-screen font-sans relative">
+            <Sidebar
+                title="Admin Dashboard"
+                sections={adminSections}
+                activeSection={activeSection}
+                setActiveSection={setActiveSection}
+            />
+            <MainContent>
+                {renderContent()}
+            </MainContent>
+        </div>
+    );
 };
 
 export default AdminDashboard;

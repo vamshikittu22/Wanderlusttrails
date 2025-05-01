@@ -48,11 +48,12 @@ if (empty($userId) || !is_numeric($userId) || empty($role)) {
 }
 
 $userId = (int)$userId;
-$validRoles = ['Admin', 'User'];
+$role = strtolower($role); // Convert role to lowercase for consistency
+$validRoles = ['admin', 'user']; // Use lowercase roles for validation
 if (!in_array($role, $validRoles)) {
     Logger::log("Invalid role: '$role'");
     http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Invalid role. Use: Admin or User"]);
+    echo json_encode(["success" => false, "message" => "Invalid role. Use: admin or user"]);
     exit;
 }
 

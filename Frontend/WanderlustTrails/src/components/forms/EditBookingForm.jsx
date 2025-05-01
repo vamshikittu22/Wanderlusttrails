@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import BookingDetailsForm from './BookingDetailsForm';
 import FlightAndHotelForm from './FlightAndHotelForm';
@@ -28,7 +29,7 @@ const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
       };
       fetchPackages();
     } else {
-      setLoadingPackages(false); // No packages needed for other booking types
+      setLoadingPackages(false);
     }
   }, [booking.booking_type]);
 
@@ -40,6 +41,7 @@ const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
         persons: booking.persons || 1,
         start_date: booking.start_date ? new Date(booking.start_date) : null,
         end_date: booking.end_date ? new Date(booking.end_date) : null,
+        insurance: booking.insurance_type || 'none', // Use insurance_type
         totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
       };
     } else if (booking.booking_type === 'itinerary') {
@@ -64,6 +66,7 @@ const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
         persons: booking.persons || 1,
         start_date: booking.start_date ? new Date(booking.start_date) : null,
         end_date: booking.end_date ? new Date(booking.end_date) : null,
+        insurance: booking.insurance_type || 'none', // Use insurance_type
         totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
       };
     } else {
@@ -78,7 +81,7 @@ const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
         flightClass: booking.flight_details?.flightClass || 'economy',
         hotelStars: booking.hotel_details?.hotelStars || '3',
         roundTrip: booking.flight_details?.roundTrip !== undefined ? booking.flight_details.roundTrip : true,
-        insurance: booking.flight_details?.insurance || false,
+        insurance: booking.insurance_type || 'none', // Use insurance_type
         carRental: booking.hotel_details?.car_rental || false,
         flightTime: booking.flight_details?.flightTime || 'any',
         amenities: {
@@ -89,19 +92,94 @@ const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
       };
     }
   };
+  // const getInitialData = () => {
+  //   if (booking.booking_type === 'package') {
+  //     const totalPrice = parseFloat(booking.total_price);
+  //     return {
+  //       package_id: booking.package_id || '',
+  //       persons: booking.persons || 1,
+  //       start_date: booking.start_date ? new Date(booking.start_date) : null,
+  //       end_date: booking.end_date ? new Date(booking.end_date) : null,
+  //       insurance: booking.insurance || 'none',
+  //       totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
+  //     };
+  //   } else if (booking.booking_type === 'itinerary') {
+  //     const selectedPackage = packages.find(pkg => pkg.id === booking.package_id) || null;
+  //     let itineraryDetails = [];
+  //     try {
+  //       itineraryDetails = typeof booking.itinerary_details === 'string'
+  //         ? JSON.parse(booking.itinerary_details)
+  //         : Array.isArray(booking.itinerary_details)
+  //         ? booking.itinerary_details
+  //         : [];
+  //     } catch (error) {
+  //       console.error('Error parsing itinerary_details:', error);
+  //       itineraryDetails = [];
+  //     }
+  //     const totalPrice = parseFloat(booking.total_price);
+  //     return {
+  //       id: booking.id,
+  //       package_id: booking.package_id || '',
+  //       selectedPackage,
+  //       itinerary_details: itineraryDetails,
+  //       persons: booking.persons || 1,
+  //       start_date: booking.start_date ? new Date(booking.start_date) : null,
+  //       end_date: booking.end_date ? new Date(booking.end_date) : null,
+  //       insurance: booking.insurance || 'none',
+  //       totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
+  //     };
+  //   } else {
+  //     const totalPrice = parseFloat(booking.total_price);
+  //     return {
+  //       from: booking.flight_details?.from || '',
+  //       to: booking.flight_details?.to || '',
+  //       startDate: booking.start_date ? new Date(booking.start_date) : null,
+  //       endDate: booking.end_date ? new Date(booking.end_date) : null,
+  //       airline: booking.flight_details?.airline || 'any',
+  //       persons: booking.persons || 1,
+  //       flightClass: booking.flight_details?.flightClass || 'economy',
+  //       hotelStars: booking.hotel_details?.hotelStars || '3',
+  //       roundTrip: booking.flight_details?.roundTrip !== undefined ? booking.flight_details.roundTrip : true,
+  //       insurance: booking.insurance || 'none',
+  //       carRental: booking.hotel_details?.car_rental || false,
+  //       flightTime: booking.flight_details?.flightTime || 'any',
+  //       amenities: {
+  //         pool: booking.hotel_details?.amenities?.pool || false,
+  //         wifi: booking.hotel_details?.amenities?.wifi || false,
+  //       },
+  //       totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
+  //     };
+  //   }
+  // };
 
-  // Recompute initialData whenever packages changes
   const initialData = getInitialData();
-
   const handleSubmit = (formData) => {
+    let changes = formData;
+  
+    // Transform formData for flight_hotel bookings to match backend expectations
+    if (booking.booking_type === 'flight_hotel') {
+      changes = {
+        flight_details: formData.flight_details,
+        hotel_details: formData.hotel_details,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        persons: formData.persons,
+        insurance: formData.insurance !== 'none' ? 1 : 0, // Convert to 0 or 1
+        insurance_type: formData.insurance, // Set insurance_type explicitly
+        total_price: formData.total_price,
+      };
+    }
+  
     const payload = {
       booking_id: booking.id,
       user_id: user.id,
-      changes: formData,
+      changes,
     };
+    console.log('Edit Payload:', payload);
     onSubmit(booking.id, payload);
     onCancel();
   };
+ 
 
   const handleItinerarySubmit = (formData) => {
     const changes = {
@@ -110,6 +188,8 @@ const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
       start_date: formData.start_date,
       end_date: formData.end_date,
       persons: formData.persons,
+      insurance: formData.insurance !== 'none' ? 1 : 0, // Set to 1 if insurance is selected, 0 otherwise
+      insurance_type: formData.insurance, // Explicitly set insurance_type
       total_price: formData.total_price,
     };
     handleSubmit(changes);

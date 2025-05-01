@@ -1,10 +1,11 @@
-// FlightAndHotelForm.jsx
+
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import airportData from '../airports.json';
 import FormWrapper from './FormWrapper';
 import { FaPlaneDeparture, FaPlaneArrival, FaUsers, FaStar, FaCar, FaShieldAlt, FaSwimmingPool, FaWifi } from 'react-icons/fa';
+import { Link } from 'react-router-dom'; // Import Link for navigation
 
 const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, onCancel }) => {
   const [from, setFrom] = useState(initialData.from || '');
@@ -17,7 +18,7 @@ const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, on
   const [hotelStars, setHotelStars] = useState(initialData.hotelStars || '3');
   const [airline, setAirline] = useState(initialData.airline || 'any');
   const [flightTime, setFlightTime] = useState(initialData.flightTime || 'any');
-  const [insurance, setInsurance] = useState(initialData.insurance || false);
+  const [insurance, setInsurance] = useState(initialData.insurance || 'none');
   const [carRental, setCarRental] = useState(initialData.carRental || false);
   const [pool, setPool] = useState(initialData.amenities?.pool || false);
   const [wifi, setWifi] = useState(initialData.amenities?.wifi || false);
@@ -79,14 +80,17 @@ const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, on
       ? Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24))
       : 1;
     let price = (basePrice + distanceCost) * persons * nights * classMultipliers[flightClass] * (parseInt(hotelStars) / 3);
-    if (insurance) price += 50;
+
     if (carRental) price += 30 * nights;
     if (pool) price += 20;
     if (wifi) price += 10;
+    if (insurance === 'basic') price += 30;
+    if (insurance === 'premium') price += 50;
+    if (insurance === 'elite') price += 75; // $75 for Elite Coverage
+
     return price > 0 ? price.toFixed(2) : '0.00';
   };
 
-  // Recalculate total price whenever dependencies change
   useEffect(() => {
     const price = calculateTotalPrice();
     setTotalPrice(price);
@@ -117,8 +121,9 @@ const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, on
     flightClass: flightClass,
     flightTime: flightTime,
     hotelStars: hotelStars,
-    amenities: `${pool ? 'Pool ' : ''}${wifi ? 'Wi-Fi' : ''}`,
-    addOns: `${insurance ? 'Insurance ' : ''}${carRental ? 'Car Rental' : ''}`,
+    amenities: `${pool ? 'Pool ' : ''}${wifi ? 'Wi-Fi' : ''}` || 'None',
+    insurance: insurance === 'none' ? 'No Insurance' : insurance === 'basic' ? 'Basic Coverage ($30)' : insurance === 'premium' ? 'Premium Coverage ($50)' : 'Elite Coverage ($75)',
+    addOns: `${carRental ? 'Car Rental' : ''}` || 'None',
     totalPrice: totalPrice,
   };
 
@@ -129,20 +134,25 @@ const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, on
       return;
     }
     const formData = {
-      from,
-      to,
-      startDate,
-      endDate,
-      roundTrip,
-      airline,
+      flight_details: {
+        from,
+        to,
+        roundTrip,
+        airline,
+        flightClass,
+        flightTime,
+        duration: flightDuration(),
+      },
+      hotel_details: {
+        hotelStars,
+        amenities: { pool, wifi },
+        car_rental: carRental,
+      },
+      start_date: startDate.toISOString().split('T')[0],
+      end_date: roundTrip && endDate ? endDate.toISOString().split('T')[0] : null,
       persons,
-      flightClass,
-      hotelStars,
-      flightTime,
       insurance,
-      carRental,
-      amenities: { pool, wifi },
-      totalPrice,
+      total_price: totalPrice,
     };
     onSubmit(formData);
   };
@@ -399,16 +409,25 @@ const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, on
 
         <div className="space-y-4">
           <h3 className="text-xl font-semibold text-indigo-800 mb-3">Add-ons</h3>
-          <div className="flex items-center">
-            <FaShieldAlt className="text-gray-400 mr-2" />
-            <label className="text-indigo-700 font-semibold">Travel Insurance ($50)</label>
-            <input
-              type="checkbox"
-              checked={insurance}
-              onChange={(e) => setInsurance(e.target.checked)}
-              className="ml-2 h-5 w-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-400"
-            />
+          <div className="flex items-center space-x-2">
+            <FaShieldAlt className="text-gray-400" />
+            <label className="text-indigo-700 font-semibold">Insurance Option:</label>
+            <select
+              value={insurance}
+              onChange={(e) => setInsurance(e.target.value)}
+              className="flex-1 p-2 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400"
+            >
+              <option value="none">No Insurance</option>
+              <option value="basic">Basic Coverage (+$30)</option>
+              <option value="premium">Premium Coverage (+$50)</option>
+              <option value="elite">Elite Coverage (+$75)</option>
+            </select>
           </div>
+          <p className="text-sm text-indigo-600">
+            <Link to="/travelinsurance" className="hover:underline">
+              Learn more about our insurance plans
+            </Link>
+          </p>
           <div className="flex items-center">
             <FaCar className="text-gray-400 mr-2" />
             <label className="text-indigo-700 font-semibold">Car Rental ($30/night)</label>

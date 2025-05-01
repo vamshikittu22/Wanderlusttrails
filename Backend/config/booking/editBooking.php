@@ -1,7 +1,4 @@
 <?php
-//path: Wanderlusttrails/Backend/config/booking/editBooking.php
-// Submits booking changes for admin approval.
-
 header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -64,6 +61,27 @@ if (!$result['success']) {
     http_response_code(400);
     echo json_encode($result);
     exit;
+}
+
+// Validate insurance fields if present in changes
+if (isset($data['changes']['insurance'])) {
+    $insurance = (int)$data['changes']['insurance'];
+    if ($insurance !== 0 && $insurance !== 1) {
+        Logger::log("Invalid insurance value in changes: $insurance");
+        http_response_code(400);
+        echo json_encode(["success" => false, "message" => "Invalid insurance value in changes"]);
+        exit;
+    }
+}
+if (isset($data['changes']['insurance_type'])) {
+    $insurance_type = $data['changes']['insurance_type'];
+    $validInsuranceTypes = ['none', 'basic', 'premium', 'elite'];
+    if (!in_array($insurance_type, $validInsuranceTypes)) {
+        Logger::log("Invalid insurance_type option in changes: $insurance_type");
+        http_response_code(400);
+        echo json_encode(["success" => false, "message" => "Invalid insurance_type option in changes"]);
+        exit;
+    }
 }
 
 $bookingId = (int)$data['booking_id'];

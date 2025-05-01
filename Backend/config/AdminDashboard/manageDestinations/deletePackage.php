@@ -1,6 +1,6 @@
 <?php
-//path: Wanderlusttrails/Backend/config/AdminDashboard/manageDestinations/editPackage.php
-// Deletes a package for admin.
+//path: Wanderlusttrails/Backend/config/AdminDashboard/manageDestinations/deletePackage.php
+// Deletes a package.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Content-Type: application/json; charset=UTF-8");

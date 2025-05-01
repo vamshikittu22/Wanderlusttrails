@@ -1,7 +1,7 @@
 // path: Frontend/WanderlustTrails/src/pages/PackageBookingDetails.jsx
 import { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
-import axios from 'axios';
+import $ from 'jquery'; // Add jQuery import for $.ajax
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import BookingForm from '../components/forms/BookingDetailsForm';
@@ -32,44 +32,89 @@ function PackageBookingDetails() {
         }
     }, [navigate]);
 
-    const handleBookingSubmit = async (formData) => {
-        console.log('[PackageBookingDetails] handleBookingSubmit:', { formData, userId: user?.id });
-        const payload = {
-            user_id: user.id,
-            booking_type: 'package',
-            package_id: packageDetails.id,
-            package_name: packageDetails.name, 
-            start_date: formData.startDate.toISOString().split('T')[0],
-            end_date: formData.endDate.toISOString().split('T')[0],
-            persons: formData.persons,
-            total_price: formData.totalPrice
-        };
-        console.log('[PackageBookingDetails] Booking data being sent:', payload);
-        try {
-            const response = await axios.post(
-                'http://localhost/WanderlustTrails/backend/config/booking/createBooking.php',
-                payload,
-                { headers: { 'Content-Type': 'application/json' } }
-            );
-            console.log('[PackageBookingDetails] Booking response:', response.data);
-            if (response.data.success) {
-                const updatedBookingData = { ...payload, booking_id: response.data.booking_id };
-                sessionStorage.setItem('bookingData', JSON.stringify(updatedBookingData));
-                console.log('[PackageBookingDetails] Booking data stored:', sessionStorage.getItem('bookingData'));
-                toast.success('Booking saved! Proceed to payment.', { position: 'top-center', autoClose: 1000 });
-                navigate('/Payment');
-            } else {
-                toast.error(response.data.message);
+    const handleBookingSubmit = (formData) => {
+      console.log('[PackageBookingDetails] handleBookingSubmit:', { formData, userId: user?.id });
+    
+      // Validate insurance_type
+      const validInsuranceTypes = ['none', 'basic', 'premium', 'elite'];
+      const insuranceType = validInsuranceTypes.includes(formData.insurance) ? formData.insurance : 'none';
+    
+      const payload = {
+        user_id: user.id,
+        booking_type: 'package',
+        package_id: packageDetails.id,
+        package_name: packageDetails.name,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        persons: formData.persons,
+        insurance: insuranceType !== 'none' ? 1 : 0,
+        insurance_type: insuranceType,
+        total_price: formData.total_price, // Use total_price from formData
+      };
+      console.log('[PackageBookingDetails] Booking data being sent:', payload);
+      
+      $.ajax({
+        url: 'http://localhost/WanderlustTrails/backend/config/booking/createBooking.php',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: (response) => {
+          console.log('[PackageBookingDetails] Booking response:', response);
+          if (response.success) {
+            const updatedBookingData = { 
+              ...payload, 
+              booking_id: response.booking_id,
+              total_price: formData.total_price // Use total_price from formData
+            };
+            
+            // Store in sessionStorage
+            try {
+              sessionStorage.setItem('bookingData', JSON.stringify(updatedBookingData));
+              const storedData = sessionStorage.getItem('bookingData');
+              console.log('[PackageBookingDetails] Booking data stored:', storedData);
+              if (!storedData) {
+                throw new Error('Failed to store bookingData in sessionStorage');
+              }
+            } catch (error) {
+              console.error('[PackageBookingDetails] Error storing bookingData:', error);
+              toast.error('Failed to store booking data. Please try again.');
+              return;
             }
-        } catch (error) {
-            console.error('[PackageBookingDetails] Error:', {
-                message: error.message,
-                response: error.response?.data,
-                status: error.response?.status,
-            });
-            toast.error('Error saving booking: ' + (error.response?.data?.message || error.message));
-            return false;
-        }
+    
+            // Ensure user is authenticated before navigating
+            if (!isAuthenticated || !user?.id) {
+              toast.error('Please log in to proceed with payment.');
+              navigate('/Login');
+              return;
+            }
+    
+            // Show toast and navigate
+            toast.success('Booking saved! Proceed to payment.', { position: 'top-center', autoClose: 1000 });
+            setTimeout(() => {
+              console.log('[PackageBookingDetails] Navigating to /Payment');
+              navigate('/Payment', { replace: false });
+            }, 1200);
+          } else {
+            toast.error(response.message);
+          }
+        },
+        error: (xhr, status, error) => {
+          console.error('[PackageBookingDetails] Error:', {
+            status,
+            error,
+            response: xhr.responseText,
+          });
+          // Attempt to parse the response text as JSON for a more detailed error message
+          let errorMessage = 'Error saving booking: ';
+          try {
+            const errorResponse = JSON.parse(xhr.responseText);
+            errorMessage += errorResponse.message || error;
+          } catch (e) {
+            errorMessage += error;
+          }
+          toast.error(errorMessage);
+        },
+      });
     };
 
     return (

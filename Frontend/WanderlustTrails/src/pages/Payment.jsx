@@ -1,6 +1,5 @@
-//path: Frontend/WanderlustTrails/src/pages/Payment.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { FaSpinner, FaCreditCard, FaPaypal, FaUniversity } from 'react-icons/fa';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,18 +7,15 @@ import $ from 'jquery';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
 const ErrorBoundary = ({ children, navigate }) => { 
   const [hasError, setHasError] = useState(false);
 
-  // This is a simple error boundary to catch errors in the component tree
   useEffect(() => {
     const errorHandler = (error, errorInfo) => {
       console.error('ErrorBoundary caught an error:', error, errorInfo);
       setHasError(true);
     };
 
-    // This is a global error handler for uncaught errors
     window.addEventListener('error', errorHandler);
     return () => window.removeEventListener('error', errorHandler);
   }, []);
@@ -29,12 +25,12 @@ const ErrorBoundary = ({ children, navigate }) => {
       <div className="min-h-screen bg-gray-900 py-8 px-4 flex items-center justify-center">
         <div className="text-center text-white">
           <h2 className="text-2xl font-bold mb-4">Something went wrong</h2>
-          <p className="mb-4">Please try refreshing the page or go back to the homepage.</p>
+          <p className="mb-4">Please try refreshing the page or go back to the previous page.</p>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate(-1)} // Go back to the previous page
             className="bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700"
           >
-            Go to Homepage
+            Go Back
           </button>
         </div>
       </div>
@@ -43,11 +39,10 @@ const ErrorBoundary = ({ children, navigate }) => {
   return children;
 };
 
-/// Payment component
 function Payment() {
-  // Initialize state and hooks
   const { user, isAuthenticated } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
   const [totalPrice, setTotalPrice] = useState(0);
   const [bookingId, setBookingId] = useState(null);
   const [bookingDetails, setBookingDetails] = useState(null);
@@ -73,7 +68,9 @@ function Payment() {
   const [retryCount, setRetryCount] = useState(0);
   const MAX_RETRIES = 3;
 
-  
+  // Determine the referring page
+  const referrer = location.state?.from || (bookingDetails?.package_id ? '/TravelPackages' : '/ItineraryBuilder');
+
   useEffect(() => {
     setIsMounted(true);
 
@@ -95,7 +92,6 @@ function Payment() {
 
       console.log('Raw session data:', { bookingDataRaw, selectedPackageRaw });
 
-      
       let bookingData = null;
       let selectedPackage = null;
 
@@ -117,12 +113,12 @@ function Payment() {
       // Check if booking data is valid
       if (bookingData) {
         const price = parseFloat(bookingData.total_price) || 0;
-        console.log('Booking totalPrice:', bookingData.total_price, 'Parsed price:', price);
-        if (price <= 0) {
+        console.log('Booking total_price:', bookingData.total_price, 'Parsed price:', price);
+        if (price <= 0 || isNaN(price)) {
           setTimeout(() => {
             if (isMounted) {
               toast.error('Invalid booking amount. Please select a valid booking.');
-              navigate('/');
+              navigate(referrer); // Redirect to the referring page
             }
           }, 100);
           return;
@@ -136,8 +132,8 @@ function Payment() {
           setBookingDetails({
             from: bookingData.flight_details?.from || 'N/A',
             to: bookingData.flight_details?.to || 'N/A',
-            start_date: bookingData.startDate || bookingData.start_date,
-            end_date: bookingData.endDate || bookingData.end_date,
+            start_date: bookingData.start_date || bookingData.startDate,
+            end_date: bookingData.end_date || bookingData.endDate,
             persons: bookingData.persons || 1,
           });
           setIsPackage(false);
@@ -145,13 +141,14 @@ function Payment() {
         // Check if package booking 
         else if (bookingData.package_id) {
           console.log('Package booking detected');
-          const start = new Date(bookingData.startDate || bookingData.start_date);
-          const end = new Date(bookingData.endDate || bookingData.end_date);
+          const start = new Date(bookingData.start_date || bookingData.startDate);
+          const end = new Date(bookingData.end_date || bookingData.endDate);
           const durationDays = isNaN(start) || isNaN(end)
             ? 'N/A'
             : Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
           setBookingDetails({
-            package_name: selectedPackage?.name || 'N/A',
+            package_id: bookingData.package_id,
+            package_name: selectedPackage?.name || bookingData.package_name || 'N/A',
             destination: selectedPackage?.location || 'N/A',
             duration: durationDays === 'N/A' ? 'N/A' : `${durationDays} day${durationDays > 1 ? 's' : ''}`,
             persons: bookingData.persons || 1,
@@ -165,25 +162,29 @@ function Payment() {
           setTimeout(() => {
             if (isMounted) {
               toast.error('Invalid booking data.');
-              navigate('/');
+              navigate(referrer); // Redirect to the referring page
             }
           }, 100);
+          return;
         }
       } else {
         setTimeout(() => {
           if (isMounted) {
             toast.error('No booking data found.');
-            navigate('/');
+            navigate(referrer); // Redirect to the referring page
           }
         }, 100);
+        return;
       }
 
-      // Set up a timer to count down from 
+      // Set up a timer to count down from 3 minutes
       const timer = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            failPayment();
+            if (!isLoading) { // Only fail payment if not currently processing
+              failPayment();
+            }
             return 0;
           }
           return prev - 1;
@@ -199,13 +200,12 @@ function Payment() {
       setTimeout(() => {
         if (isMounted) {
           toast.error('An error occurred while loading payment data.');
-          navigate('/');
+          navigate(referrer); // Redirect to the referring page
         }
       }, 100);
     }
-  }, [navigate, isMounted]);
+  }, [navigate, isMounted, isLoading]);
 
-  // Function to create a booking
   const createBooking = (bookingData, selectedPackage) => {
     const numericUserId = parseInt(user?.id, 10);
     if (isNaN(numericUserId)) {
@@ -215,14 +215,13 @@ function Payment() {
       return;
     }
 
-    // Check if booking data is valid
     const bookingPayload = {
       user_id: numericUserId,
       package_id: bookingData.package_id,
       persons: bookingData.persons || 1,
-      start_date: bookingData.startDate || bookingData.start_date,
-      end_date: bookingData.endDate || bookingData.end_date,
-      total_price: bookingData.totalPrice || 0,
+      start_date: bookingData.start_date || bookingData.startDate,
+      end_date: bookingData.end_date || bookingData.endDate,
+      total_price: bookingData.total_price || 0,
       status: 'pending',
     };
 
@@ -243,18 +242,17 @@ function Payment() {
           }));
         } else {
           toast.error('Failed to create booking: ' + (response.message || 'Unknown error'));
-          navigate('/');
+          navigate(referrer); // Redirect to the referring page
         }
       },
       error: (xhr, status, error) => {
         console.error('Error creating booking:', error, xhr.responseText);
         toast.error('Error creating booking: ' + xhr.responseText);
-        navigate('/');
+        navigate(referrer); // Redirect to the referring page
       },
     });
   };
 
-  // Function to handle payment failure
   const failPayment = () => {
     if (!isMounted) {
       console.log('Component unmounted, skipping failPayment');
@@ -270,25 +268,24 @@ function Payment() {
       success: (response) => {
         console.log('Fail response:', response);
         if (isMounted) {
-          toast.error('Payment timed out after 90 seconds.');
-          navigate('/');
+          toast.error('Payment timed out after 3 minutes.');
+          navigate(referrer); // Redirect to the referring page
         }
       },
       error: (xhr, status, error) => {
         console.error('Failed to update status:', error, xhr.responseText);
         if (isMounted) {
           if (xhr.status === 404) {
-            toast.error('Payment timed out after 90 seconds.');
+            toast.error('Payment timed out after 3 minutes.');
           } else {
             toast.error('Error timing out payment: ' + xhr.responseText);
           }
-          navigate('/');
+          navigate(referrer); // Redirect to the referring page
         }
       },
     });
   };
 
-  // Function to validate the form data
   const validateForm = () => {
     console.log('Validating:', { paymentMethod, formData });
     const newErrors = {};
@@ -333,7 +330,6 @@ function Payment() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Function to handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     let formattedValue = value;
@@ -368,11 +364,10 @@ function Payment() {
     if (!bookingId) {
       console.log('No booking ID, redirecting');
       toast.error('Booking ID is missing. Please try again.');
-      navigate('/');
+      navigate(referrer); // Redirect to the referring page
       return;
     }
 
-    
     const numericUserId = parseInt(user.id, 10);
     console.log('User ID in handleSubmit:', user.id, 'Parsed:', numericUserId);
     if (isNaN(numericUserId)) {
@@ -384,7 +379,6 @@ function Payment() {
 
     setIsLoading(true);
 
-    // Prepare payment data
     const paymentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
     const paymentData = {
@@ -396,7 +390,6 @@ function Payment() {
       payment_date: paymentDate,
     };
 
-    // Validate payment data
     const requiredFields = ['booking_id', 'user_id', 'amount', 'payment_method', 'transaction_id', 'payment_date'];
     const missingFields = requiredFields.filter(field => !paymentData[field] || (field === 'amount' && paymentData[field] <= 0));
     console.log('Payment data before submission:', paymentData);
@@ -406,7 +399,6 @@ function Payment() {
       setIsLoading(false);
       return;
     }
-    // Check if payment method is valid
 
     $.ajax({
       url: 'http://localhost/wanderlusttrails/Backend/config/payment/getPaymentDetails.php',
@@ -912,10 +904,10 @@ function Payment() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate(referrer)} // Redirect to the referring page
                     className="flex-1 bg-gray-600 text-white py-2 rounded hover:bg-gray-700"
                   >
-                    Cancel
+                    Go Back
                   </button>
                 </div>
               </div>

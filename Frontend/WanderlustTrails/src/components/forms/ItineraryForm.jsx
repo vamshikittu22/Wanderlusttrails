@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import mockData from '../../data/mockData.js';
 import FormWrapper from './FormWrapper.jsx';
+import { Link } from 'react-router-dom'; // Import Link for navigation
 
 const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, error }) => {
   const [packageId, setPackageId] = useState(initialData?.package_id || '');
@@ -17,18 +19,17 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
       : initialData?.end_date || ''
   );
   const [persons, setPersons] = useState(initialData?.persons || 1);
+  const [insurance, setInsurance] = useState(initialData?.insurance || 'none');
   const [totalPrice, setTotalPrice] = useState(initialData?.totalPrice || 0);
 
   const today = new Date();
   const minStartDate = new Date(today);
   minStartDate.setDate(today.getDate() + 7);
   const minStartDateString = minStartDate.toISOString().split('T')[0];
-
   const [minEndDate, setMinEndDate] = useState('');
 
   const availableActivities = mockData.itinerary.activities;
 
-  // Log initial data for debugging
   useEffect(() => {
     console.log('ItineraryForm initialData:', initialData);
     console.log('Initial selectedPackage:', selectedPackage);
@@ -36,7 +37,6 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     console.log('Packages available:', packages);
   }, [initialData, packages]);
 
-  // Ensure selectedPackage is set correctly in edit mode
   useEffect(() => {
     if (packages.length > 0) {
       let pkg = selectedPackage;
@@ -47,7 +47,6 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
           setSelectedPackage(pkg);
         }
       }
-      // If no packageId (new booking), set default package
       if (!packageId) {
         pkg = packages[0];
         setPackageId(pkg.id);
@@ -57,7 +56,6 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     }
   }, [packages, packageId, selectedPackage]);
 
-  // Update minimum end date when start date changes
   useEffect(() => {
     if (startDate) {
       const start = new Date(startDate);
@@ -72,27 +70,33 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     }
   }, [startDate]);
 
-  // Function to calculate total price
   const calculateTotalPrice = () => {
     const basePrice = selectedPackage ? parseFloat(selectedPackage.price) || 0 : 0;
     const activitiesPrice = activities.reduce((sum, activity) => sum + (parseFloat(activity.price) || 0), 0);
-    const total = (basePrice + activitiesPrice) * persons;
-    console.log('Calculating total price:', { basePrice, activitiesPrice, persons, total });
+    let total = (basePrice + activitiesPrice) * persons;
+
+    // Add insurance cost
+    if (insurance === 'basic') {
+      total += 30;
+    } else if (insurance === 'premium') {
+      total += 50;
+    } else if (insurance === 'elite') {
+      total += 75; // $75 for Elite Coverage
+    }
+
     return total.toFixed(2);
   };
 
-  // Recalculate total price whenever selectedPackage, activities, or persons change
   useEffect(() => {
     if (selectedPackage) {
       const price = calculateTotalPrice();
       setTotalPrice(price);
     } else {
-      // If no package selected, calculate price with activities only
       const activitiesPrice = activities.reduce((sum, activity) => sum + (parseFloat(activity.price) || 0), 0);
       const total = activitiesPrice * persons;
       setTotalPrice(total.toFixed(2));
     }
-  }, [selectedPackage, activities, persons]);
+  }, [selectedPackage, activities, persons, insurance]);
 
   const handlePackageChange = (e) => {
     const id = e.target.value;
@@ -131,6 +135,7 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     startDate: startDate instanceof Date ? startDate.toISOString().split('T')[0] : startDate || 'N/A',
     endDate: endDate instanceof Date ? endDate.toISOString().split('T')[0] : endDate || 'N/A',
     persons: persons,
+    insurance: insurance === 'none' ? 'No Insurance' : insurance === 'basic' ? 'Basic Coverage ($30)' : insurance === 'premium' ? 'Premium Coverage ($50)' : 'Elite Coverage ($75)',
     totalPrice: totalPrice,
   };
 
@@ -147,8 +152,10 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
       start_date: startDate,
       end_date: endDate,
       persons: persons,
+      insurance: insurance, // Log this value
       total_price: totalPrice,
     };
+    console.log('Form Data Submitted:', formData); // Add this line
     onSubmit(formData);
   };
 
@@ -259,6 +266,25 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
           className="w-full p-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400"
           required
         />
+      </div>
+
+      <div className="mb-6">
+        <label className="block text-indigo-700 font-semibold mb-2">Insurance Option:</label>
+        <select
+          value={insurance}
+          onChange={(e) => setInsurance(e.target.value)}
+          className="w-full p-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400"
+        >
+          <option value="none">No Insurance</option>
+          <option value="basic">Basic Coverage (+$30)</option>
+          <option value="premium">Premium Coverage (+$50)</option>
+          <option value="elite">Elite Coverage (+$75)</option>
+        </select>
+        <p className="mt-2 text-sm text-indigo-600">
+          <Link to="/travelinsurance" className="hover:underline">
+            Learn more about our insurance plans
+          </Link>
+        </p>
       </div>
     </FormWrapper>
   );

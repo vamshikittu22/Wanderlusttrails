@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 // Utility functions for formatting
@@ -95,6 +96,10 @@ const BookingCard = ({
                             <span className={`font-semibold ${isAdminView ? 'text-gray-300' : 'text-gray-700'}`}>Persons:</span>{' '}
                             {booking.persons}
                         </p>
+                        <p>
+                            <span className={`font-semibold ${isAdminView ? 'text-gray-300' : 'text-gray-700'}`}>Insurance:</span>{' '}
+                            {booking.insurance_type}
+                        </p>
                     </>
                 ) : booking.booking_type === 'itinerary' ? (
                     <>
@@ -113,6 +118,10 @@ const BookingCard = ({
                         <p>
                             <span className={`font-semibold ${isAdminView ? 'text-gray-300' : 'text-gray-700'}`}>Persons:</span>{' '}
                             {booking.persons}
+                        </p>
+                        <p>
+                            <span className={`font-semibold ${isAdminView ? 'text-gray-300' : 'text-gray-700'}`}>Insurance:</span>{' '}
+                            {booking.insurance_type}
                         </p>
                         <div>
                             <span className={`font-semibold ${isAdminView ? 'text-gray-300' : 'text-gray-700'}`}>Activities:</span>
@@ -159,10 +168,7 @@ const BookingCard = ({
                             <span className={`font-semibold ${isAdminView ? 'text-gray-300' : 'text-gray-700'}`}>Preferred Time:</span>{' '}
                             {booking.flight_details?.preferred_time || 'N/A'}
                         </p>
-                        <p>
-                            <span className={`font-semibold ${isAdminView ? 'text-gray-300' : 'text-gray-700'}`}>Insurance:</span>{' '}
-                            {booking.flight_details?.insurance ? 'Yes' : 'No'}
-                        </p>
+                        
                         <p>
                             <span className={`font-semibold ${isAdminView ? 'text-gray-300' : 'text-gray-700'}`}>Hotel Stars:</span>{' '}
                             {booking.hotel_details?.star_rating || 'N/A'}
@@ -179,6 +185,11 @@ const BookingCard = ({
                             <span className={`font-semibold ${isAdminView ? 'text-gray-300' : 'text-gray-700'}`}>Persons:</span>{' '}
                             {booking.persons}
                         </p>
+                        <p>
+                            <span className={`font-semibold ${isAdminView ? 'text-gray-300' : 'text-gray-700'}`}>Insurance:</span>{' '}
+                            {booking.insurance_type}
+                        </p>
+                       
                     </>
                 )}
                 <p>

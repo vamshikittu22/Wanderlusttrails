@@ -259,3 +259,28 @@ Stack trace:
 [29-Apr-2025 00:08:03 Europe/Berlin] PHP Deprecated:  json_decode(): Passing null to parameter #1 ($json) of type string is deprecated in C:\xampp\htdocs\Wanderlusttrails\Backend\config\blogs\inc_blogModel.php on line 39
 [29-Apr-2025 00:08:03 Europe/Berlin] PHP Deprecated:  json_decode(): Passing null to parameter #1 ($json) of type string is deprecated in C:\xampp\htdocs\Wanderlusttrails\Backend\config\blogs\inc_blogModel.php on line 39
 [29-Apr-2025 00:08:03 Europe/Berlin] PHP Deprecated:  json_decode(): Passing null to parameter #1 ($json) of type string is deprecated in C:\xampp\htdocs\Wanderlusttrails\Backend\config\blogs\inc_blogModel.php on line 39
+[29-Apr-2025 04:36:27 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of variables must match the number of parameters in the prepared statement in C:\xampp\htdocs\Wanderlusttrails\Backend\config\inc_databaseClass.php:105
+Stack trace:
+#0 C:\xampp\htdocs\Wanderlusttrails\Backend\config\inc_databaseClass.php(105): mysqli_stmt->bind_param('iis', '77', 4, 'good')
+#1 C:\xampp\htdocs\Wanderlusttrails\Backend\config\reviews\inc_reviewModel.php(162): DatabaseClass->executeQuery('INSERT INTO com...', 'iis', '77', 4, 'good')
+#2 C:\xampp\htdocs\Wanderlusttrails\Backend\config\reviews\addComment.php(55): ReviewModel->addComment(4, '77', 'good', NULL)
+#3 {main}
+  thrown in C:\xampp\htdocs\Wanderlusttrails\Backend\config\inc_databaseClass.php on line 105
+[29-Apr-2025 08:18:01 Europe/Berlin] PHP Fatal error:  Uncaught Error: Cannot access private property ReviewModel::$db in C:\xampp\htdocs\Wanderlusttrails\Backend\config\reviews\addComment.php:57
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\Wanderlusttrails\Backend\config\reviews\addComment.php on line 57
+[29-Apr-2025 08:28:28 Europe/Berlin] PHP Fatal error:  Uncaught Error: Cannot access private property ReviewModel::$db in C:\xampp\htdocs\Wanderlusttrails\Backend\config\reviews\addComment.php:57
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\Wanderlusttrails\Backend\config\reviews\addComment.php on line 57
+[29-Apr-2025 08:29:23 Europe/Berlin] PHP Fatal error:  Uncaught Error: Cannot access private property ReviewModel::$db in C:\xampp\htdocs\Wanderlusttrails\Backend\config\reviews\addComment.php:57
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\Wanderlusttrails\Backend\config\reviews\addComment.php on line 57
+[29-Apr-2025 08:35:16 Europe/Berlin] PHP Fatal error:  Uncaught Error: Cannot access private property ReviewModel::$db in C:\xampp\htdocs\Wanderlusttrails\Backend\config\reviews\addComment.php:57
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\Wanderlusttrails\Backend\config\reviews\addComment.php on line 57
+[29-Apr-2025 09:26:56 Europe/Berlin] PHP Warning:  Undefined array key "role" in C:\xampp\htdocs\Wanderlusttrails\Backend\config\blogs\inc_blogModel.php on line 74
+[29-Apr-2025 09:29:59 Europe/Berlin] PHP Warning:  Undefined array key "role" in C:\xampp\htdocs\Wanderlusttrails\Backend\config\blogs\inc_blogModel.php on line 74

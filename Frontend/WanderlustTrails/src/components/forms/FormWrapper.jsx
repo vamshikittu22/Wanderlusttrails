@@ -1,11 +1,9 @@
-// FormWrapper.jsx
+
 import React from 'react';
 
 const FormWrapper = ({ children, onSubmit, onCancel, summary, isEditMode, bookingType }) => {
-  // Set background color based on booking type
   const bgColor = bookingType === 'itinerary' ? 'bg-teal-50' : 'bg-indigo-50';
 
-  // Render summary based on bookingType
   const renderSummary = () => {
     if (bookingType === 'flight_hotel') {
       return (
@@ -23,6 +21,7 @@ const FormWrapper = ({ children, onSubmit, onCancel, summary, isEditMode, bookin
           <p className="text-gray-700"><strong>Flight Time:</strong> {summary.flightTime}</p>
           <p className="text-gray-700"><strong>Hotel Stars:</strong> {summary.hotelStars}</p>
           <p className="text-gray-700"><strong>Amenities:</strong> {summary.amenities || 'None'}</p>
+          <p className="text-gray-700"><strong>Insurance:</strong> {summary.insurance}</p>
           <p className="text-gray-700"><strong>Add-ons:</strong> {summary.addOns || 'None'}</p>
           <p className="text-lg font-semibold text-indigo-800 mt-2">
             Total Price: <span className="text-indigo-600">${summary.totalPrice}</span>
@@ -37,6 +36,7 @@ const FormWrapper = ({ children, onSubmit, onCancel, summary, isEditMode, bookin
           <p className="text-gray-700">
             <strong>Dates:</strong> {summary.startDate} to {summary.endDate}
           </p>
+          <p className="text-gray-700"><strong>Insurance:</strong> {summary.insurance}</p>
           <p className="text-lg font-semibold text-indigo-800 mt-2">
             Total Price: <span className="text-indigo-600">${summary.totalPrice}</span>
           </p>
@@ -51,6 +51,7 @@ const FormWrapper = ({ children, onSubmit, onCancel, summary, isEditMode, bookin
           <p className="text-gray-700"><strong>Start Date:</strong> {summary.startDate || 'N/A'}</p>
           <p className="text-gray-700"><strong>End Date:</strong> {summary.endDate || 'N/A'}</p>
           <p className="text-gray-700"><strong>Travelers:</strong> {summary.persons}</p>
+          <p className="text-gray-700"><strong>Insurance:</strong> {summary.insurance}</p>
           <p className="text-lg font-semibold text-indigo-800 mt-2">
             Total Price: <span className="text-indigo-600">${summary.totalPrice}</span>
           </p>

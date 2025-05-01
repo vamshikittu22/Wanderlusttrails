@@ -148,6 +148,7 @@ const mockData = {
     plans: [
       { id: 1, name: 'Basic Plan', price: 50, coverage: 'Trip cancellation, medical emergencies' },
       { id: 2, name: 'Premium Plan', price: 100, coverage: 'All Basic Plan features plus lost luggage, delays' },
+      { id: 3, name: "Elite",  price: 75, coverage: "Covers cancellations, delays, medical emergencies, and lost luggage"}
     ],
   },
   support: {

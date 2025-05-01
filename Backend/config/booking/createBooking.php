@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With");
-header("Access-Control-Max-Age: 3600"); // Cache preflight response for 1 hour
+header("Access-Control-Max-Age: 3600");
 
 require_once __DIR__ . "/../inc_logger.php";
 require_once __DIR__ . "/../inc_validationClass.php";
@@ -15,7 +15,7 @@ Logger::log("createBooking API Started - Method: {$_SERVER['REQUEST_METHOD']}");
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     Logger::log("Handling OPTIONS request");
     http_response_code(200);
-    exit; // No response body needed for OPTIONS, just headers and status
+    exit;
 }
 
 // Ensure the request method is POST for actual booking creation
@@ -75,6 +75,23 @@ if (!$result['success']) {
     exit;
 }
 
+// Validate insurance fields
+$insurance = isset($data['insurance']) ? (int)$data['insurance'] : 0; // Expect 0 or 1
+$insurance_type = isset($data['insurance_type']) ? $data['insurance_type'] : 'none';
+$validInsuranceTypes = ['none', 'basic', 'premium', 'elite']; // Include 'elite'
+if (!in_array($insurance_type, $validInsuranceTypes)) {
+    Logger::log("Invalid insurance_type option: $insurance_type");
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Invalid insurance_type option"]);
+    exit;
+}
+if ($insurance !== 0 && $insurance !== 1) {
+    Logger::log("Invalid insurance value: $insurance");
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Invalid insurance value"]);
+    exit;
+}
+
 $isFlightHotel = $data['booking_type'] === 'flight_hotel';
 $isItinerary = $data['booking_type'] === 'itinerary';
 $endDateProvided = isset($data['end_date']) && $data['end_date'] !== null;
@@ -83,12 +100,14 @@ $bookingData = [
     'user_id' => (int)$data['user_id'],
     'booking_type' => $data['booking_type'],
     'package_id' => isset($data['package_id']) && is_numeric($data['package_id']) ? (int)$data['package_id'] : null,
-    'itinerary_details' => $isItinerary && isset($data['itinerary_details']) ? json_encode($data['itinerary_details']) : null,
+    'itinerary_details' => $isItinerary && isset($data['itinerary_details']) ? $data['itinerary_details'] : null,
     'flight_details' => $isFlightHotel && isset($data['flight_details']) ? $data['flight_details'] : null,
     'hotel_details' => $isFlightHotel && isset($data['hotel_details']) ? $data['hotel_details'] : null,
     'start_date' => $data['start_date'],
     'end_date' => $endDateProvided ? $data['end_date'] : null,
     'persons' => (int)$data['persons'],
+    'insurance' => $insurance, // 0 or 1
+    'insurance_type' => $insurance_type, // Use insurance_type
     'total_price' => isset($data['total_price']) ? (float)$data['total_price'] : null,
 ];
 

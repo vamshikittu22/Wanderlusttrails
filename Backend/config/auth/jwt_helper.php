@@ -29,9 +29,10 @@ function generateJWT($userId) {
 }
 
 function validateJWT($token) {
+    global $key;
     Logger::log("Validating JWT: " . substr($token, 0, 10) . "...");
     try {
-        $decoded = JWT::decode($token, 'your-secret-key', array('HS256'));
+        $decoded = JWT::decode($token, $key, array('HS256'));
         Logger::log("JWT validated successfully for userId: {$decoded->userId}");
         return $decoded;
     } catch (Exception $e) {

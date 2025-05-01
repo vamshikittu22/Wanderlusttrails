@@ -4,7 +4,7 @@ import { Nav, Navbar, Container } from 'react-bootstrap';
 import logo from '../../assets/Images/WanderlustTrails5.webp';
 import { useUser } from "../../context/UserContext";
 import SearchBar from './SearchBar';
-import CustomDropdown from './CustomDropdown';
+import CustomDropdown from './../CustomDropdown';
 
 export default function Header() {
     const { user, isAuthenticated, logout } = useUser();

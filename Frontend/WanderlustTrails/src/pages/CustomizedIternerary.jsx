@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
@@ -51,6 +52,8 @@ const CustomizedItinerary = () => {
       end_date: formData.end_date,
       persons: formData.persons,
       total_price: formData.total_price,
+      insurance: formData.insurance !== 'none' ? 1 : 0, // Set to 1 if insurance is selected, 0 otherwise
+    insurance_type: formData.insurance, // Directly use the selected insurance type
     };
 
     $.ajax({

@@ -61,13 +61,21 @@ class BlogModel {
             return ["success" => false, "message" => "User ID must be numeric"];
         }
 
-        // Check if user exists
-        $query = "SELECT id FROM users WHERE id = ?";
+        // Check if user exists and get their role
+        $query = "SELECT id, role FROM users WHERE id = ?";
         $user = $this->db->fetchQuery($query, "i", $userId);
         Logger::log("User check result: " . json_encode($user));
         if (empty($user)) {
             Logger::log("User not found for userId: $userId");
             return ["success" => false, "message" => "User not found"];
+        }
+
+        // Check if the user is an admin
+        $userRole = $user[0]['role'];
+        Logger::log("User role for userId $userId: $userRole");
+        if ($userRole === 'admin') {
+            Logger::log("Admin user (userId: $userId) attempted to create a blog");
+            return ["success" => false, "message" => "Admins are not allowed to create blogs"];
         }
 
         // Handle media uploads

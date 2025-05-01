@@ -1,4 +1,3 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/components/Popup.jsx
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -7,17 +6,17 @@ const Popup = ({ isOpen, onClose, children, showCloseButton = true }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-xl relative">
+      <div className="bg-white rounded-lg p-6 w-full max-w-xl mt-10 max-h-[80vh] overflow-y-auto relative">
         {showCloseButton && (
           <button
             onClick={onClose}
-            className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+            className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl font-bold"
             aria-label="Close"
           >
             ×
           </button>
         )}
-        {children}
+        <div className="pt-6">{children}</div>
       </div>
     </div>
   );
