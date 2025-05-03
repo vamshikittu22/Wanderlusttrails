@@ -8,39 +8,39 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Access-Control-Max-Age: 86400");
 
-require_once __DIR__ . "/../../inc_logger.php";
-require_once __DIR__ . "/inc_PackageModel.php";
+require_once __DIR__ . "/../../inc_logger.php"; // Include the logger class for logging
+require_once __DIR__ . "/inc_PackageModel.php"; // Include the PackageModel class for package operations
 
 Logger::log("insertPackage API Started - Method: {$_SERVER['REQUEST_METHOD']}");
-
+// Handle preflight request for CORS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     Logger::log("Handling OPTIONS request for insertPackage");
     http_response_code(200);
     echo json_encode(["message" => "OPTIONS request successful"]);
     exit;
 }
-
+ // Handle POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
     http_response_code(405);
     echo json_encode(["success" => false, "message" => "Method not allowed"]);
     exit;
 }
-
+// Read the raw input data
 $packageName = $_POST['name'] ?? '';
 $description = $_POST['description'] ?? '';
 $location = $_POST['location'] ?? '';
 $price = $_POST['price'] ?? '';
 
 Logger::log("Received data - name: $packageName, location: $location, price: $price");
-
+// Validate input fields
 if (empty($packageName) || empty($description) || empty($location) || empty($price) || !is_numeric($price) || $price <= 0) {
     Logger::log("Validation failed: Missing or invalid fields");
     http_response_code(400);
     echo json_encode(["success" => false, "message" => "All fields are required and price must be a positive number"]);
     exit;
 }
-
+//IMAGE UPLOAD
 $imageUrl = $_POST['image_url'] ?? '';
 if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     $image = $_FILES['image'];
@@ -48,7 +48,7 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
-    $imageName = time() . '_' . basename($image['name']);
+    $imageName = time() . '_' . basename($image['name']); // Generate a unique name for the image
     $uploadPath = $uploadDir . $imageName;
     if (move_uploaded_file($image['tmp_name'], $uploadPath)) {
         $imageUrl = $imageName;
@@ -65,16 +65,17 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     echo json_encode(["success" => false, "message" => "Image is required"]);
     exit;
 }
-
-$packageModel = new PackageModel();
-$result = $packageModel->insertPackage($packageName, $description, $location, $price, $imageUrl);
+// Include the PackageModel class and create an instance
+$packageModel = new PackageModel(); // Create an instance of the PackageModel class
+$result = $packageModel->insertPackage($packageName, $description, $location, $price, $imageUrl); // Call the insertPackage method
 
 Logger::log("insertPackage result: " . ($result['success'] ? "Success: {$result['message']}" : "Failed: {$result['message']}"));
 http_response_code($result['success'] ? 200 : 400);
+
 if ($result['success']) {
-    echo json_encode(["success" => true, "message" => "Package added successfully", "image_url" => $imageUrl]);
+    echo json_encode(["success" => true, "message" => "Package added successfully", "image_url" => $imageUrl]); // Return success message with image URL
 } else {
-    echo json_encode(["success" => false, "message" => $result['message']]);
+    echo json_encode(["success" => false, "message" => $result['message']]); // Return failure message
 }
 exit;
 ?>

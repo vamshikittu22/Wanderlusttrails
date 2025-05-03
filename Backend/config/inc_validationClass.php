@@ -6,9 +6,9 @@ class ValidationClass {
     private $db;
 
     public function __construct() {
-        $this->db = new DatabaseClass();
+        $this->db = new DatabaseClass(); // Initialize the database connection
     }
-
+// Validate required fields in the request data
     public function validateRequiredFields($data, $requiredFields) {
         foreach ($requiredFields as $field) {
             if (!isset($data[$field]) || $data[$field] === '' || $data[$field] === null) {
@@ -17,14 +17,14 @@ class ValidationClass {
         }
         return ["success" => true];
     }
-
+// Validate if a field is numeric and greater than zero
     public function validateNumeric($value, $fieldName) {
         if (!isset($value) || !is_numeric($value) || $value <= 0) {
             return ["success" => false, "message" => "$fieldName must be a positive number"];
         }
         return ["success" => true];
     }
-
+// Validate if a field is a valid string
     public function validateBookingType($bookingType) {
         $validTypes = ['flight_hotel', 'package', 'itinerary'];
         if (!in_array($bookingType, $validTypes)) {
@@ -32,7 +32,7 @@ class ValidationClass {
         }
         return ["success" => true];
     }
-
+// Validate if a field is a valid date format (Y-m-d) and check if the date is in the past or not
     public function validateDateRange($startDate, $endDate, $bookingType) {
         $start = DateTime::createFromFormat('Y-m-d', $startDate);
         if (!$start || $start->format('Y-m-d') !== $startDate) {
@@ -58,14 +58,14 @@ class ValidationClass {
 
         return ["success" => true];
     }
-
+// Validate if a field is a valid email format
     public function validateUserExists($userId) {
         if (!$this->db->recordExists('users', 'id', $userId, 'i')) {
             return ["success" => false, "message" => "User not found"];
         }
         return ["success" => true];
     }
-
+    //validate package id and get package details
     public function validatePackage($packageId) {
         $query = "SELECT name, price FROM packages WHERE id = ?";
         $types = "i";
@@ -75,7 +75,7 @@ class ValidationClass {
         }
         return ["success" => true, "data" => $result[0]];
     }
-
+    //validate status of booking
     public function validateStatus($status) {
         $validStatuses = ['pending', 'confirmed', 'canceled'];
         if (!in_array($status, $validStatuses)) {
@@ -83,7 +83,7 @@ class ValidationClass {
         }
         return ["success" => true];
     }
-
+//validate if booking exists and belongs to user
     public function validateBookingExists($bookingId, $userId) {
         $query = "SELECT 1 FROM bookings WHERE id = ? AND user_id = ?";
         $types = "ii";

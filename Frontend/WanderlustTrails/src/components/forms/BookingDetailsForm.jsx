@@ -5,25 +5,26 @@ import 'react-datepicker/dist/react-datepicker.css';
 import FormWrapper from './FormWrapper';
 import { Link } from 'react-router-dom'; // Import Link for navigation
 
+//BookingDetailsForm component
 const BookingDetailsForm = ({ package: initialPackage, isEditMode, initialData = {}, onSubmit, onCancel }) => {
-  const [packageId, setPackageId] = useState(initialData.package_id || (JSON.parse(sessionStorage.getItem('selectedPackage')) || {}).id || '');
-  const [persons, setPersons] = useState(initialData.persons || 1);
-  const [startDate, setStartDate] = useState(initialData.start_date ? new Date(initialData.start_date) : null);
-  const [endDate, setEndDate] = useState(initialData.end_date ? new Date(initialData.end_date) : null);
-  const [insurance, setInsurance] = useState(initialData.insurance || 'none');
-  const [totalPrice, setTotalPrice] = useState(initialData.totalPrice || 0);
+  const [packageId, setPackageId] = useState(initialData.package_id || (JSON.parse(sessionStorage.getItem('selectedPackage')) || {}).id || ''); //state for package ID
+  const [persons, setPersons] = useState(initialData.persons || 1); //state for number of persons
+  const [startDate, setStartDate] = useState(initialData.start_date ? new Date(initialData.start_date) : null); //state for start date
+  const [endDate, setEndDate] = useState(initialData.end_date ? new Date(initialData.end_date) : null); //state for end date
+  const [insurance, setInsurance] = useState(initialData.insurance || 'none');  //state for insurance type
+  const [totalPrice, setTotalPrice] = useState(initialData.totalPrice || 0); //state for total price
 
-  const selectedPackage = JSON.parse(sessionStorage.getItem('selectedPackage')) || {};
-  const pricePerPerson = isEditMode && initialPackage?.price
+  const selectedPackage = JSON.parse(sessionStorage.getItem('selectedPackage')) || {}; // Retrieve the selected package from session storage
+  const pricePerPerson = isEditMode && initialPackage?.price 
     ? parseFloat(initialPackage.price)
     : selectedPackage.price
-    ? parseFloat(selectedPackage.price)
-    : 100;
-
+    ? parseFloat(selectedPackage.price) 
+    : 100; // Default price per person if not available
+ 
   const calculateTotalPrice = () => {
     const days = startDate && endDate
       ? Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1
-      : 1;
+      : 1; // Calculate the number of days between start and end dates
 
     let total = days * pricePerPerson * persons;
 
@@ -37,13 +38,13 @@ const BookingDetailsForm = ({ package: initialPackage, isEditMode, initialData =
     }
 
     return total.toFixed(2);
-  };
+  }; // Function to calculate total price based on selected options
 
   useEffect(() => {
     const price = calculateTotalPrice();
     setTotalPrice(price);
-  }, [startDate, endDate, persons, insurance, pricePerPerson]);
-
+  }, [startDate, endDate, persons, insurance, pricePerPerson]); // Recalculate total price whenever the relevant state changes
+  // Function to validate the form inputs
   const validateForm = () => {
     const errors = {};
     if (!packageId) errors.packageId = 'Please select a package';
@@ -59,7 +60,7 @@ const BookingDetailsForm = ({ package: initialPackage, isEditMode, initialData =
     }
     return errors;
   };
-
+// Function to generate a summary of the booking details
   const summary = {
     packageId: packageId,
     persons: persons,
@@ -69,13 +70,13 @@ const BookingDetailsForm = ({ package: initialPackage, isEditMode, initialData =
     totalPrice: totalPrice,
   };
   
-
+// Function to handle form submission
   const handleSubmit = () => {
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       alert('Please fix the errors in the form.');
       return;
-    }
+    } 
   
     // Additional safety check for dates to prevent toISOString() error
     if (!startDate || !endDate) {
@@ -87,6 +88,7 @@ const BookingDetailsForm = ({ package: initialPackage, isEditMode, initialData =
     const validInsuranceTypes = ['none', 'basic', 'premium', 'elite'];
     const safeInsurance = validInsuranceTypes.includes(insurance) ? insurance : 'none';
   
+    // Prepare the form data for submission
     const formData = {
       package_id: packageId,
       persons,
@@ -97,28 +99,12 @@ const BookingDetailsForm = ({ package: initialPackage, isEditMode, initialData =
     };
     onSubmit(formData);
   };
-  // const handleSubmit = () => {
-  //   const errors = validateForm();
-  //   if (Object.keys(errors).length > 0) {
-  //     alert('Please fix the errors in the form.');
-  //     return;
-  //   }
-  //   const formData = {
-  //     package_id: packageId,
-  //     persons,
-  //     start_date: startDate.toISOString().split('T')[0],
-  //     end_date: endDate.toISOString().split('T')[0],
-  //     insurance,
-  //     total_price: totalPrice,
-  //   };
-  //   onSubmit(formData);
-  // };
-
+  
   const handleDateChange = (dates) => {
     const [start, end] = dates;
     setStartDate(start);
     setEndDate(end);
-  };
+  }; // Function to handle date change for the date picker
 
   return (
     <FormWrapper

@@ -13,12 +13,12 @@ const UserForm = ({
   includePassword = false,
   includeChangePassword = false, // New prop for UserProfile
 }) => {
-  const [formData, setFormData] = useState(initialFormData);
-  const [errors, setErrors] = useState(initialErrors);
-  const [countries, setCountries] = useState([]);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const [formData, setFormData] = useState(initialFormData); //state to hold form data
+  const [errors, setErrors] = useState(initialErrors); //state to hold validation errors
+  const [countries, setCountries] = useState([]); //state to hold country data
+  const [showPassword, setShowPassword] = useState(false); //state to toggle password visibility
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); //state to toggle confirm password visibility
+ 
   useEffect(() => {
     const fetchCountries = async () => {
       try {
@@ -29,23 +29,24 @@ const UserForm = ({
       }
     };
     fetchCountries();
-  }, []);
+  }, []); // Fetch countries on component mount
 
   useEffect(() => {
     setFormData(initialFormData);
-  }, [initialFormData]);
+  }, [initialFormData]); // Update form data when initialFormData changes
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     const updatedFormData = { ...formData, [name]: value };
     setFormData(updatedFormData);
     setParentFormData(updatedFormData);
-  };
+  }; // Update parent form data on change
 
+  // Validation function to check for errors in the form data
   const validate = () => {
-    const newErrors = {};
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phonePattern = /^[0-9]{10}$/;
+    const newErrors = {}; // Object to hold validation errors
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Regex for email validation
+    const phonePattern = /^[0-9]{10}$/; // Regex for phone number validation
 
     if (!formData.firstName) newErrors.firstName = "*First Name is required";
     if (!formData.lastName) newErrors.lastName = "*Last Name is required";
@@ -60,7 +61,7 @@ const UserForm = ({
     if (!phonePattern.test(formData.phone)) newErrors.phone = "*Invalid phone number format 10digits required";
     if (!formData.street || !formData.city || !formData.state || !formData.zip) newErrors.address = "*Address is required";
 
-    setErrors(newErrors);
+    setErrors(newErrors); // Update errors state with new errors
     return Object.keys(newErrors).length === 0;
   };
 
@@ -68,7 +69,7 @@ const UserForm = ({
     e.preventDefault();
     if (!validate()) return;
     parentHandleSubmit(e, formData);
-  };
+  }; // Handle form submission and validation
 
   return (
     <form onSubmit={handleSubmit} noValidate>

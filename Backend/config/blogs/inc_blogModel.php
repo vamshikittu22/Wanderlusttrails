@@ -2,15 +2,16 @@
 // path: Backend/config/blogs/inc_blogModel.php
 // Handles database operations for blogs (create, update, delete, get all blogs).
 
-require_once __DIR__ . "/../inc_databaseClass.php";
-require_once __DIR__ . "/../inc_logger.php";
+require_once __DIR__ . "/../inc_databaseClass.php"; // Include database class for database operations
+require_once __DIR__ . "/../inc_logger.php"; // Include logger for logging
 
+// BlogModel class 
 class BlogModel {
-    private $db;
-    private $uploadDir = __DIR__ . "/../../uploads/";
-    private $baseUrl = "http://localhost/Wanderlusttrails/Backend/uploads/";
+    private $db; // Database connection
+    private $uploadDir = __DIR__ . "/../../uploads/"; // Directory for media uploads
+    private $baseUrl = "http://localhost/Wanderlusttrails/Backend/uploads/"; // Base URL for media files
 
-    public function __construct() {
+    public function __construct() {  // Constructor to initialize database connection and upload directory
         Logger::log("BlogModel instantiated");
         $this->db = new DatabaseClass();
         // Ensure upload directory exists
@@ -23,18 +24,18 @@ class BlogModel {
     // Get all blogs with user details
     public function getAllBlogs() {
         Logger::log("getAllBlogs called");
-
-        $query = "SELECT b.id, b.userId, u.firstName, u.lastName, b.title, b.content, b.status, b.createdAt, b.media_urls 
-                  FROM blogs b 
-                  JOIN users u ON b.userId = u.id 
-                  ORDER BY b.createdAt DESC";
-        $blogs = $this->db->query($query);
+//prepare the query
+        $query = "SELECT b.id, b.userId, u.firstName, u.lastName, b.title, b.content, b.status, b.createdAt, b.media_urls
+                        FROM blogs b JOIN users u ON b.userId = u.id 
+                            ORDER BY b.createdAt DESC"; // Query to fetch all blogs with user details
+        $blogs = $this->db->query($query); // Execute the query
 
         if (isset($blogs['success']) && !$blogs['success']) {
             Logger::log("getAllBlogs failed: " . $blogs['message']);
             return ["success" => false, "message" => $blogs['message']];
         }
 
+        // Decode media URLs from JSON to array
         foreach ($blogs as &$blog) {
             $blog['media_urls'] = json_decode($blog['media_urls'], true) ?: [];
         }
@@ -44,7 +45,7 @@ class BlogModel {
             'sample' => $blogs ? array_slice($blogs, 0, 1) : []
         ]));
 
-        return ["success" => true, "data" => $blogs];
+        return ["success" => true, "data" => $blogs]; // Return blogs data
     }
 
     // Create a new blog
@@ -62,8 +63,9 @@ class BlogModel {
         }
 
         // Check if user exists and get their role
-        $query = "SELECT id, role FROM users WHERE id = ?";
-        $user = $this->db->fetchQuery($query, "i", $userId);
+        //prepare the query
+        $query = "SELECT id, role FROM users WHERE id = ?"; // Query to check if user exists
+        $user = $this->db->fetchQuery($query, "i", $userId); // Execute the query
         Logger::log("User check result: " . json_encode($user));
         if (empty($user)) {
             Logger::log("User not found for userId: $userId");
@@ -71,7 +73,7 @@ class BlogModel {
         }
 
         // Check if the user is an admin
-        $userRole = $user[0]['role'];
+        $userRole = $user[0]['role']; // Get user role
         Logger::log("User role for userId $userId: $userRole");
         if ($userRole === 'admin') {
             Logger::log("Admin user (userId: $userId) attempted to create a blog");
@@ -79,12 +81,13 @@ class BlogModel {
         }
 
         // Handle media uploads
-        $mediaUrls = $this->handleMediaUploads($mediaFiles, $existingMedia);
+        $mediaUrls = $this->handleMediaUploads($mediaFiles, $existingMedia); 
 
-        $mediaUrlsJson = json_encode($mediaUrls);
-        $query = "INSERT INTO blogs (userId, title, content, status, media_urls) VALUES (?, ?, ?, ?, ?)";
-        $types = "issss";
-        $result = $this->db->executeQuery($query, $types, $userId, $title, $content, $status, $mediaUrlsJson);
+        $mediaUrlsJson = json_encode($mediaUrls); // Convert media URLs to JSON
+        //prepare the insert query
+        $query = "INSERT INTO blogs (userId, title, content, status, media_urls) VALUES (?, ?, ?, ?, ?)"; // Query to insert new blog   
+        $types = "issss"; // Define parameter types for prepared statement
+        $result = $this->db->executeQuery($query, $types, $userId, $title, $content, $status, $mediaUrlsJson); // Execute the query
 
         Logger::log("createBlog query result: " . json_encode([
             'success' => $result['success'],
@@ -94,10 +97,10 @@ class BlogModel {
         ]));
 
         if ($result['success'] && $result['affected_rows'] > 0) {
-            $blogId = $result['insert_id'];
-            return ["success" => true, "message" => "Blog created successfully", "blogId" => $blogId];
+            $blogId = $result['insert_id']; // Get the ID of the newly created blog 
+            return ["success" => true, "message" => "Blog created successfully", "blogId" => $blogId]; // Return success message with blog ID
         } else {
-            return ["success" => false, "message" => $result['message'] ?? "Failed to create blog"];
+            return ["success" => false, "message" => $result['message'] ?? "Failed to create blog"]; // Return error message
         }
     }
 
@@ -116,9 +119,9 @@ class BlogModel {
         }
 
         // Check if blog exists and belongs to user
-        $query = "SELECT id, media_urls FROM blogs WHERE id = ? AND userId = ?";
-        $blog = $this->db->fetchQuery($query, "ii", $blogId, $userId);
-        Logger::log("Blog check result: " . json_encode($blog));
+        $query = "SELECT id, media_urls FROM blogs WHERE id = ? AND userId = ?"; // Query to check if blog exists and belongs to user
+        $blog = $this->db->fetchQuery($query, "ii", $blogId, $userId); // Execute the query
+        Logger::log("Blog check result: " . json_encode($blog)); 
         if (empty($blog)) {
             Logger::log("Blog not found or not owned by user - blogId: $blogId, userId: $userId");
             return ["success" => false, "message" => "Blog not found or unauthorized"];
@@ -127,10 +130,11 @@ class BlogModel {
         // Handle media uploads
         $mediaUrls = $this->handleMediaUploads($mediaFiles, $existingMedia);
 
-        $mediaUrlsJson = json_encode($mediaUrls);
-        $query = "UPDATE blogs SET title = ?, content = ?, status = ?, media_urls = ? WHERE id = ? AND userId = ?";
-        $types = "ssssii";
-        $result = $this->db->executeQuery($query, $types, $title, $content, $status, $mediaUrlsJson, $blogId, $userId);
+        $mediaUrlsJson = json_encode($mediaUrls); // Convert media URLs to JSON
+        //prepare the update query
+        $query = "UPDATE blogs SET title = ?, content = ?, status = ?, media_urls = ? WHERE id = ? AND userId = ?"; // Query to update blog
+        $types = "ssssii"; // Define parameter types for prepared statement
+        $result = $this->db->executeQuery($query, $types, $title, $content, $status, $mediaUrlsJson, $blogId, $userId); // Execute the query
 
         Logger::log("updateBlog query result: " . json_encode([
             'success' => $result['success'],
@@ -140,7 +144,7 @@ class BlogModel {
 
         return $result['success'] && $result['affected_rows'] > 0
             ? ["success" => true, "message" => "Blog updated successfully"]
-            : ["success" => false, "message" => $result['message'] ?? "Failed to update blog"];
+            : ["success" => false, "message" => $result['message'] ?? "Failed to update blog"]; // Return success or error message
     }
 
     // Delete a blog
@@ -158,8 +162,8 @@ class BlogModel {
         }
 
         // Check if blog exists and belongs to user
-        $query = "SELECT media_urls FROM blogs WHERE id = ? AND userId = ?";
-        $blog = $this->db->fetchQuery($query, "ii", $blogId, $userId);
+        $query = "SELECT media_urls FROM blogs WHERE id = ? AND userId = ?"; // Query to check if blog exists and belongs to user
+        $blog = $this->db->fetchQuery($query, "ii", $blogId, $userId);  // Execute the query
         Logger::log("Blog check result: " . json_encode($blog));
         if (empty($blog)) {
             Logger::log("Blog not found or not owned by user - blogId: $blogId, userId: $userId");
@@ -167,7 +171,7 @@ class BlogModel {
         }
 
         // Delete associated media files
-        $mediaUrls = json_decode($blog[0]['media_urls'], true) ?: [];
+        $mediaUrls = json_decode($blog[0]['media_urls'], true) ?: []; // Decode media URLs from JSON
         foreach ($mediaUrls as $url) {
             $filePath = str_replace($this->baseUrl, $this->uploadDir, $url);
             if (file_exists($filePath)) {
@@ -175,10 +179,10 @@ class BlogModel {
                 Logger::log("Deleted media file: $filePath");
             }
         }
-
-        $query = "DELETE FROM blogs WHERE id = ? AND userId = ?";
-        $types = "ii";
-        $result = $this->db->executeQuery($query, $types, $blogId, $userId);
+//prepare the delete query
+        $query = "DELETE FROM blogs WHERE id = ? AND userId = ?"; // Query to delete blog
+        $types = "ii"; // Define parameter types for prepared statement
+        $result = $this->db->executeQuery($query, $types, $blogId, $userId); // Execute the query
 
         Logger::log("deleteBlog query result: " . json_encode([
             'success' => $result['success'],
@@ -187,8 +191,8 @@ class BlogModel {
         ]));
 
         return $result['success'] && $result['affected_rows'] > 0
-            ? ["success" => true, "message" => "Blog deleted successfully"]
-            : ["success" => false, "message" => $result['message'] ?? "Failed to delete blog"];
+            ? ["success" => true, "message" => "Blog deleted successfully"] // Return success message
+            : ["success" => false, "message" => $result['message'] ?? "Failed to delete blog"]; // Return error message
     }
 
     // Helper method to handle media uploads
@@ -196,6 +200,7 @@ class BlogModel {
         Logger::log("Handling media uploads");
         $mediaUrls = is_array($existingMedia) ? $existingMedia : [];
 
+        // Check if media files are provided
         if (!empty($mediaFiles) && isset($mediaFiles['name'])) {
             $fileCount = count($mediaFiles['name']);
             for ($i = 0; $i < $fileCount; $i++) {
@@ -204,19 +209,19 @@ class BlogModel {
                     continue;
                 }
 
-                $fileName = uniqid() . '_' . basename($mediaFiles['name'][$i]);
-                $filePath = $this->uploadDir . $fileName;
+                $fileName = uniqid() . '_' . basename($mediaFiles['name'][$i]); // Generate unique file name
+                $filePath = $this->uploadDir . $fileName; // Set file path for upload
 
                 if (move_uploaded_file($mediaFiles['tmp_name'][$i], $filePath)) {
-                    $mediaUrls[] = $this->baseUrl . $fileName;
+                    $mediaUrls[] = $this->baseUrl . $fileName; // Store the URL of the uploaded file
                     Logger::log("Uploaded file: $fileName");
                 } else {
-                    Logger::log("Failed to upload file: " . $mediaFiles['name'][$i]);
+                    Logger::log("Failed to upload file: " . $mediaFiles['name'][$i]); 
                 }
             }
         }
 
-        return $mediaUrls;
-    }
+        return $mediaUrls; // Return array of media URLs
+    } 
 }
 ?>

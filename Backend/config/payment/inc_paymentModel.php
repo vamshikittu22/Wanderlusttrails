@@ -2,13 +2,15 @@
 require_once __DIR__ . "/../inc_databaseClass.php";
 require_once __DIR__ . "/../inc_logger.php";
 
+//PaymentClass 
 class PaymentClass {
     private $db;
 
-    public function __construct() {
-        $this->db = new DatabaseClass();
+    public function __construct() {     // Constructor to initialize the database connection
+        $this->db = new DatabaseClass(); // Initialize the database connection
     }
 
+    // Function to create a payment record
     public function createPayment($bookingId, $userId, $amount, $paymentMethod, $transactionId, $paymentDate = null) {
         // Validate inputs
         $validMethods = ['credit_card', 'debit_card', 'paypal', 'bank_transfer'];
@@ -36,8 +38,8 @@ class PaymentClass {
         }
 
         // Verify booking exists and user matches
-        $bookingQuery = "SELECT user_id FROM bookings WHERE id = ?";
-        $bookingData = $this->db->fetchQuery($bookingQuery, "i", $bookingId);
+        $bookingQuery = "SELECT user_id FROM bookings WHERE id = ?"; //query to check if booking exists
+        $bookingData = $this->db->fetchQuery($bookingQuery, "i", $bookingId); //fetch the booking data
         if (empty($bookingData)) {
             Logger::log("Validation failed: Booking not found");
             throw new Exception("Booking not found", 400);
@@ -48,36 +50,36 @@ class PaymentClass {
         }
 
         // Insert payment
-        $query = "INSERT INTO payments (booking_id, user_id, amount, payment_method, transaction_id, payment_status, payment_date) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        $status = 'completed';
-        $types = "iidssss";
-        $params = [$bookingId, $userId, $amount, $paymentMethod, $transactionId, $status, $paymentDate ?: date('Y-m-d H:i:s')];
-
-        $this->db->beginTransaction();
+        $query = "INSERT INTO payments (booking_id, user_id, amount, payment_method, transaction_id, payment_status, payment_date) VALUES (?, ?, ?, ?, ?, ?, ?)"; //query to insert payment details
+        $status = 'completed'; //default status is completed
+        $types = "iidssss"; //types of the parameters to be inserted
+        $params = [$bookingId, $userId, $amount, $paymentMethod, $transactionId, $status, $paymentDate ?: date('Y-m-d H:i:s')]; //parameters to be inserted
+        $this->db->beginTransaction(); //start transaction
         try {
-            $result = $this->db->executeQuery($query, $types, ...$params);
+            $result = $this->db->executeQuery($query, $types, ...$params); //execute the query
             if ($result['success']) {
-                $this->db->commit();
+                $this->db->commit(); //commit the transaction
                 Logger::log("Payment recorded, ID: " . $result['insert_id']);
                 return [
                     "success" => true,
                     "message" => "Payment recorded successfully",
                     "payment_id" => $result['insert_id']
-                ];
+                ]; //return success message with payment ID
             } else {
-                $this->db->rollback();
+                $this->db->rollback(); //rollback the transaction
                 Logger::log("Insert failed: " . json_encode($result));
-                throw new Exception("Failed to record payment", 500);
+                throw new Exception("Failed to record payment", 500); // Use 500 for server-side error
             }
         } catch (Exception $e) {
-            $this->db->rollback();
-            Logger::log("Exception in createPayment: " . $e->getMessage());
-            throw $e;
+            $this->db->rollback(); //rollback the transaction
+            Logger::log("Exception in createPayment: " . $e->getMessage()); 
+            throw $e; //rethrow the exception
         }
     }
 
+    // Function to update payment status
     public function updatePaymentStatus($transactionId, $paymentStatus) {
-        $validStatuses = ['pending', 'completed', 'failed'];
+        $validStatuses = ['pending', 'completed', 'failed']; //valid payment statuses
         if (!$transactionId || !$paymentStatus || !in_array($paymentStatus, $validStatuses)) {
             Logger::log("Validation failed: Missing or invalid fields");
             throw new Exception("Missing or invalid fields", 400);
@@ -88,80 +90,74 @@ class PaymentClass {
             throw new Exception("Transaction ID not found", 404);
         }
 
-        $currentStatusQuery = "SELECT payment_status FROM payments WHERE transaction_id = ?";
-        $currentStatusData = $this->db->fetchQuery($currentStatusQuery, "s", $transactionId);
+        $currentStatusQuery = "SELECT payment_status FROM payments WHERE transaction_id = ?"; //query to get current payment status
+        $currentStatusData = $this->db->fetchQuery($currentStatusQuery, "s", $transactionId); //fetch current payment status
         if (!empty($currentStatusData) && $currentStatusData[0]['payment_status'] === $paymentStatus) {
             Logger::log("Status unchanged: $paymentStatus");
             return ["success" => true, "message" => "Status unchanged"];
         }
 
-        $query = "UPDATE payments SET payment_status = ?, updated_at = NOW() WHERE transaction_id = ?";
-        $types = "ss";
-        $params = [$paymentStatus, $transactionId];
+        $query = "UPDATE payments SET payment_status = ?, updated_at = NOW() WHERE transaction_id = ?"; //query to update payment status
+        $types = "ss"; //types of the parameters to be updated
+        $params = [$paymentStatus, $transactionId]; //parameters to be updated
 
-        $this->db->beginTransaction();
+        $this->db->beginTransaction(); //start transaction
+         //execute the query
         try {
-            $result = $this->db->executeQuery($query, $types, ...$params);
+            $result = $this->db->executeQuery($query, $types, ...$params); //execute the query
             if ($result['success']) {
-                $this->db->commit();
+                $this->db->commit(); //commit the transaction
                 Logger::log("Payment status updated");
                 return [
                     "success" => true,
                     "message" => "Payment status updated successfully"
-                ];
+                ]; //return success message
             } else {
-                $this->db->rollback();
+                $this->db->rollback(); //rollback the transaction
                 Logger::log("Update failed: " . json_encode($result));
-                throw new Exception("Failed to update payment status", 500);
+                throw new Exception("Failed to update payment status", 500); // Use 500 for server-side error
             }
         } catch (Exception $e) {
-            $this->db->rollback();
+            $this->db->rollback(); //rollback the transaction
             Logger::log("Exception in updatePaymentStatus: " . $e->getMessage());
-            throw $e;
+            throw $e;   //rethrow the exception
         }
     }
 
+    // Function to get payment details by booking ID
     public function getPaymentDetails($bookingId) {
         if (!$bookingId) {
             Logger::log("Validation failed: Missing booking_id");
             throw new Exception("Missing booking_id", 400);
         }
 
-        $query = "
-            SELECT 
-                payment_method, 
-                payment_status, 
-                transaction_id, 
-                payment_date
-            FROM payments 
-            WHERE booking_id = ?
-            ORDER BY payment_date DESC
-        ";
-        $types = "i";
-        $data = $this->db->fetchQuery($query, $types, $bookingId);
+        $query = "SELECT payment_method, payment_status, transaction_id, payment_date FROM payments 
+                        WHERE booking_id = ? ORDER BY payment_date DESC"; //query to get payment details
+        $types = "i"; //types of the parameters to be fetched
+        $data = $this->db->fetchQuery($query, $types, $bookingId); //fetch payment details
 
         if (!empty($data)) {
-            $payments = array_map(function($payment) {
+            $payments = array_map(function($payment) { 
                 return [
                     "payment_method" => $payment['payment_method'] ?? 'N/A',
                     "payment_status" => $payment['payment_status'] ?? 'N/A',
                     "transaction_id" => $payment['transaction_id'] ?? null,
                     "payment_date" => $payment['payment_date'] ?? 'N/A'
-                ];
-            }, $data);
+                ]; //payment details to be returned
+            }, $data);  //map the payment details to the required format
             Logger::log("Payments found for booking_id=$bookingId: " . json_encode($payments));
             return [
                 "success" => true,
                 "data" => $payments,
                 "message" => "Payment details retrieved successfully"
-            ];
+            ]; //return success message with payment details
         } else {
             Logger::log("No payment found for booking_id=$bookingId");
             return [
                 "success" => true,
                 "data" => [],
                 "message" => "No payments found"
-            ];
+            ]; //return success message with empty data
         }
     }
 }

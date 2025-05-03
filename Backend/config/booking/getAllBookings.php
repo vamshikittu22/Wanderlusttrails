@@ -13,14 +13,14 @@ require_once __DIR__ . "/../inc_validationClass.php";
 require_once __DIR__ . "/inc_bookingModel.php";
 
 Logger::log("getAllBookings API Started - Method: {$_SERVER['REQUEST_METHOD']}");
-
+//preflight test
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     Logger::log("Handling OPTIONS request for getAllBookings");
     http_response_code(200);
     echo json_encode(["message" => "OPTIONS request successful"]);
     exit;
 }
-
+// Ensure the request method is GET for fetching all bookings
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
     http_response_code(405);
@@ -28,8 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-$bookingModel = new BookingModel();
-$result = $bookingModel->getAllBookings();
+$bookingModel = new BookingModel(); // Create an instance of the BookingModel for database operations
+$result = $bookingModel->getAllBookings();  // Call the getAllBookings method to fetch all bookings
 
 Logger::log("getAllBookings result: " . (empty($result['data']) ? "No bookings found" : count($result['data']) . " bookings"));
 http_response_code($result['success'] ? 200 : 500);

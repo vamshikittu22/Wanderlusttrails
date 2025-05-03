@@ -4,12 +4,14 @@ import BookingDetailsForm from './BookingDetailsForm';
 import FlightAndHotelForm from './FlightAndHotelForm';
 import ItineraryForm from './ItineraryForm';
 
+//edit booking form component
 const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
-  const [isEditMode] = useState(true);
-  const [packages, setPackages] = useState([]);
-  const [loadingPackages, setLoadingPackages] = useState(true);
-  const [packagesError, setPackagesError] = useState(null);
+  const [isEditMode] = useState(true); //state for edit mode
+  const [packages, setPackages] = useState([]); //state for packages
+  const [loadingPackages, setLoadingPackages] = useState(true); //state for loading packages
+  const [packagesError, setPackagesError] = useState(null); //state for packages error
 
+  // Check if the booking type is 'itinerary' and fetch packages if true
   useEffect(() => {
     if (booking.booking_type === 'itinerary') {
       const fetchPackages = async () => {
@@ -31,7 +33,7 @@ const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
     } else {
       setLoadingPackages(false);
     }
-  }, [booking.booking_type]);
+  }, [booking.booking_type]); //fetch packages when booking type is itinerary
 
   const getInitialData = () => {
     if (booking.booking_type === 'package') {
@@ -92,66 +94,7 @@ const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
       };
     }
   };
-  // const getInitialData = () => {
-  //   if (booking.booking_type === 'package') {
-  //     const totalPrice = parseFloat(booking.total_price);
-  //     return {
-  //       package_id: booking.package_id || '',
-  //       persons: booking.persons || 1,
-  //       start_date: booking.start_date ? new Date(booking.start_date) : null,
-  //       end_date: booking.end_date ? new Date(booking.end_date) : null,
-  //       insurance: booking.insurance || 'none',
-  //       totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
-  //     };
-  //   } else if (booking.booking_type === 'itinerary') {
-  //     const selectedPackage = packages.find(pkg => pkg.id === booking.package_id) || null;
-  //     let itineraryDetails = [];
-  //     try {
-  //       itineraryDetails = typeof booking.itinerary_details === 'string'
-  //         ? JSON.parse(booking.itinerary_details)
-  //         : Array.isArray(booking.itinerary_details)
-  //         ? booking.itinerary_details
-  //         : [];
-  //     } catch (error) {
-  //       console.error('Error parsing itinerary_details:', error);
-  //       itineraryDetails = [];
-  //     }
-  //     const totalPrice = parseFloat(booking.total_price);
-  //     return {
-  //       id: booking.id,
-  //       package_id: booking.package_id || '',
-  //       selectedPackage,
-  //       itinerary_details: itineraryDetails,
-  //       persons: booking.persons || 1,
-  //       start_date: booking.start_date ? new Date(booking.start_date) : null,
-  //       end_date: booking.end_date ? new Date(booking.end_date) : null,
-  //       insurance: booking.insurance || 'none',
-  //       totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
-  //     };
-  //   } else {
-  //     const totalPrice = parseFloat(booking.total_price);
-  //     return {
-  //       from: booking.flight_details?.from || '',
-  //       to: booking.flight_details?.to || '',
-  //       startDate: booking.start_date ? new Date(booking.start_date) : null,
-  //       endDate: booking.end_date ? new Date(booking.end_date) : null,
-  //       airline: booking.flight_details?.airline || 'any',
-  //       persons: booking.persons || 1,
-  //       flightClass: booking.flight_details?.flightClass || 'economy',
-  //       hotelStars: booking.hotel_details?.hotelStars || '3',
-  //       roundTrip: booking.flight_details?.roundTrip !== undefined ? booking.flight_details.roundTrip : true,
-  //       insurance: booking.insurance || 'none',
-  //       carRental: booking.hotel_details?.car_rental || false,
-  //       flightTime: booking.flight_details?.flightTime || 'any',
-  //       amenities: {
-  //         pool: booking.hotel_details?.amenities?.pool || false,
-  //         wifi: booking.hotel_details?.amenities?.wifi || false,
-  //       },
-  //       totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
-  //     };
-  //   }
-  // };
-
+    
   const initialData = getInitialData();
   const handleSubmit = (formData) => {
     let changes = formData;

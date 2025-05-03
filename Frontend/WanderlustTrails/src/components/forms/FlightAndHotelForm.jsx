@@ -7,27 +7,29 @@ import FormWrapper from './FormWrapper';
 import { FaPlaneDeparture, FaPlaneArrival, FaUsers, FaStar, FaCar, FaShieldAlt, FaSwimmingPool, FaWifi } from 'react-icons/fa';
 import { Link } from 'react-router-dom'; // Import Link for navigation
 
+// FlightAndHotelForm component for booking flight and hotel
 const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, onCancel }) => {
-  const [from, setFrom] = useState(initialData.from || '');
-  const [to, setTo] = useState(initialData.to || '');
-  const [startDate, setStartDate] = useState(initialData.startDate ? new Date(initialData.startDate) : null);
-  const [endDate, setEndDate] = useState(initialData.endDate ? new Date(initialData.endDate) : null);
-  const [roundTrip, setRoundTrip] = useState(initialData.roundTrip !== undefined ? initialData.roundTrip : true);
-  const [persons, setPersons] = useState(initialData.persons || 1);
-  const [flightClass, setFlightClass] = useState(initialData.flightClass || 'economy');
-  const [hotelStars, setHotelStars] = useState(initialData.hotelStars || '3');
-  const [airline, setAirline] = useState(initialData.airline || 'any');
-  const [flightTime, setFlightTime] = useState(initialData.flightTime || 'any');
-  const [insurance, setInsurance] = useState(initialData.insurance || 'none');
-  const [carRental, setCarRental] = useState(initialData.carRental || false);
-  const [pool, setPool] = useState(initialData.amenities?.pool || false);
-  const [wifi, setWifi] = useState(initialData.amenities?.wifi || false);
-  const [fromSuggestions, setFromSuggestions] = useState([]);
-  const [toSuggestions, setToSuggestions] = useState([]);
-  const [showFromSuggestions, setShowFromSuggestions] = useState(false);
-  const [showToSuggestions, setShowToSuggestions] = useState(false);
-  const [totalPrice, setTotalPrice] = useState(initialData.totalPrice || 0);
+  const [from, setFrom] = useState(initialData.from || ''); //state for departure city
+  const [to, setTo] = useState(initialData.to || '');  //state for destination city 
+  const [startDate, setStartDate] = useState(initialData.startDate ? new Date(initialData.startDate) : null); //state for start date
+  const [endDate, setEndDate] = useState(initialData.endDate ? new Date(initialData.endDate) : null); //state for end date
+  const [roundTrip, setRoundTrip] = useState(initialData.roundTrip !== undefined ? initialData.roundTrip : true); //state for round trip
+  const [persons, setPersons] = useState(initialData.persons || 1); //state for number of persons
+  const [flightClass, setFlightClass] = useState(initialData.flightClass || 'economy'); //state for flight class
+  const [hotelStars, setHotelStars] = useState(initialData.hotelStars || '3'); //state for hotel stars
+  const [airline, setAirline] = useState(initialData.airline || 'any'); //state for airline
+  const [flightTime, setFlightTime] = useState(initialData.flightTime || 'any'); //state for flight time
+  const [insurance, setInsurance] = useState(initialData.insurance || 'none'); //state for insurance
+  const [carRental, setCarRental] = useState(initialData.carRental || false); //state for car rental
+  const [pool, setPool] = useState(initialData.amenities?.pool || false); //state for pool
+  const [wifi, setWifi] = useState(initialData.amenities?.wifi || false); //state for wifi
+  const [fromSuggestions, setFromSuggestions] = useState([]); //state for from suggestions
+  const [toSuggestions, setToSuggestions] = useState([]); //state for to suggestions
+  const [showFromSuggestions, setShowFromSuggestions] = useState(false); //state for showing from suggestions
+  const [showToSuggestions, setShowToSuggestions] = useState(false); //state for showing to suggestions
+  const [totalPrice, setTotalPrice] = useState(initialData.totalPrice || 0); //state for total price
 
+  // Filtered city data for suggestions
   const cityData = airportData
     .filter(airport => ['large_airport', 'medium_airport'].includes(airport.type) && airport.iata_code)
     .map(airport => ({
@@ -39,8 +41,9 @@ const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, on
   const airlines = [
     'Any Airline', 'Delta', 'American Airlines', 'United', 'British Airways',
     'Emirates', 'Qantas', 'Air France', 'Japan Airlines', 'Lufthansa',
-  ];
+  ]; // List of airlines
 
+  // Function to calculate distance between two cities using Haversine formula
   const distance = () => {
     const fromCity = cityData.find(city => city.name === from);
     const toCity = cityData.find(city => city.name === to);
@@ -58,6 +61,7 @@ const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, on
     return 0;
   };
 
+  // Function to calculate flight duration based on distance and average speed
   const flightDuration = () => {
     const dist = distance();
     if (dist) {
@@ -71,6 +75,7 @@ const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, on
     return 'N/A';
   };
 
+  // Function to calculate total price based on various factors
   const calculateTotalPrice = () => {
     const basePrice = 100;
     const dist = distance();
@@ -89,13 +94,14 @@ const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, on
     if (insurance === 'elite') price += 75; // $75 for Elite Coverage
 
     return price > 0 ? price.toFixed(2) : '0.00';
-  };
+  }; 
 
   useEffect(() => {
     const price = calculateTotalPrice();
     setTotalPrice(price);
-  }, [from, to, startDate, endDate, roundTrip, persons, flightClass, hotelStars, insurance, carRental, pool, wifi]);
+  }, [from, to, startDate, endDate, roundTrip, persons, flightClass, hotelStars, insurance, carRental, pool, wifi]); // Recalculate total price when dependencies change
 
+  // Function to validate form inputs
   const validateForm = () => {
     const errors = {};
     if (!from) errors.from = 'Departure city is required';
@@ -107,8 +113,9 @@ const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, on
     }
     if (persons < 1) errors.persons = 'Number of travelers must be at least 1';
     return errors;
-  };
+  }; 
 
+  // Summary of the booking details
   const summary = {
     from: from || 'N/A',
     to: to || 'N/A',
@@ -127,12 +134,14 @@ const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, on
     totalPrice: totalPrice,
   };
 
+  // Function to handle form submission
   const handleSubmit = () => {
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       alert('Please fix the errors in the form.');
       return;
     }
+    // Create form data object to send to the server
     const formData = {
       flight_details: {
         from,
@@ -157,6 +166,7 @@ const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, on
     onSubmit(formData);
   };
 
+  // Function to handle input changes for departure and destination cities
   const handleFromChange = (e) => {
     const value = e.target.value;
     setFrom(value);
@@ -172,6 +182,7 @@ const FlightAndHotelForm = ({ initialData = {}, isEditMode = false, onSubmit, on
     }
   };
 
+  
   const handleToChange = (e) => {
     const value = e.target.value;
     setTo(value);

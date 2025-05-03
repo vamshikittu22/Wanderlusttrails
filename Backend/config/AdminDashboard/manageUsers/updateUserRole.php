@@ -12,24 +12,24 @@ require_once __DIR__ . "/../../inc_logger.php";
 require_once __DIR__ . "/inc_UsersOpsModel.php";
 
 Logger::log("updateUserRole API Started - Method: {$_SERVER['REQUEST_METHOD']}");
-
+// Check if the request method is OPTIONS for preflight checks
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     Logger::log("Handling OPTIONS request for updateUserRole");
     http_response_code(200);
     echo json_encode(["message" => "OPTIONS request successful"]);
     exit;
 }
-
+// Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
     http_response_code(405);
     echo json_encode(["success" => false, "message" => "Method not allowed"]);
     exit;
 }
-
+// rawInput is the raw POST data
 $rawInput = file_get_contents("php://input");
 Logger::log("Raw input: " . ($rawInput ?: "Empty"));
-
+//data is the decoded JSON input
 $data = json_decode($rawInput, true);
 if ($data === null) {
     Logger::log("JSON decode failed. Possible malformed JSON.");
@@ -37,20 +37,21 @@ if ($data === null) {
     echo json_encode(["success" => false, "message" => "Invalid JSON format"]);
     exit;
 }
-
+// Check if id and role are present and valid
 $userId = $data['id'] ?? '';
 $role = $data['role'] ?? '';
+// Validate userId and role
 if (empty($userId) || !is_numeric($userId) || empty($role)) {
     Logger::log("Missing or invalid id/role: " . json_encode($data));
     http_response_code(400);
     echo json_encode(["success" => false, "message" => "Valid numeric user ID and role are required"]);
     exit;
 }
-
+// Sanitize userId to prevent SQL injection
 $userId = (int)$userId;
 $role = strtolower($role); // Convert role to lowercase for consistency
 $validRoles = ['admin', 'user']; // Use lowercase roles for validation
-if (!in_array($role, $validRoles)) {
+if (!in_array($role, $validRoles)) { // Check if role is valid
     Logger::log("Invalid role: '$role'");
     http_response_code(400);
     echo json_encode(["success" => false, "message" => "Invalid role. Use: admin or user"]);
@@ -58,12 +59,12 @@ if (!in_array($role, $validRoles)) {
 }
 
 Logger::log("Updating role for user_id: $userId to $role");
-
-$userOpsModel = new UserOpsModel();
-$result = $userOpsModel->updateUserRole($userId, $role);
+// Create an instance of UserOpsModel and call updateUserRole method
+$userOpsModel = new UserOpsModel(); //instance of UserOpsModel class
+$result = $userOpsModel->updateUserRole($userId, $role); // Call the updateUserRole method
 
 Logger::log("updateUserRole result for user_id: $userId - " . ($result['success'] ? "Success: {$result['message']}" : "Failed: {$result['message']}"));
 http_response_code($result['success'] ? 200 : 400);
-echo json_encode($result);
+echo json_encode($result); // Return the result as JSON
 exit;
 ?>

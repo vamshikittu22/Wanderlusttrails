@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react"; // Added useState for validation state
 import { toast } from "react-toastify";
 
 const ReviewForm = ({
@@ -10,15 +10,48 @@ const ReviewForm = ({
     onCancel,
     isEditMode = false,
 }) => {
+    const [errors, setErrors] = useState({}); // State to hold validation errors
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setReviewData((prev) => ({ ...prev, [name]: value }));
+        // Clear error for the field when user starts typing
+        setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
     const handleRatingClick = (rating) => {
         if (!submitting) {
             setReviewData((prev) => ({ ...prev, rating }));
+            // Clear rating error when a rating is selected
+            setErrors((prev) => ({ ...prev, rating: "" }));
         }
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!isEditMode && !reviewData.bookingId) {
+            newErrors.bookingId = "Please select a booking.";
+        }
+        if (!reviewData.rating) {
+            newErrors.rating = "Please select a rating.";
+        }
+        if (!reviewData.title.trim()) {
+            newErrors.title = "Title is required.";
+        }
+        if (!reviewData.review.trim()) {
+            newErrors.review = "Review is required.";
+        }
+        return newErrors;
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const formErrors = validateForm();
+        if (Object.keys(formErrors).length > 0) {
+            setErrors(formErrors);
+            return;
+        }
+        onSubmit(e); // Proceed with submission if no errors
     };
 
     return (
@@ -26,7 +59,7 @@ const ReviewForm = ({
             <h3 className="text-lg text-orange-600 font-bold mb-4 text-center">
                 {isEditMode ? "Edit Review" : "Write a Review"}
             </h3>
-            <form onSubmit={onSubmit} noValidate>
+            <form onSubmit={handleSubmit} noValidate>
                 {!isEditMode && (
                     <div className="mb-4">
                         <label htmlFor="bookingId" className="block text-sm text-sky-300 font-bold mb-2">
@@ -49,6 +82,9 @@ const ReviewForm = ({
                                 </option>
                             ))}
                         </select>
+                        {errors.bookingId && (
+                            <p className="text-red-500 text-xs mt-1">{errors.bookingId}</p>
+                        )}
                     </div>
                 )}
 
@@ -70,6 +106,9 @@ const ReviewForm = ({
                             </svg>
                         ))}
                     </div>
+                    {errors.rating && (
+                        <p className="text-red-500 text-xs mt-1">{errors.rating}</p>
+                    )}
                 </div>
 
                 <div className="mb-4">
@@ -86,6 +125,9 @@ const ReviewForm = ({
                         className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                         disabled={submitting}
                     />
+                    {errors.title && (
+                        <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+                    )}
                 </div>
 
                 <div className="mb-4">
@@ -102,6 +144,9 @@ const ReviewForm = ({
                         rows="4"
                         disabled={submitting}
                     />
+                    {errors.review && (
+                        <p className="text-red-500 text-xs mt-1">{errors.review}</p>
+                    )}
                 </div>
 
                 <div className="text-center space-x-2">

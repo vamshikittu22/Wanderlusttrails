@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useUser } from "../../context/UserContext";
-import UserProfile from "../../components/userDashboard/UserProfile.jsx";
-import UserViewBookings from "../../components/userDashboard/userViewBookings.jsx";
-import UserReviews from "../../components/userDashboard/userReviews.jsx";
+import UserProfile from "./../../components/userDashboard/UserProfile.jsx";
+import UserViewBookings from "./../../components/userDashboard/userViewBookings.jsx";
+import UserReviews from "./../../components/userDashboard/UserReviews.jsx";
 import Sidebar from "./../../components/SideBar.jsx"; // Adjust path as needed
 import MainContent from "./MainContent.jsx"; // Adjust path as needed
 
+// UserDashboard component
 const UserDashboard = () => {
     const navigate = useNavigate();
     const { user, isAuthenticated } = useUser();
@@ -19,16 +20,18 @@ const UserDashboard = () => {
         return "profile";
     });
 
-    useEffect(() => {
-        if (!isAuthenticated) {
-            navigate("/login");
-        }
-    }, [isAuthenticated, navigate]);
+    // Redirect to login if not authenticated
+    // useEffect(() => {
+    //     if (!isAuthenticated) {
+    //         navigate("/login");
+    //     }
+    // }, [isAuthenticated, navigate]);
 
     useEffect(() => {
         setSearchParams({ section: activeSection });
-    }, [activeSection, setSearchParams]);
+    }, [activeSection, setSearchParams]); // Update URL parameters when activeSection changes
 
+    // Render content based on the active section
     const renderContent = () => {
         switch (activeSection) {
             case "profile":
@@ -42,6 +45,7 @@ const UserDashboard = () => {
         }
     };
 
+    // Define the sections for the sidebar
     const userSections = [
         { key: "profile", label: "Profile" },
         { key: "bookings", label: "Bookings" },

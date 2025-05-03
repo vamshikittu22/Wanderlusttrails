@@ -10,7 +10,7 @@ header("Access-Control-Allow-Headers: Content-Type");
 
 require_once __DIR__ . "/../inc_logger.php";
 Logger::log("signupuser API Started - Method: {$_SERVER['REQUEST_METHOD']}");
-
+// Check if the request method is OPTIONS (preflight request)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     Logger::log("Handling OPTIONS request for signupuser");
     http_response_code(200);
@@ -18,8 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . "/inc_userModel.php";
-
+require_once __DIR__ . "/inc_userModel.php"; // Include the user model for database operations
+// Include the logger for logging purposes
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $data = json_decode(file_get_contents("php://input"), true);
     Logger::log("POST Data - Email: " . ($data['email'] ?? 'none') . ", FirstName: " . ($data['firstName'] ?? 'none'));
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         echo json_encode(["success" => false, "message" => "First name, last name, email, and password are required"]);
         exit;
     }
-
+// Get the user data from the request
     $firstName = trim($data['firstName']);
     $lastName = trim($data['lastName']);
     $email = filter_var($data['email'], FILTER_SANITIZE_EMAIL);
@@ -53,8 +53,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Instantiate UserModel
-    $userModel = new UserModel();
-    $result = $userModel->registerUser($firstName, $lastName, $email, $password, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip);
+    $userModel = new UserModel(); // Create an instance of the UserModel class to interact with the database
+    $result = $userModel->registerUser($firstName, $lastName, $email, $password, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip); // Call the registerUser method to register the user
 
     Logger::log("signupuser result for email: $email - " . ($result['success'] ? "Success: {$result['message']}" : "Failed: {$result['message']}"));
     http_response_code($result['success'] ? 201 : 400);

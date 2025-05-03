@@ -5,19 +5,19 @@ import $ from "jquery";
 import { toast } from "react-toastify";
 import UserForm from "./../forms/UserForm.jsx";
 
-
+// UserProfile component
 const UserProfile = () => {
   // State to manage user data and form visibility
-  const [user, setUser] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [user, setUser] = useState(null); // Initialize user state to null
+  const [isEditing, setIsEditing] = useState(false); // State to manage editing mode
+  const [isChangingPassword, setIsChangingPassword] = useState(false); // State to manage password change mode
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmNewPassword: "",
     otp: "",
-  });
-  const [otpSent, setOtpSent] = useState(false);
+  }); // State to manage password data
+  const [otpSent, setOtpSent] = useState(false); // State to manage OTP sent status
 
   const [profileData, setProfileData] = useState({
     firstName: "",
@@ -31,7 +31,7 @@ const UserProfile = () => {
     city: "",
     state: "",
     zip: "",
-  });
+  }); // State to manage profile data
 
   // Fetch user profile on mount
   useEffect(() => {
@@ -42,7 +42,7 @@ const UserProfile = () => {
         return;
       }
 
-      $.ajax({
+      $.ajax({ // Fetch user profile data from the server
         url: `http://localhost/WanderlustTrails/Backend/config/UserDashboard/manageUserProfile/viewProfile.php?userID=${userId}`,
         type: "GET",
         dataType: "json",
@@ -72,7 +72,7 @@ const UserProfile = () => {
     };
 
     fetchUserProfile();
-  }, []);
+  }, []); // Fetch user profile data on component mount
 
   // Handle profile update submission
   const handleProfileSubmit = (e, updatedProfileData) => {
@@ -80,7 +80,7 @@ const UserProfile = () => {
     const userId = localStorage.getItem("userId");
 
     console.log("Submitting profile data:", updatedProfileData);
-    $.ajax({
+    $.ajax({ // Send updated profile data to the server
       url: "http://localhost/WanderlustTrails/Backend/config/UserDashboard/manageUserProfile/editProfile.php",
       type: "POST",
       contentType: "application/json",
@@ -89,7 +89,7 @@ const UserProfile = () => {
       success: function (response) {
         console.log("Edit response:", response);
         if (response.success) {
-          setUser({ ...user, ...updatedProfileData });
+          setUser({ ...user, ...updatedProfileData }); // Update user state with new data
           setIsEditing(false);
           toast.success("Profile updated successfully!");
         } else {
@@ -119,7 +119,7 @@ const UserProfile = () => {
       return;
     }
 
-    $.ajax({
+    $.ajax({ // Verify current password
       url: "http://localhost/WanderlustTrails/Backend/config/auth/verifyPassword.php",
       type: "POST",
       contentType: "application/json",
@@ -128,7 +128,7 @@ const UserProfile = () => {
       success: function (verifyResponse) {
         console.log("Verification response:", verifyResponse);
         if (verifyResponse.success) {
-          $.ajax({
+          $.ajax({ // Send OTP to the user's email
             url: "http://localhost/WanderlustTrails/Backend/config/auth/forgotPassword.php",
             type: "POST",
             contentType: "application/json",
@@ -179,6 +179,7 @@ const UserProfile = () => {
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
 
+    // Validate password fields
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
       toast.error("New passwords do not match");
       return;
@@ -192,7 +193,7 @@ const UserProfile = () => {
       return;
     }
 
-    $.ajax({
+    $.ajax({ // Verify OTP and change password
       url: "http://localhost/WanderlustTrails/Backend/config/auth/verifyOtp.php",
       type: "POST",
       contentType: "application/json",
@@ -234,7 +235,8 @@ const UserProfile = () => {
     setPasswordData((prev) => ({ ...prev, [name]: value }));
   };
 
-  if (!user) return <div className="p-8 text-white">Loading...</div>;
+  // Show loading state if user data is not available
+  if (!user) return <div className="p-8 text-white">Loading...</div>; 
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">

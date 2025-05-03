@@ -13,6 +13,7 @@ require_once __DIR__ . "/inc_PackageModel.php";
 
 Logger::log("deletePackage API Started - Method: {$_SERVER['REQUEST_METHOD']}");
 
+// Handle preflight request for CORS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     Logger::log("Handling OPTIONS request for deletePackage");
     http_response_code(200);
@@ -20,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+// Handle POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
     http_response_code(405);
@@ -27,9 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Read the raw input data
 $rawInput = file_get_contents("php://input");
 Logger::log("Raw input: " . ($rawInput ?: "Empty"));
 
+// Check if the input is empty
 $data = json_decode($rawInput, true);
 if ($data === null) {
     Logger::log("JSON decode failed. Possible malformed JSON.");
@@ -38,6 +42,7 @@ if ($data === null) {
     exit;
 }
 
+// Check if package_id is provided and is numeric
 $packageId = $data['id'] ?? '';
 if (empty($packageId) || !is_numeric($packageId)) {
     Logger::log("Missing or invalid package_id: " . json_encode($data));
@@ -46,14 +51,16 @@ if (empty($packageId) || !is_numeric($packageId)) {
     exit;
 }
 
-$packageId = (int)$packageId;
+// Sanitize package_id
+$packageId = (int)$packageId; // Cast to integer
 Logger::log("Deleting package_id: $packageId");
 
-$packageModel = new PackageModel();
-$result = $packageModel->deletePackage($packageId);
+// Include the PackageModel class and create an instance
+$packageModel = new PackageModel(); 
+$result = $packageModel->deletePackage($packageId); // Call the deletePackage method
 
 Logger::log("deletePackage result for package_id: $packageId - " . ($result['success'] ? "Success: {$result['message']}" : "Failed: {$result['message']}"));
-http_response_code($result['success'] ? 200 : 400);
-echo json_encode($result);
+http_response_code($result['success'] ? 200 : 400); // Set the response code based on success or failure
+echo json_encode($result); // Return the result as JSON
 exit;
 ?>

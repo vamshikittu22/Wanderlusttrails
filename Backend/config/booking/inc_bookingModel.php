@@ -4,20 +4,21 @@ require_once __DIR__ . "/../inc_logger.php";
 require_once __DIR__ . "/../inc_validationClass.php";
 
 class BookingModel {
-    private $db;
-    private $input;
-    private $validator;
+    private $db; // Database connection instance
+    private $input;  // Input data for the booking
+    private $validator;  // Instance of the ValidationClass for input validation
 
     public function __construct() {
-        $this->db = new DatabaseClass();
-        $this->validator = new ValidationClass();
-        $this->input = [];
+        $this->db = new DatabaseClass(); // Initialize the database connection
+        $this->validator = new ValidationClass(); // Create an instance of the ValidationClass for input validation
+        $this->input = []; // Initialize input data
     }
 
     public function setInput($input) {
-        $this->input = $input;
-    }
+        $this->input = $input; // Set the input data for the booking
+    } 
 
+    // Calculate the number of nights based on start and end dates
     private function calculateNights($start_date, $end_date) {
         $start = new DateTime($start_date);
         $end = new DateTime($end_date);
@@ -25,56 +26,60 @@ class BookingModel {
         return max(1, $nights); // Minimum 1 day
     }
 
+    
+
+    // Calculate the price based on booking type, number of persons, dates, and other details
     private function calculatePrice($booking_type, $persons, $start_date, $end_date, $flight_details = null, $hotel_details = null, $package_id = null, $itinerary_details = null, $insurance = 'none') {
-        $nights = $this->calculateNights($start_date, $end_date);
+        $nights = $this->calculateNights($start_date, $end_date); // Calculatenights
         if ($booking_type === 'flight_hotel') {
             $base_price = 100;
             $flight_cost = 50;
             $hotel_per_night = 30;
             $class_multipliers = ['economy' => 1, 'premium_economy' => 1.5, 'business' => 2.5, 'first' => 4];
             $star_multipliers = ['3' => 1, '4' => 1.5, '5' => 2];
+            $insurance_costs = ['basic' => 30, 'premium' => 50, 'elite' => 75];
     
+            // Default values for flight and hotel details
             $flight_class = $flight_details['flightClass'] ?? 'economy';
             $hotel_stars = $hotel_details['hotelStars'] ?? '3';
             $car_rental = $hotel_details['car_rental'] ?? false;
             $amenities = $hotel_details['amenities'] ?? ['pool' => false, 'wifi' => false];
     
-            $price = ($base_price + $flight_cost) * $class_multipliers[$flight_class] * $persons;
-            $price += $hotel_per_night * $nights * $star_multipliers[$hotel_stars] * $persons;
-            if ($car_rental) $price += 30 * $nights;
+            // Calculate the price based on flight and hotel details 
+            $price = ($base_price + $flight_cost) * $class_multipliers[$flight_class] * $persons; // Flight price
+            $price += $hotel_per_night * $nights * $star_multipliers[$hotel_stars] * $persons; // Hotel price per night
+            if ($car_rental) $price += 30 * $nights; // Car rental price
             if ($amenities['pool']) $price += 20;
             if ($amenities['wifi']) $price += 10;
-            if ($insurance === 'basic') $price += 30;
-            if ($insurance === 'premium') $price += 50;
-            if ($insurance === 'elite') $price += 75; // Add elite pricing
+            $price += $insurance_costs[$insurance] ?? 0; // Add insurance costs
+            
             return $price;
         } elseif ($booking_type === 'package') {
             if (!$package_id) {
                 Logger::log("calculatePrice: No package_id for package booking");
                 return 0;
             }
-            $packageResult = $this->validator->validatePackage($package_id);
+            $packageResult = $this->validator->validatePackage($package_id); // Validate package_id
             if (!$packageResult['success']) {
                 Logger::log("calculatePrice: " . $packageResult['message']);
                 return 0;
             }
-            $package = $packageResult['data'];
-            $price = $package['price'] * $persons * $nights;
-            if ($insurance === 'basic') $price += 30;
-            if ($insurance === 'premium') $price += 50;
-            if ($insurance === 'elite') $price += 75;
+            $package = $packageResult['data']; // Get package details
+            $price = $package['price'] * $persons * $nights; // Calculate package price
+            $price += $insurance_costs[$insurance] ?? 0; // Add insurance costs
+            
             return $price;
         } elseif ($booking_type === 'itinerary') {
             if (!$package_id || !$itinerary_details) {
                 Logger::log("calculatePrice: Missing package_id or itinerary_details for itinerary booking");
                 return 0;
             }
-            $packageResult = $this->validator->validatePackage($package_id);
+            $packageResult = $this->validator->validatePackage($package_id); // Validate package_id
             if (!$packageResult['success']) {
                 Logger::log("calculatePrice: " . $packageResult['message']);
                 return 0;
             }
-            $package = $packageResult['data'];
+            $package = $packageResult['data']; // Get package details
             $activities = is_string($itinerary_details) ? json_decode($itinerary_details, true) : $itinerary_details;
             $activity_cost = 0;
             if (is_array($activities)) {
@@ -84,98 +89,34 @@ class BookingModel {
                     }
                 }
             }
+            // Calculate the total price for the itinerary booking
             $package_cost = $package['price'] * $persons * $nights;
-            $price = $package_cost + $activity_cost;
-            if ($insurance === 'basic') $price += 30;
-            if ($insurance === 'premium') $price += 50;
-            if ($insurance === 'elite') $price += 75;
+            $price = $package_cost + $activity_cost; // Add package cost and activity cost
+            $price += $insurance_costs[$insurance] ?? 0; // Add insurance costs
+            
             return $price;
         }
         return 0;
-    }
-    // private function calculatePrice($booking_type, $persons, $start_date, $end_date, $flight_details = null, $hotel_details = null, $package_id = null, $itinerary_details = null, $insurance = 'none') {
-    //     $nights = $this->calculateNights($start_date, $end_date);
-    //     if ($booking_type === 'flight_hotel') {
-    //         $base_price = 100;
-    //         $flight_cost = 50;
-    //         $hotel_per_night = 30;
-    //         $class_multipliers = ['economy' => 1, 'premium_economy' => 1.5, 'business' => 2.5, 'first' => 4];
-    //         $star_multipliers = ['3' => 1, '4' => 1.5, '5' => 2];
+    } 
 
-    //         $flight_class = $flight_details['flightClass'] ?? 'economy';
-    //         $hotel_stars = $hotel_details['hotelStars'] ?? '3';
-    //         $car_rental = $hotel_details['car_rental'] ?? false;
-    //         $amenities = $hotel_details['amenities'] ?? ['pool' => false, 'wifi' => false];
-
-    //         $price = ($base_price + $flight_cost) * $class_multipliers[$flight_class] * $persons;
-    //         $price += $hotel_per_night * $nights * $star_multipliers[$hotel_stars] * $persons;
-    //         if ($car_rental) $price += 30 * $nights;
-    //         if ($amenities['pool']) $price += 20;
-    //         if ($amenities['wifi']) $price += 10;
-    //         if ($insurance === 'basic') $price += 30;
-    //         if ($insurance === 'premium') $price += 50;
-    //         return $price;
-    //     } elseif ($booking_type === 'package') {
-    //         if (!$package_id) {
-    //             Logger::log("calculatePrice: No package_id for package booking");
-    //             return 0;
-    //         }
-    //         $packageResult = $this->validator->validatePackage($package_id);
-    //         if (!$packageResult['success']) {
-    //             Logger::log("calculatePrice: " . $packageResult['message']);
-    //             return 0;
-    //         }
-    //         $package = $packageResult['data'];
-    //         $price = $package['price'] * $persons * $nights;
-    //         if ($insurance === 'basic') $price += 30;
-    //         if ($insurance === 'premium') $price += 50;
-    //         return $price;
-    //     } elseif ($booking_type === 'itinerary') {
-    //         if (!$package_id || !$itinerary_details) {
-    //             Logger::log("calculatePrice: Missing package_id or itinerary_details for itinerary booking");
-    //             return 0;
-    //         }
-    //         $packageResult = $this->validator->validatePackage($package_id);
-    //         if (!$packageResult['success']) {
-    //             Logger::log("calculatePrice: " . $packageResult['message']);
-    //             return 0;
-    //         }
-    //         $package = $packageResult['data'];
-    //         $activities = is_string($itinerary_details) ? json_decode($itinerary_details, true) : $itinerary_details;
-    //         $activity_cost = 0;
-    //         if (is_array($activities)) {
-    //             foreach ($activities as $activity) {
-    //                 if (isset($activity['price'])) {
-    //                     $activity_cost += $activity['price'] * $persons;
-    //                 }
-    //             }
-    //         }
-    //         $package_cost = $package['price'] * $persons * $nights;
-    //         $price = $package_cost + $activity_cost;
-    //         if ($insurance === 'basic') $price += 30;
-    //         if ($insurance === 'premium') $price += 50;
-    //         return $price;
-    //     }
-    //     return 0;
-    // }
-
+    // Create a new booking in the database
     public function createBooking($data) {
         Logger::log("createBooking started: " . json_encode($data));
     
-        $requiredFields = ['user_id', 'booking_type', 'start_date', 'persons'];
-        $result = $this->validator->validateRequiredFields($data, $requiredFields);
+        $requiredFields = ['user_id', 'booking_type', 'start_date', 'persons']; // Define required fields for booking creation
+        $result = $this->validator->validateRequiredFields($data, $requiredFields);     // Validate required fields method
         if (!$result['success']) return $result;
     
-        $result = $this->validator->validateUserExists($data['user_id']);
+        $result = $this->validator->validateUserExists($data['user_id']); // Validate user_id
         if (!$result['success']) return $result;
     
-        $result = $this->validator->validateNumeric($data['persons'], 'persons');
+        $result = $this->validator->validateNumeric($data['persons'], 'persons');   // Validate persons
         if (!$result['success']) return $result;
     
-        $result = $this->validator->validateBookingType($data['booking_type']);
+        $result = $this->validator->validateBookingType($data['booking_type']); // Validate booking_type
         if (!$result['success']) return $result;
     
-        $endDateProvided = isset($data['end_date']) && $data['end_date'] !== null;
+        $endDateProvided = isset($data['end_date']) && $data['end_date'] !== null; // Check if end_date is provided
         $result = $this->validator->validateDateRange($data['start_date'], $data['end_date'] ?? null, $data['booking_type']);
         if (!$result['success']) return $result;
     
@@ -187,7 +128,7 @@ class BookingModel {
             if (!isset($data['package_id'])) {
                 return ["success" => false, "message" => "Missing package_id for package booking"];
             }
-            $result = $this->validator->validatePackage($data['package_id']);
+            $result = $this->validator->validatePackage($data['package_id']); // Validate package_id
             if (!$result['success']) return $result;
             $package = $result['data'];
             $package_name = $package['name'];
@@ -195,7 +136,7 @@ class BookingModel {
             if (!isset($data['package_id']) || !isset($data['itinerary_details'])) {
                 return ["success" => false, "message" => "Missing package_id or itinerary_details for itinerary booking"];
             }
-            $result = $this->validator->validatePackage($data['package_id']);
+            $result = $this->validator->validatePackage($data['package_id']); // Validate package_id
             if (!$result['success']) return $result;
             $package = $result['data'];
             $package_name = $package['name'];
@@ -227,8 +168,8 @@ class BookingModel {
         if ($total_price <= 0) {
             return ["success" => false, "message" => "Invalid total price"];
         }
-    
-        $query = "INSERT INTO bookings (user_id, booking_type, package_id, package_name, flight_details, hotel_details, itinerary_details, start_date, end_date, persons, total_price, status, insurance, insurance_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    //Prepare the booking data for insertion
+        $query = "INSERT INTO bookings (user_id, booking_type, package_id, package_name, flight_details, hotel_details, itinerary_details, start_date, end_date, persons, total_price, status, insurance, insurance_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; // Insert booking query
         $types = "isissssssdisis"; // Updated types for insurance (i) and insurance_type (s)
         $params = [
             $data['user_id'],
@@ -245,9 +186,9 @@ class BookingModel {
             'pending',
             $insurance, // 0 or 1
             $insurance_type // 'none', 'basic', 'premium', or 'elite'
-        ];
+        ]; // Parameters for the query
     
-        $result = $this->db->executeQuery($query, $types, ...$params);
+        $result = $this->db->executeQuery($query, $types, ...$params); // Execute the query
         if ($result['success'] && $result['affected_rows'] > 0) {
             return [
                 "success" => true,
@@ -257,11 +198,12 @@ class BookingModel {
         }
         return ["success" => false, "message" => "Failed to create booking"];
     }
-    
+
+    // Update the status of an existing booking
     public function updateBookingStatus($bookingId, $status) {
         Logger::log("updateBookingStatus started for booking_id: $bookingId, status: $status");
     
-        $result = $this->validator->validateNumeric($bookingId, 'booking_id');
+        $result = $this->validator->validateNumeric($bookingId, 'booking_id'); // Validate booking_id
         if (!$result['success']) {
             return $result;
         }
@@ -269,45 +211,44 @@ class BookingModel {
         if (!isset($this->input['user_id'])) {
             return ["success" => false, "message" => "Missing user_id in input"];
         }
-        $userId = (int)$this->input['user_id'];
-        $result = $this->validator->validateUserExists($userId);
+        $userId = (int)$this->input['user_id']; // Cast user_id to integer for processing
+        $result = $this->validator->validateUserExists($userId); // Validate user_id
         if (!$result['success']) {
             return $result;
         }
     
-        $result = $this->validator->validateStatus($status);
+        $result = $this->validator->validateStatus($status);    // Validate status
         if (!$result['success']) {
             return $result;
         }
     
-        $this->db->beginTransaction();
-    
+        $this->db->beginTransaction(); // Start a transaction for the update operation
         try {
-            $checkQuery = "SELECT status FROM bookings WHERE id = ? FOR UPDATE";
-            $checkResult = $this->db->fetchQuery($checkQuery, "i", $bookingId);
+            $checkQuery = "SELECT status FROM bookings WHERE id = ? FOR UPDATE"; // Query to check current status of booking
+            $checkResult = $this->db->fetchQuery($checkQuery, "i", $bookingId); // Execute the query
             if (empty($checkResult)) {
-                $this->db->rollback();
+                $this->db->rollback(); // Rollback the transaction if booking not found
                 return ["success" => false, "message" => "Booking not found"];
             }
             $currentStatus = $checkResult[0]['status'];
             if ($currentStatus === $status) {
-                $this->db->commit();
+                $this->db->commit(); // Commit the transaction if the status is unchanged
                 return ["success" => true, "message" => "Status unchanged"];
             }
     
             if ($status === 'confirmed') {
-                $query = "SELECT booking_type, persons, start_date, end_date, total_price, pending_changes, flight_details, hotel_details, itinerary_details, package_id, insurance, insurance_type FROM bookings WHERE id = ? FOR UPDATE";
-                $result = $this->db->fetchQuery($query, "i", $bookingId);
+                $query = "SELECT booking_type, persons, start_date, end_date, total_price, pending_changes, flight_details, hotel_details, itinerary_details, package_id, insurance, insurance_type FROM bookings WHERE id = ? FOR UPDATE";     // Query to fetch booking details for confirmation
+                $result = $this->db->fetchQuery($query, "i", $bookingId); // Execute the query
                 if (empty($result)) {
-                    $this->db->rollback();
+                    $this->db->rollback(); // Rollback the transaction if booking not found
                     return ["success" => false, "message" => "Booking not found"];
                 }
-                $booking = $result[0];
-                $dbPendingChanges = $booking['pending_changes'] ? json_decode($booking['pending_changes'], true) : [];
-                $inputPendingChanges = $this->input['pending_changes'] ?? [];
+                $booking = $result[0]; // Get the booking details
+                $dbPendingChanges = $booking['pending_changes'] ? json_decode($booking['pending_changes'], true) : []; // Decode pending changes from JSON
+                $inputPendingChanges = $this->input['pending_changes'] ?? []; // Get pending changes from input
     
                 if (!empty($inputPendingChanges) || !empty($dbPendingChanges)) {
-                    $mergedPendingChanges = array_merge($dbPendingChanges, $inputPendingChanges);
+                    $mergedPendingChanges = array_merge($dbPendingChanges, $inputPendingChanges); // Merge pending changes
     
                     $newPersons = $mergedPendingChanges['persons'] ?? $booking['persons'];
                     $newStartDate = $mergedPendingChanges['start_date'] ?? $booking['start_date'];
@@ -319,11 +260,8 @@ class BookingModel {
                     $newInsurance = $mergedPendingChanges['insurance_type'] ?? $booking['insurance_type'];
                     $hasInsurance = isset($mergedPendingChanges['insurance']) ? ($mergedPendingChanges['insurance'] !== '0' ? 1 : 0) : $booking['insurance'];
     
-                    if (isset($mergedPendingChanges['itinerary_details'])) {
-                        $newItineraryDetails = $mergedPendingChanges['itinerary_details'];
-                    }
-    
-                    foreach ($mergedPendingChanges as $key => $value) {
+                    // Iterate through pending changes and update flight and hotel details
+                    foreach ($mergedPendingChanges as $key => $value) { 
                         if (strpos($key, 'flight_details.') === 0) {
                             $flightKey = substr($key, 14);
                             $newFlightDetails[$flightKey] = $value;
@@ -345,20 +283,21 @@ class BookingModel {
                         $newFlightDetails,
                         $newHotelDetails,
                         $newPackageId,
-                        json_encode($newItineraryDetails),
+                        $newItineraryDetails,
                         $newInsurance
-                    );
+                    ); // Calculate the new price based on updated details
     
                     if ($newPrice <= 0) {
                         $this->db->rollback();
                         return ["success" => false, "message" => "Invalid total price calculated"];
                     }
     
-                    $updateFields = [];
-                    $types = "";
-                    $params = [];
+                    $updateFields = [];            // Prepare the fields to be updated
+                    $types = "";                   // Initialize types for prepared statement
+                    $params = [];              // Initialize parameters for prepared statement
+                    // Check which fields need to be updated based on pending changes
                     if (isset($mergedPendingChanges['start_date'])) {
-                        $updateFields[] = "start_date = ?";
+                        $updateFields[] = "start_date = ?"; 
                         $types .= "s";
                         $params[] = $newStartDate;
                     }
@@ -386,6 +325,7 @@ class BookingModel {
                         $params[] = $newInsurance;
                     }
     
+                    // Check if flight and hotel details are provided in pending changes
                     $updateFields[] = "flight_details = ?";
                     $types .= "s";
                     $params[] = json_encode($newFlightDetails);
@@ -403,49 +343,50 @@ class BookingModel {
                     $params[] = $status;
                     $updateFields[] = "pending_changes = NULL";
     
-                    $query = "UPDATE bookings SET " . implode(", ", $updateFields) . " WHERE id = ?";
-                    $types .= "i";
-                    $params[] = $bookingId;
+                    $query = "UPDATE bookings SET " . implode(", ", $updateFields) . " WHERE id = ?"; // Prepare the update query
+                    $types .= "i"; // Append the type for booking ID
+                    $params[] = $bookingId; // Append booking ID to parameters
     
-                    $result = $this->db->executeQuery($query, $types, ...$params);
+                    $result = $this->db->executeQuery($query, $types, ...$params); // Execute the update query
                 } else {
-                    $query = "UPDATE bookings SET status = ? WHERE id = ?";
-                    $result = $this->db->executeQuery($query, "si", $status, $bookingId);
+                    $query = "UPDATE bookings SET status = ? WHERE id = ?"; // Update status only if no changes are pending
+                    $result = $this->db->executeQuery($query, "si", $status, $bookingId); // Update status only if no changes are pending
                 }
     
                 if ($result['success'] && $result['affected_rows'] > 0) {
-                    $this->db->commit();
+                    $this->db->commit(); // Commit the transaction if update is successful
                     return ["success" => true, "message" => "Booking status updated successfully"];
                 }
-                $this->db->rollback();
+                $this->db->rollback(); // Rollback the transaction if update fails
                 return ["success" => false, "message" => "Failed to update booking status"];
             } else {
                 $query = "UPDATE bookings SET status = ? WHERE id = ?";
-                $result = $this->db->executeQuery($query, "si", $status, $bookingId);
+                $result = $this->db->executeQuery($query, "si", $status, $bookingId); // Update status only if no changes are pending
     
                 if ($result['success'] && $result['affected_rows'] > 0) {
-                    $this->db->commit();
+                    $this->db->commit(); // Commit the transaction if update is successful
                     return ["success" => true, "message" => "Booking status updated successfully"];
                 }
-                $this->db->rollback();
+                $this->db->rollback(); // Rollback the transaction if update fails
                 return ["success" => false, "message" => "Failed to update booking status"];
             }
         } catch (Exception $e) {
-            $this->db->rollback();
+            $this->db->rollback(); // Rollback the transaction in case of an exception
             return ["success" => false, "message" => "Error updating booking status: " . $e->getMessage()];
         }
     }
 
+    // Get bookings for a specific user
     public function getUserBookings($userId) {
         $result = $this->validator->validateNumeric($userId, 'user_id');
         if (!$result['success']) return $result;
 
-        $result = $this->validator->validateUserExists($userId);
+        $result = $this->validator->validateUserExists($userId); // Validate user_id
         if (!$result['success']) return $result;
-
-        $query = "SELECT id, booking_type, package_id, package_name, flight_details, hotel_details, itinerary_details, start_date, end_date, persons, total_price, status, created_at, pending_changes, insurance, insurance_type FROM bookings WHERE user_id = ?";
-        $bookings = $this->db->fetchQuery($query, "i", $userId);
-
+//Prepare the query to fetch user bookings
+        $query = "SELECT id, booking_type, package_id, package_name, flight_details, hotel_details, itinerary_details, start_date, end_date, persons, total_price, status, created_at, pending_changes, insurance, insurance_type FROM bookings WHERE user_id = ?"; // Query to fetch user bookings
+        $bookings = $this->db->fetchQuery($query, "i", $userId); // Execute the query
+// DECODE JSON fields for each booking
         foreach ($bookings as &$booking) {
             $booking['flight_details'] = $booking['flight_details'] ? json_decode($booking['flight_details'], true) : null;
             $booking['hotel_details'] = $booking['hotel_details'] ? json_decode($booking['hotel_details'], true) : null;
@@ -455,14 +396,16 @@ class BookingModel {
 
         return ["success" => true, "data" => $bookings];
     }
-
+// Get all bookings for admin view
     public function getAllBookings() {
+        //Prepare the query to fetch all bookings with user details
         $query = "SELECT b.id, b.user_id, u.firstName, u.lastName, u.role, b.booking_type, b.package_id, b.package_name, b.flight_details, b.hotel_details, b.itinerary_details, b.start_date, b.end_date, b.persons, b.total_price, b.status, b.created_at, b.pending_changes, b.insurance, b.insurance_type 
                   FROM bookings b 
                   JOIN users u ON b.user_id = u.id  
-                  ORDER BY b.id ASC";
-        $bookings = $this->db->fetchQuery($query, "");
+                  ORDER BY b.id ASC"; // Query to fetch all bookings with user details
+        $bookings = $this->db->fetchQuery($query, ""); // Execute the query to fetch all bookings
 
+        // Decode JSON fields for each booking
         foreach ($bookings as &$booking) {
             $booking['flight_details'] = $booking['flight_details'] ? json_decode($booking['flight_details'], true) : null;
             $booking['hotel_details'] = $booking['hotel_details'] ? json_decode($booking['hotel_details'], true) : null;
@@ -472,32 +415,32 @@ class BookingModel {
 
         return ["success" => true, "data" => $bookings];
     }
-
+// Edit an existing booking
     public function editBooking($bookingId, $userId, $changes) {
-        $result = $this->validator->validateNumeric($bookingId, 'booking_id');
+        $result = $this->validator->validateNumeric($bookingId, 'booking_id'); // Validate booking_id
         if (!$result['success']) return $result;
 
-        $result = $this->validator->validateUserExists($userId);
+        $result = $this->validator->validateUserExists($userId); // Validate user_id
         if (!$result['success']) return $result;
 
-        $result = $this->validator->validateBookingExists($bookingId, $userId);
+        $result = $this->validator->validateBookingExists($bookingId, $userId); // Validate booking exists
         if (!$result['success']) return $result;
 
         if (isset($changes['package_id'])) {
-            $result = $this->validator->validatePackage($changes['package_id']);
+            $result = $this->validator->validatePackage($changes['package_id']); // Validate package_id
             if (!$result['success']) return $result;
-            $package = $result['data'];
-            $changes['package_name'] = $package['name'];
+            $package = $result['data']; // Get package details
+            $changes['package_name'] = $package['name']; // Add package name to changes
         }
-
+            //Prepare the query to update booking with pending changes
         $query = "UPDATE bookings SET pending_changes = ?, status = 'pending' 
-                  WHERE id = ? AND user_id = ? AND status != 'canceled'";
-        $result = $this->db->executeQuery($query, "sii", json_encode($changes), $bookingId, $userId);
+                  WHERE id = ? AND user_id = ? AND status != 'canceled'"; // Prepare the query to update booking with pending changes
+        $result = $this->db->executeQuery($query, "sii", json_encode($changes), $bookingId, $userId); // Execute the query to update booking
         return $result['success'] && $result['affected_rows'] > 0 
             ? ["success" => true, "message" => "Edit request submitted and awaiting admin confirmation"]
             : ["success" => false, "message" => "Booking not found or cannot be edited"];
     }
-
+// Cancel an existing booking
     public function cancelBooking($bookingId, $userId) {
         $result = $this->validator->validateNumeric($bookingId, 'booking_id');
         if (!$result['success']) return $result;
@@ -507,17 +450,17 @@ class BookingModel {
 
         $result = $this->validator->validateBookingExists($bookingId, $userId);
         if (!$result['success']) return $result;
-
-        $query = "UPDATE bookings SET status = 'canceled' WHERE id = ? AND user_id = ? AND status != 'canceled'";
-        $result = $this->db->executeQuery($query, "ii", $bookingId, $userId);
+  // Prepare the query to cancel booking
+        $query = "UPDATE bookings SET status = 'canceled' WHERE id = ? AND user_id = ? AND status != 'canceled'"; // Prepare the query to cancel booking 
+        $result = $this->db->executeQuery($query, "ii", $bookingId, $userId); // Execute the query to cancel booking
         return $result['success'] && $result['affected_rows'] > 0 
             ? ["success" => true, "message" => "Booking canceled successfully"] 
             : ["success" => false, "message" => "Booking not found or already canceled"];
     }
-
+// Get booking details by booking ID
     public function getBookingById($booking_id) {
-        $query = "SELECT * FROM bookings WHERE id = ?";
-        $result = $this->db->fetchQuery($query, "i", $booking_id);
+        $query = "SELECT * FROM bookings WHERE id = ?"; // Prepare the query to fetch booking details by ID
+        $result = $this->db->fetchQuery($query, "i", $booking_id); // Execute the query to fetch booking details
         if ($result && count($result) > 0) {
             $booking = $result[0];
             $booking['flight_details'] = $booking['flight_details'] ? json_decode($booking['flight_details'], true) : null;

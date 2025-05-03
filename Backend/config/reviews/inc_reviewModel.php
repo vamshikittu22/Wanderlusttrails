@@ -5,12 +5,13 @@
 require_once __DIR__ . "/../inc_databaseClass.php";
 require_once __DIR__ . "/../inc_logger.php";
 
+// ReviewModel class 
 class ReviewModel {
-    private $db;
+    private $db; // Database connection
 
-    public function __construct() {
+    public function __construct() { // Constructor to initialize the database connection
         Logger::log("ReviewModel instantiated");
-        $this->db = new DatabaseClass();
+        $this->db = new DatabaseClass(); // Initialize the database connection
     }
 
     // Write a new review
@@ -33,8 +34,8 @@ class ReviewModel {
         }
 
         // Check if booking exists and belongs to user
-        $query = "SELECT id FROM bookings WHERE id = ? AND user_id = ? AND status = 'confirmed'";
-        $booking = $this->db->fetchQuery($query, "ii", $bookingId, $userId);
+        $query = "SELECT id FROM bookings WHERE id = ? AND user_id = ? AND status = 'confirmed'"; // Check for confirmed bookings only
+        $booking = $this->db->fetchQuery($query, "ii", $bookingId, $userId); // Fetch booking details
         Logger::log("Booking check result: " . json_encode($booking));
         if (empty($booking)) {
             Logger::log("Booking not found or not confirmed for bookingId: $bookingId, userId: $userId");
@@ -42,17 +43,18 @@ class ReviewModel {
         }
 
         // Check if review already exists
-        $query = "SELECT id FROM reviews WHERE bookingId = ? AND userId = ?";
-        $existing = $this->db->fetchQuery($query, "ii", $bookingId, $userId);
-        Logger::log("Existing review check: " . json_encode($existing));
+        $query = "SELECT id FROM reviews WHERE bookingId = ? AND userId = ?"; // query to check existing reviews
+        $existing = $this->db->fetchQuery($query, "ii", $bookingId, $userId); // Fetch existing reviews
+        Logger::log("Existing review check: " . json_encode($existing)); 
         if (!empty($existing)) {
             Logger::log("Review already exists for bookingId: $bookingId, userId: $userId");
             return ["success" => false, "message" => "Review already exists for this booking"];
         }
 
-        $query = "INSERT INTO reviews (userId, bookingId, rating, title, review) VALUES (?, ?, ?, ?, ?)";
-        $types = "iiiss";
-        $result = $this->db->executeQuery($query, $types, $userId, $bookingId, $rating, $title, $review);
+        //prepare the insert query
+        $query = "INSERT INTO reviews (userId, bookingId, rating, title, review) VALUES (?, ?, ?, ?, ?)"; // Insert query for new review
+        $types = "iiiss"; // Define the types for prepared statement
+        $result = $this->db->executeQuery($query, $types, $userId, $bookingId, $rating, $title, $review); // Execute the query
 
         Logger::log("writeReview query result: " . json_encode([
             'success' => $result['success'],
@@ -61,8 +63,8 @@ class ReviewModel {
         ]));
 
         return $result['success'] && $result['affected_rows'] > 0
-            ? ["success" => true, "message" => "Review submitted successfully"]
-            : ["success" => false, "message" => "Failed to submit review"];
+            ? ["success" => true, "message" => "Review submitted successfully"]   // Success response
+            : ["success" => false, "message" => "Failed to submit review"]; // Failure response
     }
 
     // Edit an existing review
@@ -85,17 +87,18 @@ class ReviewModel {
         }
 
         // Check if review exists and belongs to user
-        $query = "SELECT id FROM reviews WHERE id = ? AND userId = ?";
-        $existing = $this->db->fetchQuery($query, "ii", $reviewId, $userId);
-        Logger::log("Existing review check: " . json_encode($existing));
+        $query = "SELECT id FROM reviews WHERE id = ? AND userId = ?"; // query to check existing reviews
+        $existing = $this->db->fetchQuery($query, "ii", $reviewId, $userId); // Fetch existing reviews
+        Logger::log("Existing review check: " . json_encode($existing));    
         if (empty($existing)) {
             Logger::log("Review not found for reviewId: $reviewId, userId: $userId");
             return ["success" => false, "message" => "Review not found or you do not have permission to edit it"];
         }
 
-        $query = "UPDATE reviews SET rating = ?, title = ?, review = ?, createdAt = NOW() WHERE id = ? AND userId = ?";
-        $types = "issii";
-        $result = $this->db->executeQuery($query, $types, $rating, $title, $review, $reviewId, $userId);
+        //prepare the update query
+        $query = "UPDATE reviews SET rating = ?, title = ?, review = ?, createdAt = NOW() WHERE id = ? AND userId = ?"; // Update query for existing review
+        $types = "issii"; // Define the types for prepared statement
+        $result = $this->db->executeQuery($query, $types, $rating, $title, $review, $reviewId, $userId); // Execute the query
 
         Logger::log("editReview query result: " . json_encode([
             'success' => $result['success'],
@@ -104,8 +107,8 @@ class ReviewModel {
         ]));
 
         return $result['success'] && $result['affected_rows'] > 0
-            ? ["success" => true, "message" => "Review updated successfully"]
-            : ["success" => false, "message" => "Failed to update review"];
+            ? ["success" => true, "message" => "Review updated successfully"] // Success response
+            : ["success" => false, "message" => "Failed to update review"];     // Failure response
     }
 
    
@@ -125,8 +128,8 @@ public function addComment($userId, $reviewId, $comment, $parentId = null) {
     }
 
     // Check if the user is an admin
-    $query = "SELECT role FROM users WHERE id = ?";
-    $user = $this->db->fetchQuery($query, "i", $userId);
+    $query = "SELECT role FROM users WHERE id = ?"; // query to check user role
+    $user = $this->db->fetchQuery($query, "i", $userId); // Fetch user details
     if (empty($user)) {
         Logger::log("User not found for userId: $userId");
         return ["success" => false, "message" => "User not found"];
@@ -140,8 +143,8 @@ public function addComment($userId, $reviewId, $comment, $parentId = null) {
     }
 
     // Check if review exists
-    $query = "SELECT id FROM reviews WHERE id = ?";
-    $review = $this->db->fetchQuery($query, "i", $reviewId);
+    $query = "SELECT id FROM reviews WHERE id = ?"; // query to check existing reviews
+    $review = $this->db->fetchQuery($query, "i", $reviewId); // Fetch review details
     Logger::log("Review check result: " . json_encode($review));
     if (empty($review)) {
         Logger::log("Review not found for reviewId: $reviewId");
@@ -149,8 +152,8 @@ public function addComment($userId, $reviewId, $comment, $parentId = null) {
     }
 
     // Check if user exists (already checked above, but keeping for consistency)
-    $query = "SELECT firstName, lastName FROM users WHERE id = ?";
-    $user = $this->db->fetchQuery($query, "i", $userId);
+    $query = "SELECT firstName, lastName FROM users WHERE id = ?"; // query to check user details
+    $user = $this->db->fetchQuery($query, "i", $userId); // Fetch user details
     Logger::log("User check result: " . json_encode($user));
     if (empty($user)) {
         Logger::log("User not found for userId: $userId");
@@ -159,9 +162,9 @@ public function addComment($userId, $reviewId, $comment, $parentId = null) {
 
     // Check if parent comment exists (if parentId is provided)
     if ($parentId !== null) {
-        $query = "SELECT id FROM comments WHERE id = ? AND review_id = ?";
-        $parent = $this->db->fetchQuery($query, "ii", $parentId, $reviewId);
-        Logger::log("Parent comment check result: " . json_encode($parent));
+        $query = "SELECT id FROM comments WHERE id = ? AND review_id = ?"; // query to check existing comments
+        $parent = $this->db->fetchQuery($query, "ii", $parentId, $reviewId); // Fetch parent comment details
+        Logger::log("Parent comment check result: " . json_encode($parent)); 
         if (empty($parent)) {
             Logger::log("Parent comment not found for parentId: $parentId, reviewId: $reviewId");
             return ["success" => false, "message" => "Parent comment not found"];
@@ -170,15 +173,15 @@ public function addComment($userId, $reviewId, $comment, $parentId = null) {
 
     // Insert the comment
     if ($parentId === null) {
-        $query = "INSERT INTO comments (review_id, user_id, comment) VALUES (?, ?, ?)";
-        $types = "iis";
-        $params = [$reviewId, $userId, $comment];
+        $query = "INSERT INTO comments (review_id, user_id, comment) VALUES (?, ?, ?)"; // Insert query for new comment
+        $types = "iis"; // Define the types for prepared statement
+        $params = [$reviewId, $userId, $comment]; // Parameters for the query
     } else {
-        $query = "INSERT INTO comments (review_id, user_id, comment, parent_id) VALUES (?, ?, ?, ?)";
-        $types = "iisi";
-        $params = [$reviewId, $userId, $comment, $parentId];
+        $query = "INSERT INTO comments (review_id, user_id, comment, parent_id) VALUES (?, ?, ?, ?)"; // Insert query for reply to a comment
+        $types = "iisi"; // Define the types for prepared statement
+        $params = [$reviewId, $userId, $comment, $parentId]; // Parameters for the query
     }
-    $result = $this->db->executeQuery($query, $types, ...$params);
+    $result = $this->db->executeQuery($query, $types, ...$params); // Execute the query
 
     Logger::log("addComment query result: " . json_encode([
         'success' => $result['success'],
@@ -192,16 +195,16 @@ public function addComment($userId, $reviewId, $comment, $parentId = null) {
         $query = "SELECT c.id, c.user_id, c.comment, c.created_at, u.firstName, u.lastName 
                   FROM comments c 
                   JOIN users u ON c.user_id = u.id 
-                  WHERE c.id = ?";
-        $newComment = $this->db->fetchQuery($query, "i", $commentId);
+                  WHERE c.id = ?"; // query to fetch the new comment
+        $newComment = $this->db->fetchQuery($query, "i", $commentId); // Fetch new comment details
         Logger::log("New comment fetched: " . json_encode($newComment));
         return [
             "success" => true,
             "message" => "Comment added successfully",
             "comment" => $newComment[0] ?? []
-        ];
+        ]; // Return the new comment details
     }
-    return ["success" => false, "message" => "Failed to add comment"];
+    return ["success" => false, "message" => "Failed to add comment"]; // Failure response
 }
     // Get all comments for a review (including nested replies)
     public function getComments($reviewId) {
@@ -217,8 +220,8 @@ public function addComment($userId, $reviewId, $comment, $parentId = null) {
                          u.firstName, u.lastName 
                   FROM comments c 
                   JOIN users u ON c.user_id = u.id 
-                  WHERE c.review_id = ?";
-        $comments = $this->db->fetchQuery($query, "i", $reviewId);
+                  WHERE c.review_id = ?"; // query to fetch comments
+        $comments = $this->db->fetchQuery($query, "i", $reviewId); // Fetch comments for the review
 
         Logger::log("getComments query result: " . json_encode([
             'comment_count' => count($comments),
@@ -226,16 +229,17 @@ public function addComment($userId, $reviewId, $comment, $parentId = null) {
         ]));
 
         // Build a nested structure for comments and replies
-        $commentTree = [];
-        $commentMap = [];
-
-        // First pass: Create a map of comments by ID
+        $commentTree = []; // Initialize the comment tree
+        $commentMap = []; // Initialize the comment map
+ 
+        // Create a map of comments by their ID
         foreach ($comments as $comment) {
             $comment['replies'] = [];
             $commentMap[$comment['id']] = $comment;
         }
 
-        // Second pass: Build the tree by assigning replies to their parent comments
+        
+        // Loop through the comments and assign replies to their parent comment
         foreach ($commentMap as $comment) {
             if ($comment['parent_id'] === null) {
                 $commentTree[] = $comment;
@@ -246,7 +250,7 @@ public function addComment($userId, $reviewId, $comment, $parentId = null) {
             }
         }
 
-        return ["success" => true, "data" => $commentTree];
+        return ["success" => true, "data" => $commentTree]; // Return the nested comment structure
     }
 
     // Get all reviews for a user with booking details
@@ -263,9 +267,9 @@ public function addComment($userId, $reviewId, $comment, $parentId = null) {
                          b.flight_details, b.hotel_details 
                   FROM reviews r 
                   JOIN bookings b ON r.bookingId = b.id 
-                  WHERE r.userId = ?";
-        $types = "i";
-        $reviews = $this->db->fetchQuery($query, $types, $userId);
+                  WHERE r.userId = ?";  // query to fetch user reviews
+        $types = "i"; // Define the types for prepared statement
+        $reviews = $this->db->fetchQuery($query, $types, $userId); // Fetch user reviews
 
         Logger::log("getUserReviews query result: " . json_encode([
             'review_count' => count($reviews),
@@ -285,14 +289,15 @@ public function addComment($userId, $reviewId, $comment, $parentId = null) {
                          b.flight_details, b.hotel_details 
                   FROM reviews r 
                   JOIN users u ON r.userId = u.id 
-                  JOIN bookings b ON r.bookingId = b.id";
-        $reviews = $this->db->query($query);
+                  JOIN bookings b ON r.bookingId = b.id"; // query to fetch all reviews
+        $reviews = $this->db->query($query); // Execute the query
 
         if (isset($reviews['success']) && !$reviews['success']) {
             Logger::log("Error fetching all reviews: " . $reviews['message']);
             return ["success" => false, "message" => $reviews['message']];
         }
 
+        // Decode JSON fields for flight and hotel details
         foreach ($reviews as &$review) {
             if ($review['flight_details']) {
                 $review['flight_details'] = json_decode($review['flight_details'], true);
@@ -307,7 +312,7 @@ public function addComment($userId, $reviewId, $comment, $parentId = null) {
             'sample' => $reviews ? array_slice($reviews, 0, 1) : []
         ]));
 
-        return ["success" => true, "data" => $reviews];
+        return ["success" => true, "data" => $reviews]; // Return all reviews
     }
 }
 ?>

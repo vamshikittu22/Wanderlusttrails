@@ -50,8 +50,9 @@ const SearchBar = ({ searchQuery, setSearchQuery, setCurrentPage }) => {
     useEffect(() => {
         setSearchQuery(debouncedSearchQuery);
         setCurrentPage(1);
-    }, [debouncedSearchQuery, setSearchQuery, setCurrentPage]);
+    }, [debouncedSearchQuery, setSearchQuery, setCurrentPage]); // Update search query and reset page when input changes
 
+    //handleSearchChange function to handle search input changes
     const handleSearchChange = (e) => {
         setInputValue(e.target.value);
     };
@@ -89,30 +90,38 @@ const BookingList = ({ currentBookings, paymentDetails, paymentLoading, handleVi
 
 // Main UserViewBookings component
 const UserViewBookings = () => {
-    const navigate = useNavigate();
-    const { user, isAuthenticated } = useUser();
-    const [selectedBooking, setSelectedBooking] = useState(null);
-    const [isViewPopupOpen, setIsViewPopupOpen] = useState(false);
-    const [editBooking, setEditBooking] = useState(null);
-    const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
-    const [cancelBookingId, setCancelBookingId] = useState(null);
-    const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [filteredBookingsWithSearch, setFilteredBookingsWithSearch] = useState([]);
-    const itemsPerPage = 6;
+    const navigate = useNavigate(); // Use useNavigate to navigate
+    const { user, isAuthenticated } = useUser(); // Get user and authentication status from context
+    const [selectedBooking, setSelectedBooking] = useState(null); // State to manage selected booking for viewing
+    const [isViewPopupOpen, setIsViewPopupOpen] = useState(false);  // State to manage view ticket popup
+    const [editBooking, setEditBooking] = useState(null); // State to manage booking for editing
+    const [isEditPopupOpen, setIsEditPopupOpen] = useState(false); // State to manage edit booking popup
+    const [cancelBookingId, setCancelBookingId] = useState(null); // State to manage booking ID for cancellation
+    const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false); // State to manage cancel booking popup
+    const [searchQuery, setSearchQuery] = useState(''); // State to manage search query
+    const [currentPage, setCurrentPage] = useState(1); // State to manage current page for pagination
+    const [filteredBookingsWithSearch, setFilteredBookingsWithSearch] = useState([]); // State to manage filtered bookings with search
+    const itemsPerPage = 6; // Number of items to display per page
 
     useEffect(() => {
         if (!isAuthenticated || !user?.id) {
             toast.error('Please log in to view your bookings.');
             navigate('/login');
         }
-    }, [isAuthenticated, user, navigate]);
+    }, [isAuthenticated, user, navigate]); // Redirect to login if not authenticated
 
     if (!isAuthenticated || !user?.id) return null;
 
-    const { bookings, paymentDetails, loading, paymentLoading, editBooking: handleEditSubmit, cancelBooking: handleCancelBooking } = useBookings(user, isAuthenticated);
+    const { 
+        bookings, 
+        paymentDetails, 
+        loading, 
+        paymentLoading, 
+        editBooking: handleEditSubmit, 
+        cancelBooking: handleCancelBooking 
+    } = useBookings(user, isAuthenticated); // Custom hook to fetch bookings and payment details
 
+    // Function to get booking name based on booking type
     const getBookingName = (booking) => {
         if (booking.booking_type === 'package') return booking.package_name || 'Unnamed Package';
         if (booking.booking_type === 'itinerary') return booking.package_name || 'Custom Itinerary';
@@ -122,7 +131,8 @@ const UserViewBookings = () => {
         return `Flight from ${from} to ${to}, Hotel: ${hotelName}`;
     };
 
-    const searchedBookings = useMemo(() => {
+//Memoized function to filter bookings based on search query
+    const searchedBookings = useMemo(() => { 
         return bookings.filter((booking) => {
             const searchLower = searchQuery.toLowerCase();
             const bookingIdMatch = booking.id.toString().includes(searchLower);
@@ -131,10 +141,11 @@ const UserViewBookings = () => {
                 ? booking.package_name.toLowerCase().includes(searchLower)
                 : false;
             const transactionIdMatch = paymentDetails[booking.id]?.transaction_id?.toLowerCase().includes(searchLower) || false;
-            return bookingIdMatch || bookingNameMatch || packageNameMatch || transactionIdMatch;
-        });
-    }, [bookings, searchQuery, paymentDetails]);
+            return bookingIdMatch || bookingNameMatch || packageNameMatch || transactionIdMatch; // return true if any of the conditions match
+        }); //
+    }, [bookings, searchQuery, paymentDetails]); 
 
+    //filteroptions and sortOptions for filter and sort functionality
     const filterOptions = useMemo(() => [
         { key: 'status-all', label: 'All', filterFunction: () => true },
         { key: 'status-pending', label: 'Pending', filterFunction: booking => booking.status === 'pending' },
@@ -192,6 +203,7 @@ const UserViewBookings = () => {
         setSelectedBooking(null);
     };
     
+    //handleCloseEditPopup function to handle closing edit booking popup
     const handleCloseEditPopup = () => {
         setIsEditPopupOpen(false);
         setEditBooking(null);

@@ -4,38 +4,39 @@ import mockData from '../../data/mockData.js';
 import FormWrapper from './FormWrapper.jsx';
 import { Link } from 'react-router-dom'; // Import Link for navigation
 
+// ItineraryForm component
 const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, error }) => {
-  const [packageId, setPackageId] = useState(initialData?.package_id || '');
-  const [selectedPackage, setSelectedPackage] = useState(initialData?.selectedPackage || null);
-  const [activities, setActivities] = useState(initialData?.itinerary_details || []);
-  const [startDate, setStartDate] = useState(
+  const [packageId, setPackageId] = useState(initialData?.package_id || ''); // state for package ID
+  const [selectedPackage, setSelectedPackage] = useState(initialData?.selectedPackage || null); // state for selected package
+  const [activities, setActivities] = useState(initialData?.itinerary_details || []); // state for selected activities
+  const [startDate, setStartDate] = useState( 
     initialData?.start_date instanceof Date
       ? initialData.start_date.toISOString().split('T')[0]
       : initialData?.start_date || ''
-  );
+  ); // state for start date
   const [endDate, setEndDate] = useState(
     initialData?.end_date instanceof Date
       ? initialData.end_date.toISOString().split('T')[0]
       : initialData?.end_date || ''
-  );
-  const [persons, setPersons] = useState(initialData?.persons || 1);
-  const [insurance, setInsurance] = useState(initialData?.insurance || 'none');
-  const [totalPrice, setTotalPrice] = useState(initialData?.totalPrice || 0);
+  ); // state for end date
+  const [persons, setPersons] = useState(initialData?.persons || 1); // state for number of persons
+  const [insurance, setInsurance] = useState(initialData?.insurance || 'none'); // state for insurance type
+  const [totalPrice, setTotalPrice] = useState(initialData?.totalPrice || 0); // state for total price
 
-  const today = new Date();
-  const minStartDate = new Date(today);
-  minStartDate.setDate(today.getDate() + 7);
-  const minStartDateString = minStartDate.toISOString().split('T')[0];
-  const [minEndDate, setMinEndDate] = useState('');
+  const today = new Date(); // Get today's date
+  const minStartDate = new Date(today); // Create a new date object for minStartDate
+  minStartDate.setDate(today.getDate() + 7); // Set minStartDate to 7 days from today 
+  const minStartDateString = minStartDate.toISOString().split('T')[0]; // Format minStartDate to YYYY-MM-DD
+  const [minEndDate, setMinEndDate] = useState(''); // state for minimum end date
 
-  const availableActivities = mockData.itinerary.activities;
+  const availableActivities = mockData.itinerary.activities; // Mock data for available activities
 
   useEffect(() => {
     console.log('ItineraryForm initialData:', initialData);
     console.log('Initial selectedPackage:', selectedPackage);
     console.log('Initial packageId:', packageId);
     console.log('Packages available:', packages);
-  }, [initialData, packages]);
+  }, [initialData, packages]); // Log initial data and packages for debugging
 
   useEffect(() => {
     if (packages.length > 0) {
@@ -54,8 +55,8 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
         console.log('Setting default package:', pkg);
       }
     }
-  }, [packages, packageId, selectedPackage]);
-
+  }, [packages, packageId, selectedPackage]); // Set default package if none is selected
+ 
   useEffect(() => {
     if (startDate) {
       const start = new Date(startDate);
@@ -67,8 +68,8 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
       if (!endDate || new Date(endDate) < new Date(newMinEndString)) {
         setEndDate(newMinEndString);
       }
-    }
-  }, [startDate]);
+    } 
+  }, [startDate]); // Update minimum end date based on start date
 
   const calculateTotalPrice = () => {
     const basePrice = selectedPackage ? parseFloat(selectedPackage.price) || 0 : 0;
@@ -85,7 +86,7 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     }
 
     return total.toFixed(2);
-  };
+  }; // Function to calculate total price based on selected options
 
   useEffect(() => {
     if (selectedPackage) {
@@ -96,7 +97,7 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
       const total = activitiesPrice * persons;
       setTotalPrice(total.toFixed(2));
     }
-  }, [selectedPackage, activities, persons, insurance]);
+  }, [selectedPackage, activities, persons, insurance]); // Recalculate total price whenever the relevant state changes
 
   const handlePackageChange = (e) => {
     const id = e.target.value;
@@ -104,7 +105,7 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     setPackageId(id);
     setSelectedPackage(pkg);
     console.log('Package changed:', pkg);
-  };
+  }; // Function to handle package selection change
 
   const handleActivityToggle = (activity) => {
     const isSelected = activities.some((act) => act.id === activity.id);
@@ -116,8 +117,8 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
       const newActivities = [...activities, activity];
       setActivities(newActivities);
       console.log('Activity added:', newActivities);
-    }
-  };
+    } 
+  }; // Function to handle activity selection toggle
 
   const validateForm = () => {
     const errors = {};
@@ -126,7 +127,7 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     if (!endDate) errors.endDate = "End date is required";
     if (persons < 1) errors.persons = "Number of travelers must be at least 1";
     return errors;
-  };
+  }; // Function to validate the form inputs
 
   const summary = {
     packageName: selectedPackage?.name || 'N/A',
@@ -137,7 +138,7 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     persons: persons,
     insurance: insurance === 'none' ? 'No Insurance' : insurance === 'basic' ? 'Basic Coverage ($30)' : insurance === 'premium' ? 'Premium Coverage ($50)' : 'Elite Coverage ($75)',
     totalPrice: totalPrice,
-  };
+  }; // Function to generate a summary of the booking details
 
   const handleSubmit = () => {
     const errors = validateForm();
@@ -157,7 +158,7 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     };
     console.log('Form Data Submitted:', formData); // Add this line
     onSubmit(formData);
-  };
+  }; // Function to handle form submission
 
   if (loading) {
     return <p className="text-white text-center">Loading packages...</p>;

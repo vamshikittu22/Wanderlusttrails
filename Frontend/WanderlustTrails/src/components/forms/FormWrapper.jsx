@@ -1,9 +1,11 @@
 
 import React from 'react';
 
+// FormWrapper component to wrap around the booking forms
 const FormWrapper = ({ children, onSubmit, onCancel, summary, isEditMode, bookingType }) => {
-  const bgColor = bookingType === 'itinerary' ? 'bg-teal-50' : 'bg-indigo-50';
+  const bgColor = bookingType === 'itinerary' ? 'bg-teal-50' : 'bg-indigo-50'; // Change background color based on booking type
 
+  // Function to render the booking summary based on the booking type
   const renderSummary = () => {
     if (bookingType === 'flight_hotel') {
       return (

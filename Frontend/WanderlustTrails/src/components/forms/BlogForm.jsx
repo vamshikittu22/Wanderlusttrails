@@ -8,12 +8,12 @@ const BlogForm = ({ formData, setFormData, error, handleSubmit, setPopup, isEdit
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  };  
 
   // Handle file input changes
   const handleFileChange = (e) => {
     setFormData((prev) => ({ ...prev, files: Array.from(e.target.files) }));
-  };
+  }; 
 
   // React Quill modules and formats
   const quillModules = {
@@ -24,14 +24,14 @@ const BlogForm = ({ formData, setFormData, error, handleSubmit, setPopup, isEdit
       ['link', 'image'],
       ['clean']
     ],
-  };
+  }; // Define the toolbar options
 
   const quillFormats = [
     'header',
     'bold', 'italic', 'underline', 'strike',
     'list', 'bullet',
     'link', 'image'
-  ];
+  ]; // Define the formats you want to use
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
