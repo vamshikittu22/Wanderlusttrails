@@ -3,13 +3,6 @@
  * DATABASE CONNECTION CLASS FOR WANDERLUSTTRAILS
  *********/
 
-// Prevent PHP errors from being output in the response
-ini_set('display_errors', 0); 
-ini_set('display_startup_errors', 0); 
-error_reporting(E_ALL); 
-ini_set('log_errors', 1); 
-ini_set('error_log', __DIR__ . '/error_log.txt'); // Set the error log file path
-
 // Include Logger
 $loggerPath = __DIR__ . '/inc_logger.php';
 if (!file_exists($loggerPath) || !is_readable($loggerPath)) {

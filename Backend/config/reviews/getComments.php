@@ -20,10 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 try {
     require_once __DIR__ . "/inc_reviewModel.php"; // Include the review model for database operations
+    require_once __DIR__ . "/../inc_validationClass.php"; // Include the validation class
 } catch (Exception $e) {
-    Logger::log("Error loading inc_reviewModel.php: {$e->getMessage()}");
+    Logger::log("Error loading required files: {$e->getMessage()}");
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => "Server error: Unable to load review model"]);
+    echo json_encode(["success" => false, "message" => "Server error: Unable to load required files"]);
     exit;
 }
 // Check if the request method is GET
@@ -37,10 +38,24 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 $reviewId = isset($_GET['reviewId']) ? $_GET['reviewId'] : ''; // Get the reviewId from the query string
 Logger::log("Received reviewId: " . ($reviewId ?: 'none'));
 
-if (empty($reviewId) || !is_numeric($reviewId)) {
-    Logger::log("Invalid or missing reviewId: " . ($reviewId ?: 'none'));
+// Initialize validation class
+$validator = new ValidationClass();
+
+// Validate reviewId
+$reviewIdValidation = $validator->validateNumeric($reviewId, 'Review ID'); // Ensure reviewId is numeric and positive
+if (!$reviewIdValidation['success']) {
+    Logger::log("Validation failed: {$reviewIdValidation['message']}");
     http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Valid numeric reviewId is required"]);
+    echo json_encode($reviewIdValidation);
+    exit;
+}
+
+// Validate review exists
+$reviewValidation = $validator->validateReviewId($reviewId);
+if (!$reviewValidation['success']) {
+    Logger::log("Validation failed: {$reviewValidation['message']}");
+    http_response_code(400);
+    echo json_encode($reviewValidation);
     exit;
 }
 

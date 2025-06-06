@@ -14,6 +14,7 @@ export function UserProvider({ children }) {
     const defaultUser = {
         firstname: null,
         lastname: null,
+        userName: null,
         role: null,
         id: null,
         email: null,

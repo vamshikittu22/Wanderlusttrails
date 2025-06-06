@@ -3,72 +3,150 @@ import $ from "jquery";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Navigate, useLocation } from "react-router-dom";
-import Pagination from './../Pagination';
-import ReviewForm from './../forms/ReviewForm';
+import Pagination from "./../Pagination";
+import ReviewForm from "./../forms/ReviewForm";
 
-//user reviews component
 const UserReviews = () => {
-    const [reviews, setReviews] = useState([]); // State to hold reviews
-    const [sortedReviews, setSortedReviews] = useState([]); // State to hold sorted reviews
-    const [bookings, setBookings] = useState([]); // State to hold bookings
-    const [showAddReviewForm, setShowAddReviewForm] = useState(false); // State to control visibility of the add review form
-    const [editReviewId, setEditReviewId] = useState(null); // State to hold the ID of the review being edited
-    const [reviewData, setReviewData] = useState({ 
+    const [reviews, setReviews] = useState([]);
+    const [sortedReviews, setSortedReviews] = useState([]);
+    const [bookings, setBookings] = useState([]);
+    const [showAddReviewForm, setShowAddReviewForm] = useState(false);
+    const [editReviewId, setEditReviewId] = useState(null);
+    const [reviewData, setReviewData] = useState({
         bookingId: "",
         rating: 0,
         title: "",
         review: "",
-    }); // State to hold review data
-    const [submitting, setSubmitting] = useState(false); // State to control the submission state of the form
-    const [loading, setLoading] = useState(true); // State to control loading state
-    const [hasShownNoReviewsToast, setHasShownNoReviewsToast] = useState(false); // State to control the toast notification for no reviews 
-    const [sortOption, setSortOption] = useState("date-desc"); // State to hold the selected sort option
-    const [currentPage, setCurrentPage] = useState(1); // State to hold the current page for pagination
-    const reviewsPerPage = 5; // Number of reviews to display per page
-    const location = useLocation(); // Hook to get the current location
+    });
+    const [submitting, setSubmitting] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [hasShownNoReviewsToast, setHasShownNoReviewsToast] = useState(false);
+    const [hasShownNoBookingsToast, setHasShownNoBookingsToast] = useState(false);
+    const [sortOption, setSortOption] = useState("date-desc");
+    const [currentPage, setCurrentPage] = useState(1);
+    const reviewsPerPage = 5;
+    const location = useLocation();
 
+    
     const fetchData = () => {
-        const userId = localStorage.getItem("userId"); // Get user ID from local storage
+        const userId = localStorage.getItem("userId");
         if (!userId) {
             toast.dismiss();
             toast.error("Please log in to view your reviews.");
-            Navigate("/login"); // Redirect to login if user ID is not found
+            Navigate("/login");
             setLoading(false);
             return;
         }
     
-        setLoading(true); 
+        setLoading(true);
     
-        $.ajax({ // Fetch reviews from the server
+        // Fetch reviews first
+        $.ajax({
             url: `http://localhost/WanderlustTrails/backend/config/reviews/getUserReviews.php?user_id=${userId}`,
             type: "GET",
             dataType: "json",
             contentType: "application/json",
+            cache: false, // Prevent caching
             success: function (response) {
                 console.log("Reviews response:", response);
                 if (response.success) {
-                    const fetchedReviews = (response.data || []).map((review) => ({
-                        ...review,
-                        bookingId: parseInt(review.bookingId),
-                    }));
-                    setReviews(fetchedReviews); // Set fetched reviews to state
+                    const fetchedReviews = (response.data || []).map((review, index) => {
+                        const bookingId = review.bookingId && !isNaN(review.bookingId) ? parseInt(review.bookingId) : null;
+                        console.log(`Review ${index}: bookingId = ${bookingId}, type = ${typeof bookingId}`);
+                        return {
+                            ...review,
+                            bookingId,
+                        };
+                    }).filter(review => review.bookingId !== null);
+                    console.log("Fetched reviews (normalized):", fetchedReviews);
+                    setReviews(fetchedReviews);
                     const sorted = [...fetchedReviews].sort((a, b) => {
                         const dateA = new Date(a.createdAt);
                         const dateB = new Date(b.createdAt);
                         return dateB - dateA;
                     });
-                    setSortedReviews(sorted); // Set sorted reviews to state
+                    setSortedReviews(sorted);
                     if (!fetchedReviews.length && !hasShownNoReviewsToast) {
                         toast.dismiss();
                         toast.info("No reviews found.");
                         setHasShownNoReviewsToast(true);
                     }
-                } else { 
+    
+                    // Fetch bookings only after reviews are set
+                    $.ajax({
+                        url: `http://localhost/WanderlustTrails/backend/config/booking/getUserBooking.php?user_id=${userId}`,
+                        type: "GET",
+                        dataType: "json",
+                        contentType: "application/json",
+                        cache: false, // Prevent caching
+                        success: function (response) {
+                            console.log("Bookings response:", response);
+                            if (response.success) {
+                                const normalizedBookings = response.data.map((booking, index) => {
+                                    const bookingId = booking.id && !isNaN(booking.id) ? parseInt(booking.id) : null;
+                                    console.log(`Booking ${index}: id = ${bookingId}, status = ${booking.status}, type = ${typeof bookingId}`);
+                                    return {
+                                        ...booking,
+                                        id: bookingId,
+                                    };
+                                }).filter(booking => booking.id !== null);
+                                console.log("Normalized bookings:", normalizedBookings);
+                                const unreviewedBookings = normalizedBookings.filter((booking) => {
+                                    const isConfirmed = booking.status === "confirmed";
+                                    const isReviewed = fetchedReviews.some((r) => {
+                                        const match = r.bookingId === booking.id;
+                                        console.log(
+                                            `Checking booking id=${booking.id} (type: ${typeof booking.id}) ` +
+                                            `against review bookingId=${r.bookingId} (type: ${typeof r.bookingId}), ` +
+                                            `match=${match}`
+                                        );
+                                        return match;
+                                    });
+                                    console.log(
+                                        `Booking id=${booking.id}: isConfirmed=${isConfirmed}, isReviewed=${isReviewed}, ` +
+                                        `included=${isConfirmed && !isReviewed}`
+                                    );
+                                    return isConfirmed && !isReviewed;
+                                });
+                                console.log("All reviews:", fetchedReviews);
+                                console.log("All bookings:", normalizedBookings);
+                                console.log("Unreviewed bookings after filter:", unreviewedBookings);
+                                setBookings(unreviewedBookings);
+                                if (!unreviewedBookings.length && !hasShownNoBookingsToast) {
+                                    toast.dismiss();
+                                    toast.info("No unreviewed confirmed bookings available.");
+                                    setHasShownNoBookingsToast(true);
+                                }
+                            } else {
+                                toast.dismiss();
+                                toast.error("Failed to fetch bookings: " + (response.message || "Unknown error"));
+                                setBookings([]);
+                            }
+                        },
+                        error: function (xhr) {
+                            console.error("Error fetching bookings:", xhr);
+                            let errorMessage = "Error fetching bookings: Server error";
+                            try {
+                                const response = JSON.parse(xhr.responseText);
+                                errorMessage = "Error fetching bookings: " + (response.message || "Server error");
+                            } catch (e) {
+                                errorMessage = xhr.statusText || `Server error (status: ${xhr.status})`;
+                            }
+                            toast.dismiss();
+                            toast.error(errorMessage);
+                            setBookings([]);
+                        },
+                        complete: function () {
+                            setLoading(false);
+                        },
+                    });
+                } else {
                     toast.dismiss();
                     toast.error("Failed to fetch reviews: " + (response.message || "Unknown error"));
+                    setLoading(false);
                 }
             },
-            error: function (xhr) { // Handle error in fetching reviews
+            error: function (xhr) {
                 console.error("Error fetching reviews:", xhr);
                 let errorMessage = "Error fetching reviews: Server error";
                 try {
@@ -79,83 +157,27 @@ const UserReviews = () => {
                 }
                 toast.dismiss();
                 toast.error(errorMessage);
-            },
-            complete: function () { // Fetch bookings after fetching reviews
-                $.ajax({
-                    url: `http://localhost/WanderlustTrails/backend/config/booking/getUserBooking.php?user_id=${userId}`,
-                    type: "GET",
-                    dataType: "json",
-                    contentType: "application/json",
-                    success: function (response) {
-                        console.log("Bookings response:", response);
-                        if (response.success) {
-                            const normalizedBookings = response.data.map((booking) => ({
-                                ...booking,
-                                id: parseInt(booking.id), // Normalize booking.id to number
-                            })); // Normalize booking IDs to numbers
-                            const unreviewedBookings = normalizedBookings.filter(
-                                (booking) =>
-                                    booking.status === "confirmed" &&
-                                    !reviews.some((r) => {
-                                        console.log(`Comparing review.bookingId (${r.bookingId}, type: ${typeof r.bookingId}) with booking.id (${booking.id}, type: ${typeof booking.id})`);
-                                        return r.bookingId === booking.id;
-                                    })
-                            ); // Filter unreviewed bookings
-                            console.log("Filtered unreviewed bookings:", unreviewedBookings);
-                            setBookings(unreviewedBookings); // Set unreviewed bookings to state
-                            if (!unreviewedBookings.length && !hasShownNoBookingsToast) {
-                                toast.dismiss();
-                                toast.info("No unreviewed confirmed bookings available.");
-                                setHasShownNoBookingsToast(true);
-                            } else {
-                                console.log("Unreviewed bookings:", unreviewedBookings);
-                            }
-                        } else {
-                            toast.dismiss();
-                            toast.error("Failed to fetch bookings: " + (response.message || "Unknown error"));
-                        }
-                    },
-                    error: function (xhr) { // Handle error in fetching bookings
-                        console.error("Error fetching bookings:", xhr);
-                        let errorMessage = "Error fetching bookings: Server error";
-                        try {
-                            const response = JSON.parse(xhr.responseText);
-                            errorMessage = "Error fetching bookings: " + (response.message || "Server error");
-                        } catch (e) {
-                            errorMessage = xhr.statusText || `Server error (status: ${xhr.status})`;
-                        }
-                        console.error("Bookings fetch failed with message:", errorMessage);
-                        toast.dismiss();
-                        toast.error(errorMessage);
-                        setBookings([]);
-                    },
-                    complete: function () { // Set loading to false after fetching bookings
-                        setLoading(false);
-                    },
-                });
+                setLoading(false);
             },
         });
     };
-
     useEffect(() => {
-        const queryParams = new URLSearchParams(location.search); // Get query parameters from the URL
+        const queryParams = new URLSearchParams(location.search);
         if (queryParams.get("tab") === "write-review") {
             setShowAddReviewForm(true);
         }
 
         fetchData();
-    }, [location.search]); // Fetch data when the component mounts or when the location changes
+    }, [location.search]);
 
-    // Handle sort option change
     const handleSortChange = (e) => {
         const newSortOption = e.target.value;
-        setSortOption(newSortOption); // Update sort option state
+        setSortOption(newSortOption);
         setCurrentPage(1);
 
-        const [sortBy, sortOrder] = newSortOption.split("-"); // Split sort option into sortBy and sortOrder
-        let sorted = [...reviews]; // Create a copy of reviews for sorting
+        const [sortBy, sortOrder] = newSortOption.split("-");
+        let sorted = [...reviews];
 
-        // Sort reviews based on selected option
         if (sortBy === "rating") {
             sorted.sort((a, b) => {
                 return sortOrder === "asc" ? a.rating - b.rating : b.rating - a.rating;
@@ -168,23 +190,22 @@ const UserReviews = () => {
             });
         }
 
-        setSortedReviews(sorted); // Update sorted reviews state
+        setSortedReviews(sorted);
     };
 
-    // Handle review submission
     const handleReviewSubmit = (e) => {
         e.preventDefault();
         const userId = localStorage.getItem("userId");
-
-        // Validate review data
+    
         if (!userId) {
             toast.dismiss();
             toast.error("Please log in to submit a review.");
             return;
         }
-        if (!reviewData.bookingId) {
+        const selectedBooking = bookings.find((b) => b.id === parseInt(reviewData.bookingId));
+        if (!reviewData.bookingId || !selectedBooking) {
             toast.dismiss();
-            toast.error("Please select a booking.");
+            toast.error("Please select a valid booking.");
             return;
         }
         if (!reviewData.rating) {
@@ -197,23 +218,24 @@ const UserReviews = () => {
             toast.error("Title and review are required.");
             return;
         }
-
+    
         setSubmitting(true);
-        console.log("Submitting review:", { userId, ...reviewData }); // Log review data for debugging
-
-        $.ajax({ // Submit review to the server
+        const payload = { userId, ...reviewData, bookingId: parseInt(reviewData.bookingId) };
+        console.log("Review submission payload:", payload);
+    
+        $.ajax({
             url: "http://localhost/WanderlustTrails/backend/config/reviews/writeReview.php",
             type: "POST",
-            data: JSON.stringify({ userId, ...reviewData }),
+            data: JSON.stringify(payload),
             contentType: "application/json",
             dataType: "json",
             success: function (response) {
                 console.log("Submit response:", response);
                 if (response.success) {
-                    const booking = bookings.find((b) => b.id === parseInt(reviewData.bookingId)); // Find the booking related to the review
+                    const booking = bookings.find((b) => b.id === parseInt(reviewData.bookingId));
                     let flightDetails = {};
                     let hotelDetails = {};
-
+    
                     try {
                         flightDetails = booking?.flight_details
                             ? typeof booking.flight_details === "string"
@@ -230,22 +252,22 @@ const UserReviews = () => {
                         flightDetails = null;
                         hotelDetails = null;
                     }
-
+    
                     const newReview = {
-                        id: Date.now(),
+                        id: response.reviewId || Date.now(),
                         ...reviewData,
                         bookingId: parseInt(reviewData.bookingId),
                         createdAt: new Date().toISOString(),
-                        package_name: booking?.booking_type === "itinerary" 
-                            ? booking?.package_name || "Custom Itinerary" 
+                        package_name: booking?.booking_type === "itinerary"
+                            ? booking?.package_name || "Custom Itinerary"
                             : booking?.package_name || (booking?.booking_type === "flight_hotel" ? "Flight + Hotel" : "N/A"),
                         booking_type: booking?.booking_type,
                         start_date: booking?.start_date,
                         end_date: booking?.end_date,
                         flight_details: flightDetails,
                         hotel_details: hotelDetails,
-                    }; // Create new review object
-                    setReviews((prev) => [...prev, newReview]); // Add new review to the state
+                    };
+                    setReviews((prev) => [...prev, newReview]);
                     setSortedReviews((prev) => {
                         let updatedReviews = [...prev, newReview];
                         const [sortBy, sortOrder] = sortOption.split("-");
@@ -260,8 +282,8 @@ const UserReviews = () => {
                                 return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
                             });
                         }
-                        return updatedReviews; 
-                    }); 
+                        return updatedReviews;
+                    });
                     setBookings((prev) => prev.filter((b) => b.id !== parseInt(reviewData.bookingId)));
                     setReviewData({ bookingId: "", rating: 0, title: "", review: "" });
                     setShowAddReviewForm(false);
@@ -269,11 +291,17 @@ const UserReviews = () => {
                     toast.dismiss();
                     toast.success("Review submitted successfully!");
                 } else {
+                    const errorMessage = response.message || "Unknown error";
                     toast.dismiss();
-                    toast.error("Failed to submit review: " + (response.message || "Unknown error"));
+                    if (errorMessage.toLowerCase().includes("already reviewed")) {
+                        toast.error("This booking has already been reviewed.");
+                        fetchData(); // Refetch to update dropdown
+                    } else {
+                        toast.error("Failed to submit review: " + errorMessage);
+                    }
                 }
             },
-            error: function (xhr) { // Handle error in submitting review
+            error: function (xhr) {
                 console.error("Error submitting review:", xhr);
                 let errorMessage = "Error submitting review: Server error";
                 try {
@@ -284,14 +312,14 @@ const UserReviews = () => {
                 }
                 toast.dismiss();
                 toast.error(errorMessage);
+                fetchData(); // Refetch in case of server error
             },
-            complete: function () { // Set submitting to false after submission
+            complete: function () {
                 setSubmitting(false);
             },
         });
     };
 
-    // Handle edit review action
     const handleEditReview = (review) => {
         setEditReviewId(review.id);
         setReviewData({
@@ -302,12 +330,10 @@ const UserReviews = () => {
         });
     };
 
-    // Handle update review action
     const handleUpdateReview = (e) => {
         e.preventDefault();
         const userId = localStorage.getItem("userId");
 
-        // Validate review data
         if (!userId) {
             toast.dismiss();
             toast.error("Please log in to update your review.");
@@ -325,13 +351,13 @@ const UserReviews = () => {
         }
 
         setSubmitting(true);
-        $.ajax({ // Update review on the server
+        $.ajax({
             url: "http://localhost/WanderlustTrails/backend/config/reviews/editReview.php",
             type: "PUT",
             data: JSON.stringify({ userId, reviewId: editReviewId, ...reviewData }),
             contentType: "application/json",
             dataType: "json",
-            success: function (response) { 
+            success: function (response) {
                 if (response.success) {
                     const updatedReviews = reviews.map((r) =>
                         r.id === editReviewId
@@ -353,8 +379,8 @@ const UserReviews = () => {
                                 return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
                             });
                         }
-                        return updated; 
-                    }); // Sort updated reviews based on the current sort option
+                        return updated;
+                    });
                     setEditReviewId(null);
                     setReviewData({ bookingId: "", rating: 0, title: "", review: "" });
                     toast.dismiss();
@@ -364,31 +390,29 @@ const UserReviews = () => {
                     toast.error("Failed to update review: " + (response.message || "Unknown error"));
                 }
             },
-            error: function (xhr) { // Handle error in updating review
+            error: function (xhr) {
                 console.error("Error updating review:", xhr);
                 let errorMessage = "Error updating review: Server error";
                 try {
                     const response = JSON.parse(xhr.responseText);
-                    errorMessage = "Error updating review: " + (response.message || "Server error");
+                    errorMessage = "Error submitting review: " + (response.message || "Server error");
                 } catch (e) {
                     errorMessage = xhr.statusText || `Server error (status: ${xhr.status})`;
                 }
                 toast.dismiss();
                 toast.error(errorMessage);
             },
-            complete: function () { // Set submitting to false after update
+            complete: function () {
                 setSubmitting(false);
             },
         });
     };
 
-    // Handle cancel edit action
     const handleCancelEdit = () => {
         setEditReviewId(null);
         setReviewData({ bookingId: "", rating: 0, title: "", review: "" });
     };
 
-    //pagination logic
     const startIndex = (currentPage - 1) * reviewsPerPage;
     const endIndex = startIndex + reviewsPerPage;
     const currentReviews = sortedReviews.slice(startIndex, endIndex);

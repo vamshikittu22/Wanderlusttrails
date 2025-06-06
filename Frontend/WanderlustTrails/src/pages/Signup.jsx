@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 function Signup() {
   // State to manage form data
   const [formData, setFormData] = useState({
-    firstName: '', lastName: '', email: '', password: '', confirmPassword: '', dob: '',
+    firstName: '', lastName: '',userName: '', email: '', password: '', confirmPassword: '', dob: '',
     gender: '', nationality: '', phone: '', street: '', city: '', state: '', zip: ''
   });
 
@@ -36,7 +36,7 @@ function Signup() {
             draggable: true
           });
           setFormData({
-            firstName: '', lastName: '', email: '', password: '', confirmPassword: '', dob: '',
+            firstName: '', lastName: '',userName: '', email: '', password: '', confirmPassword: '', dob: '',
             gender: '', nationality: '', phone: '', street: '', city: '', state: '', zip: ''
           });
         } else {

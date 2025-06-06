@@ -1,5 +1,5 @@
 <?php
-//path: Backend/config/reviews/getAllReviews.php
+// Path: Wanderlusttrails/Backend/config/reviews/getUserReviews.php
 // Retrieves user reviews from the database via GET request, returns JSON response.
 
 header("Access-Control-Allow-Origin: http://localhost:5173");
@@ -20,10 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 try {
     require_once __DIR__ . "/inc_reviewModel.php"; // Include the review model for database operations
+    require_once __DIR__ . "/../inc_validationClass.php"; // Include the validation class
 } catch (Exception $e) {
-    Logger::log("Error loading inc_reviewModel.php: {$e->getMessage()}");
+    Logger::log("Error loading required files: {$e->getMessage()}");
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => "Server error: Unable to load review model"]);
+    echo json_encode(["success" => false, "message" => "Server error: Unable to load required files"]);
     exit;
 }
 // Check if the request method is GET
@@ -37,10 +38,24 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 $userId = isset($_GET['user_id']) ? $_GET['user_id'] : ''; // Get the user_id from the query string
 Logger::log("Received user_id: " . ($userId ?: 'none'));
 
-if (empty($userId) || !is_numeric($userId)) {
-    Logger::log("Invalid or missing user_id: " . ($userId ?: 'none'));
+// Initialize validation class
+$validator = new ValidationClass();
+
+// Validate userId
+$userIdValidation = $validator->validateNumeric($userId, 'User ID'); // Ensure userId is numeric and positive
+if (!$userIdValidation['success']) {
+    Logger::log("Validation failed: {$userIdValidation['message']}");
     http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Valid numeric user_id is required"]);
+    echo json_encode($userIdValidation);
+    exit;
+}
+
+// Validate user exists
+$userValidation = $validator->validateUserExists($userId);
+if (!$userValidation['success']) {
+    Logger::log("Validation failed: {$userValidation['message']}");
+    http_response_code(400);
+    echo json_encode($userValidation);
     exit;
 }
 

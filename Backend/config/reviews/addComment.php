@@ -20,10 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 try {
     require_once __DIR__ . "/inc_reviewModel.php"; // Include the review model for database operations
+    require_once __DIR__ . "/../inc_validationClass.php"; // Include the validation class
 } catch (Exception $e) {
-    Logger::log("Error loading inc_reviewModel.php: {$e->getMessage()}");
+    Logger::log("Error loading required files: {$e->getMessage()}");
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => "Server error: Unable to load review model"]);
+    echo json_encode(["success" => false, "message" => "Server error: Unable to load required files"]);
     exit;
 }
 // Check if the request method is POST
@@ -49,6 +50,69 @@ $comment = $data['comment'] ?? '';
 $parentId = $data['parentId'] ?? null;
 
 Logger::log("Received data - userId: $userId, reviewId: $reviewId, parentId: " . ($parentId ?? 'null') . ", comment: " . substr($comment, 0, 100));
+
+// Initialize validation class
+$validator = new ValidationClass();
+
+// Validate required fields
+$requiredFields = ['userId', 'reviewId', 'comment'];
+$requiredValidation = $validator->validateRequiredFields($data, $requiredFields);
+if (!$requiredValidation['success']) {
+    Logger::log("Validation failed: {$requiredValidation['message']}");
+    http_response_code(400);
+    echo json_encode($requiredValidation);
+    exit;
+}
+
+// Validate numeric fields
+$numericValidations = [
+    $validator->validateNumeric($userId, 'User ID'), // Ensure userId is numeric and positive
+    $validator->validateNumeric($reviewId, 'Review ID') // Ensure reviewId is numeric and positive
+];
+foreach ($numericValidations as $validation) {
+    if (!$validation['success']) {
+        Logger::log("Validation failed: {$validation['message']}");
+        http_response_code(400);
+        echo json_encode($validation);
+        exit;
+    }
+}
+
+// Validate user exists
+$userValidation = $validator->validateUserExists($userId);
+if (!$userValidation['success']) {
+    Logger::log("Validation failed: {$userValidation['message']}");
+    http_response_code(400);
+    echo json_encode($userValidation);
+    exit;
+}
+
+// Validate admin role
+$adminValidation = $validator->validateAdminRole($userId);
+if (!$adminValidation['success']) {
+    Logger::log("Validation failed: {$adminValidation['message']}");
+    http_response_code(400);
+    echo json_encode($adminValidation);
+    exit;
+}
+
+// Validate review exists
+$reviewValidation = $validator->validateReviewId($reviewId);
+if (!$reviewValidation['success']) {
+    Logger::log("Validation failed: {$reviewValidation['message']}");
+    http_response_code(400);
+    echo json_encode($reviewValidation);
+    exit;
+}
+
+// Validate parent comment (if provided)
+$parentValidation = $validator->validateParentComment($parentId, $reviewId);
+if (!$parentValidation['success']) {
+    Logger::log("Validation failed: {$parentValidation['message']}");
+    http_response_code(400);
+    echo json_encode($parentValidation);
+    exit;
+}
 
 try {
     $reviewModel = new ReviewModel(); // Create an instance of the ReviewModel class

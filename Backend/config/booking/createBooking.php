@@ -76,21 +76,21 @@ if (!$result['success']) {
 }
 
 // Validate insurance fields
-$insurance = isset($data['insurance']) ? (int)$data['insurance'] : 0; // Expect 0 or 1
+// $insurance = isset($data['insurance']) ? (int)$data['insurance'] : 0; // Expect 0 or 1
 $insurance_type = isset($data['insurance_type']) ? $data['insurance_type'] : 'none';
-$validInsuranceTypes = ['none', 'basic', 'premium', 'elite']; // Define valid insurance types
-if (!in_array($insurance_type, $validInsuranceTypes)) {
-    Logger::log("Invalid insurance_type option: $insurance_type");
-    http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Invalid insurance_type option"]);
-    exit;
-}
-if ($insurance !== 0 && $insurance !== 1) {
-    Logger::log("Invalid insurance value: $insurance");
-    http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Invalid insurance value"]);
-    exit;
-}
+// $validInsuranceTypes = ['none', 'basic', 'premium', 'elite']; // Define valid insurance types
+// if (!in_array($insurance_type, $validInsuranceTypes)) {
+//     Logger::log("Invalid insurance_type option: $insurance_type");
+//     http_response_code(400);
+//     echo json_encode(["success" => false, "message" => "Invalid insurance_type option"]);
+//     exit;
+// }
+// if ($insurance !== 0 && $insurance !== 1) {
+//     Logger::log("Invalid insurance value: $insurance"); 
+//     http_response_code(400);
+//     echo json_encode(["success" => false, "message" => "Invalid insurance value"]);
+//     exit;
+// }
 
 $isFlightHotel = $data['booking_type'] === 'flight_hotel'; // Check if booking type is flight_hotel
 $isItinerary = $data['booking_type'] === 'itinerary'; // Check if booking type is itinerary
@@ -106,7 +106,7 @@ $bookingData = [
     'start_date' => $data['start_date'],
     'end_date' => $endDateProvided ? $data['end_date'] : null,
     'persons' => (int)$data['persons'],
-    'insurance' => $insurance, // 0 or 1
+    // 'insurance' => $insurance, // 0 or 1
     'insurance_type' => $insurance_type, // insurance_type
     'total_price' => isset($data['total_price']) ? (float)$data['total_price'] : null,
 ]; // Prepare booking data for processing
@@ -116,7 +116,7 @@ try {
     $result = $bookingModel->createBooking($bookingData); // Call the createBooking method to process the booking creation
     Logger::log("Create booking result: " . json_encode($result));
     http_response_code($result['success'] ? 201 : 500);
-    echo json_encode($result);
+    echo json_encode($result); 
 } catch (Exception $e) {
     Logger::log("Exception: " . $e->getMessage());
     http_response_code(500);

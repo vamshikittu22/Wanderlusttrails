@@ -366,27 +366,30 @@ function Reviews() {
                                         <p className="text-gray-300 mt-4 leading-relaxed">{review.review}</p>
                                         {/* Review Details */}
                                         <div className="border-t border-gray-700 pt-4 mt-4">
-                                            <p className="text-sm text-red-700 font-medium">
-                                                {review.booking_type === "package" || review.booking_type === "flight_hotel"
-                                                    ? review.package_name || "Flight + Hotel"
-                                                    : "N/A"}
-                                            </p>
-                                            <p className="text-sm text-orange-400">
-                                                <span className="font-medium text-gray-200">Dates:</span>{" "}
-                                                {review.start_date} to {review.end_date}
-                                            </p>
-                                            {flightDetails.from && flightDetails.to && (
-                                                <p className="text-sm text-orange-400">
-                                                    <span className="font-medium text-gray-200">Flight:</span>{" "}
-                                                    {flightDetails.from} to {flightDetails.to}
+                                            
+
+                                        <p className="text-sm text-red-700 font-medium">
+                                                    {review.booking_type || "Unknown Type"}
                                                 </p>
-                                            )}
-                                            {flightDetails.destination && (
-                                                <p className="text-sm text-orange-400">
-                                                    <span className="font-medium text-gray-200">Hotel Destination:</span>{" "}
-                                                    {flightDetails.destination}
-                                                </p>
-                                            )}
+                                                {review.booking_type === "flight_hotel" && flightDetails.from && flightDetails.to ? (
+                                                    <p className="text-sm text-orange-400">
+                                                        <span className="font-medium text-gray-200">Flight:</span>{" "}
+                                                        {flightDetails.from} to {flightDetails.to}
+                                                    </p>
+                                                    
+                                                ) : (
+                                                    <>
+                                                        <p className="text-sm text-orange-400">
+                                                            <span className="font-medium text-gray-200">Dates:</span>{" "}
+                                                            {review.start_date} to {review.end_date}
+                                                        </p>
+                                                        <p className="text-sm text-orange-400">
+                                                            <span className="font-medium text-gray-200">Package:</span>{" "}
+                                                            {review.package_name || "N/A"}
+                                                        </p>
+                                                    </>
+                                                )}
+                                           
                                             <p className="text-sm text-gray-400 mt-2">
                                                 <span className="font-medium text-gray-200">Review ID:</span> {review.id}
                                             </p>

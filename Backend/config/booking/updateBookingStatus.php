@@ -69,15 +69,16 @@ if (!$result['success']) {
 
 // Validate fields if present in pending_changes
 //insurance
-if (isset($data['pending_changes']['insurance'])) {
-    $insurance = (int)$data['pending_changes']['insurance'];
-    if ($insurance !== 0 && $insurance !== 1) {
-        Logger::log("Invalid insurance value: $insurance");
-        http_response_code(400);
-        echo json_encode(["success" => false, "message" => "Invalid insurance value"]);
-        exit;
-    }
-}
+// if (isset($data['pending_changes']['insurance'])) {
+//     $insurance = (int)$data['pending_changes']['insurance'];
+//     if ($insurance !== 0 && $insurance !== 1) {
+//         Logger::log("Invalid insurance value: $insurance");
+//         http_response_code(400);
+//         echo json_encode(["success" => false, "message" => "Invalid insurance value"]);
+//         exit;
+//     }
+// }
+
 //insurance_type
 if (isset($data['pending_changes']['insurance_type'])) {
     $insurance_type = $data['pending_changes']['insurance_type'];
@@ -110,8 +111,8 @@ foreach ($data as $key => $value) {
         $changes["hotel_details.$key"] = $value;
     } elseif (in_array($key, $itineraryDetailsFields)) {
         $changes["itinerary_details.$key"] = $value;
-    } elseif ($key === 'insurance') {
-        $changes['insurance'] = $value; // Map insurance directly
+    // } elseif ($key === 'insurance') {
+    //     $changes['insurance'] = $value; // Map insurance directly
     } elseif ($key === 'insurance_type') {
         $changes['insurance_type'] = $value; // Map insurance_type directly
     } elseif (!in_array($key, ['booking_id', 'user_id', 'status'])) { 

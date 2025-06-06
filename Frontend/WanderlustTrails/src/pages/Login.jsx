@@ -1,4 +1,3 @@
-// path: Frontend/WanderlustTrails/src/pages/Login.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import $ from 'jquery';
@@ -6,6 +5,7 @@ import background from '../assets/Images/travel1.jpg';
 import { useUser } from '../context/UserContext';
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
+import CaptchaBox from '../components/CaptchaBox';
 
 //login component
 function Login() {
@@ -15,13 +15,14 @@ function Login() {
     });
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState('');
+    const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
     const { login, logout, token, isAuthenticated, user } = useUser();
     const navigate = useNavigate();
 
     // Validate login data
     const validate = () => {
         const newErrors = {};
-        if (!loginData.identifier) newErrors.identifier = 'Please enter your email or phone number.';
+        if (!loginData.identifier) newErrors.identifier = 'Please enter your username.';
         if (!loginData.password) newErrors.password = 'Password is required';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -33,11 +34,29 @@ function Login() {
         setLoginData({ ...loginData, [name]: value });
     };
 
-    // Handle form submission
-    const handleSubmit = (e) => {
+    // Handle CAPTCHA verification status
+    const handleCaptchaVerification = (isVerified) => {
+        setIsCaptchaVerified(isVerified);
+        if (isVerified) {
+            toast.success('CAPTCHA verified successfully!');
+        } else if (isVerified === false) {
+            toast.error('CAPTCHA verification failed.');
+        }
+    };
+
+    // Handle login submission
+    const handleLogin = (e) => {
         e.preventDefault();
         setMessage('');
         setErrors({});
+
+        // Check if CAPTCHA is verified
+        if (!isCaptchaVerified) {
+            toast.error('Please verify the CAPTCHA before logging in.');
+            return;
+        }
+
+        // Validate login data
         if (!validate()) return;
 
         // Prepare login data
@@ -74,22 +93,24 @@ function Login() {
                 console.log('[Login] Backend response:', response);
                 if (response.success) {
                     try {
-                        const requiredFields = ['token', 'role', 'firstname', 'lastname', 'id', 'email'];
+                        const requiredFields = ['token', 'role', 'firstname', 'lastname', 'userName', 'id', 'email'];
                         const missingFields = requiredFields.filter(field => !response[field]);
                         if (missingFields.length > 0) {
                             throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
                         }
 
-                        const { token, role, firstname, lastname, id, email, phone, dob, gender, nationality, street, city, state, zip } = response;
-                        console.log('[Login] Calling login with:', { id, firstname, role, token });
-                        login({ firstname, lastname, role, id, email, phone, dob, gender, nationality, street, city, state, zip }, token);
+                        const { token, role, firstname, lastname, userName, id, email, phone, dob, gender, nationality, street, city, state, zip } = response;
+                        console.log('[Login] Calling login with:', { id, firstname, userName, role, token });
+                        login({ firstname, lastname, userName, role, id, email, phone, dob, gender, nationality, street, city, state, zip }, token);
 
                         setMessage(response.message || 'Login successful!');
                         setLoginData({ identifier: '', password: '' });
+                        setIsCaptchaVerified(false); // Reset CAPTCHA verification after login
 
                         localStorage.setItem("userId", id);
-                        localStorage.setItem("userName", `${firstname} ${lastname}`);
-
+                        localStorage.setItem("userName", userName);
+                        toast.success('Login successful!');
+                        navigate('/');
                     } catch (error) {
                         console.error('[Login] Error processing response:', error);
                         setMessage('Login failed: ' + error.message);
@@ -145,9 +166,9 @@ function Login() {
                             </div>
                         )}
                         {message && <p className="text-green-500 text-center mb-4">{message}</p>}
-                        <form onSubmit={handleSubmit} noValidate>
+                        <form onSubmit={handleLogin} noValidate>
                             <div className="mb-4">
-                                <label htmlFor="identifier" className="block text-sky-300 font-bold mb-2">Email or Phone:</label>
+                                <label htmlFor="identifier" className="block text-sky-300 font-bold mb-2">Username</label>
                                 <input
                                     type="text"
                                     id="identifier"
@@ -160,7 +181,7 @@ function Login() {
                                 {errors.identifier && <p className="text-red-500 text-xs italic">{errors.identifier}</p>}
                             </div>
                             <div className="mb-4">
-                                <label htmlFor="password" className="block text-sky-300 font-bold mb-2">Password:</label>
+                                <label htmlFor="password" className="block text-sky-300 font-bold mb-2">Password</label>
                                 <input
                                     type="password"
                                     id="password"
@@ -172,10 +193,14 @@ function Login() {
                                 />
                                 {errors.password && <p className="text-red-500 text-xs italic">{errors.password}</p>}
                             </div>
+                            <div className="mb-4">
+                                <CaptchaBox onVerify={handleCaptchaVerification} />
+                            </div>
                             <div className="text-center">
                                 <button
                                     type="submit"
-                                    className="py-2 px-3 rounded-md text-white bg-gradient-to-r from-orange-500 to-red-700"
+                                    disabled={!isCaptchaVerified}
+                                    className={`py-2 px-3 rounded-md text-white bg-gradient-to-r from-orange-500 to-red-700 ${!isCaptchaVerified ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     Login
                                 </button>

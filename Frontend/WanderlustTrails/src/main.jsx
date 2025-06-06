@@ -44,6 +44,7 @@ import LanguageAndTouristAssist from './pages/NeedAssist.jsx';
 import LearnCultureAndHistory from './pages/CultureAndHistory.jsx';
 import CustomizedItinerary from './pages/CustomizedIternerary.jsx';
 import HelpAndSupport from './pages/Help.jsx';
+import { TodoProvider } from './context/TodoContext.jsx';
 
 
 const router = createBrowserRouter(
@@ -162,7 +163,9 @@ const App = () => {
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <UserProvider>
-      <App />
+      <TodoProvider>
+        <App />
+      </TodoProvider>
     </UserProvider>
   </StrictMode>
 );

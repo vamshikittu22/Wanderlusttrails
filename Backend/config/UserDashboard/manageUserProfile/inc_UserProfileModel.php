@@ -22,7 +22,7 @@ class UserProfileModel {
         }
 
         //prepare the SQL query to fetch user profile details
-        $query = "SELECT id, firstName, lastName, email, dob, gender, nationality, phone, street, city, state, zip FROM users WHERE id = ?"; // SQL query to fetch user profile details
+        $query = "SELECT id, firstName, lastName, userName, email, dob, gender, nationality, phone, street, city, state, zip FROM users WHERE id = ?"; // SQL query to fetch user profile details
         $types = "i"; // Data types for the query parameters (i = integer)
         $user = $this->db->fetchQuery($query, $types, $userId); // Execute the query and fetch the result
 

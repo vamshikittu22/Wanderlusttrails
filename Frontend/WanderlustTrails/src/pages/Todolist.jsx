@@ -1,71 +1,42 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/Todolist.jsx
+import React from 'react';
+import { useUser } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
+import { useTodo } from '../context/TodoContext';
+import { TodoForm, TodoItem } from '../components/Todo/index';
 
-import React from 'react'
-import { useState, useEffect} from 'react'
-import {TodoItem,TodoForm} from '../components/Todo/index'
-import { TodoProvider } from '../context/TodoContext'
-
-
+// Component to display the todo list and form
 function Todolist() {
-  const [todos, setTodos] = useState([])
+    const { user, isAuthenticated } = useUser(); // Access user authentication state
+    const { todos } = useTodo(); // Access the list of todos from context
+    const navigate = useNavigate(); // Hook for navigation
 
-const addTodo = (todo) => {
-  setTodos((prev) => [{id: Date.now(), ...todo}, ...prev])
-}
+    // Redirect to login if not authenticated
+    if (!isAuthenticated || !user) {
+        navigate('/login');
+        return null;
+    }
 
-const updateTodo = (id,todo) => {
-  setTodos((prev) => prev.map((prevTodo) => (prevTodo.id === todo.id ? todo : prevTodo )))
-}
-
-const deleteTodo = (id) => {
-  setTodos((prev) => prev.filter((todo) => todo.id !== id ))
-}
-
-const toggleComplete = (id) => {
-  setTodos((prev) =>
-    prev.map((prevTodo) =>
-      prevTodo.id === id ? {...prevTodo, completed: 
-      !prevTodo.completed } :  prevTodo
-    )
-  )
-}
-
-useEffect(() =>{
-  const todos = JSON.parse(localStorage.getItem("todos"))
-  if (todos && todos.length > 0) {
-    setTodos(todos)
-  }
-}, []) 
-
-useEffect(() => {
-  localStorage.setItem("todos",JSON.stringify(todos))
-},[todos])
-
-  return (
-    <TodoProvider value={{todos, addTodo, updateTodo, deleteTodo, toggleComplete}}>
-      <div className="bg-[#172842] min-h-screen py-8" >
-          <div className="w-full max-w-2xl mx-auto shadow-md rounded-lg px-4 py-3 text-white" >
-          <h1 className="text-2xl font-bold text-center mb-8 mt-2">Manage Your Todo List on the trip</h1>
-            <div className='mb-4'>
-            <TodoForm />
+    return (
+        <div className="bg-[#172842] min-h-screen py-8">
+            <div className="w-full max-w-2xl mx-auto shadow-md rounded-lg px-4 py-3 text-white">
+                <h1 className="text-2xl font-bold text-center mb-8 mt-2">Manage Your Todo List on the Trip</h1>
+                <div className="mb-4">
+                    <TodoForm /> {/* Render the todo form */}
+                </div>
+                <div>
+                    {todos.length === 0 ? (
+                        <p className="text-center text-gray-400">No todos found. Add one to get started!</p>
+                    ) : (
+                        todos.map((todo) => (
+                            <div key={todo.id}>
+                                <TodoItem todo={todo} /> {/* Render each todo item */}
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
-
-            <div >
-            {
-              todos.map((todo) => (
-                <div key={todo.id}>
-                  <TodoItem todo={todo}/>
-            </div>
-              ))
-            }
-
-            </div>
-          </div>
-      </div>
-    </TodoProvider>
-
-  )
-
+        </div>
+    );
 }
 
-export default Todolist
+export default Todolist;

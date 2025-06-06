@@ -50,6 +50,7 @@ const UserForm = ({
 
     if (!formData.firstName) newErrors.firstName = "*First Name is required";
     if (!formData.lastName) newErrors.lastName = "*Last Name is required";
+    if (!formData.userName) newErrors.userName = "*User Name is required";
     if (!emailPattern.test(formData.email)) newErrors.email = "*Invalid email format correct Email required";
     if ((includePassword || includeChangePassword) && formData.password && formData.password.length < 8)
       newErrors.password = "*Password must be at least 8 characters";
@@ -83,7 +84,7 @@ const UserForm = ({
             placeholder="First Name"
             value={formData.firstName || ""}
             onChange={handleChange}
-            disabled={!isEditing}
+            disabled
             className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
           {errors.firstName && <p className="text-red-500 text-xs italic font-bold">{errors.firstName}</p>}
@@ -97,12 +98,26 @@ const UserForm = ({
             placeholder="Last Name"
             value={formData.lastName || ""}
             onChange={handleChange}
-            disabled={!isEditing}
+            disabled
             className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
           {errors.lastName && <p className="text-red-500 text-xs italic font-bold">{errors.lastName}</p>}
         </div>
       </div>
+      <div className="w-1/2 mr-2">
+          <label htmlFor="firstName" className="block text-sm text-sky-300 font-bold mb-2">User Name</label>
+          <input
+            type="text"
+            id="userName"
+            name="userName"
+            placeholder="User Name"
+            value={formData.userName || ""}
+            onChange={handleChange}
+            disabled={!isEditing}
+            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          {errors.userName && <p className="text-red-500 text-xs italic font-bold">{errors.userName}</p>}
+        </div>
 
       <div className="flex mb-4">
         <div className="w-1/2 mr-2">

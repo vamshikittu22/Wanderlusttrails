@@ -60,19 +60,21 @@ if (!$result['success']) {
     Logger::log($result['message']);
     http_response_code(400);
     echo json_encode($result);
-    exit;
+    exit;   
 }
 
 // Validate insurance fields if present in changes
-if (isset($data['changes']['insurance'])) {
-    $insurance = (int)$data['changes']['insurance'];
-    if ($insurance !== 0 && $insurance !== 1) {
-        Logger::log("Invalid insurance value in changes: $insurance");
-        http_response_code(400);
-        echo json_encode(["success" => false, "message" => "Invalid insurance value in changes"]);
-        exit;
-    }
-}
+// if (isset($data['changes']['insurance'])) {
+//     $insurance = (int)$data['changes']['insurance'];
+//     if ($insurance !== 0 && $insurance !== 1) {
+//         Logger::log("Invalid insurance value in changes: $insurance");
+//         http_response_code(400);
+//         echo json_encode(["success" => false, "message" => "Invalid insurance value in changes"]);
+//         exit;
+//     }
+// }
+
+
 // Validate insurance_type if present in changes
 if (isset($data['changes']['insurance_type'])) {
     $insurance_type = $data['changes']['insurance_type'];

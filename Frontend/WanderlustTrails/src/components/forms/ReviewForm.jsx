@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // Added useState for validation state
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 
 const ReviewForm = ({
@@ -10,19 +10,19 @@ const ReviewForm = ({
     onCancel,
     isEditMode = false,
 }) => {
-    const [errors, setErrors] = useState({}); // State to hold validation errors
+    const [errors, setErrors] = useState({});
+
+    console.log("Bookings received in ReviewForm:", bookings); // Debug bookings
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setReviewData((prev) => ({ ...prev, [name]: value }));
-        // Clear error for the field when user starts typing
         setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
     const handleRatingClick = (rating) => {
         if (!submitting) {
             setReviewData((prev) => ({ ...prev, rating }));
-            // Clear rating error when a rating is selected
             setErrors((prev) => ({ ...prev, rating: "" }));
         }
     };
@@ -51,7 +51,7 @@ const ReviewForm = ({
             setErrors(formErrors);
             return;
         }
-        onSubmit(e); // Proceed with submission if no errors
+        onSubmit(e);
     };
 
     return (

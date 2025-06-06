@@ -9,6 +9,7 @@ require_once __DIR__ . "/../../vendor/autoload.php";
 // Load PHPMailer classes
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
 //usermodel class
 class UserModel {
     private $db; // Database connection object
@@ -19,7 +20,7 @@ class UserModel {
     }
 
     // Method to register a new user
-    public function registerUser($firstName, $lastName, $email, $password, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip) {
+    public function registerUser($firstName, $lastName, $userName, $email, $password, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip) {
         Logger::log("registerUser started for email: $email");
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             Logger::log("Invalid email format: $email");
@@ -31,10 +32,10 @@ class UserModel {
         }
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT); // Hash the password for security
         //prepare the SQL query to insert user data into the database
-        $query = "INSERT INTO users (firstName, lastName, email, password, dob, gender, nationality, phone, street, city, state, zip) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; // SQL query to insert user data into the database
-        $types = "ssssssssssss"; // Define the types for the prepared statement
-        $result = $this->db->executeQuery($query, $types, $firstName, $lastName, $email, $hashedPassword, 
+        $query = "INSERT INTO users (firstName, lastName, userName, email, password, dob, gender, nationality, phone, street, city, state, zip) 
+                    VALUES (?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; // SQL query to insert user data into the database
+        $types = "sssssssssssss"; // Define the types for the prepared statement
+        $result = $this->db->executeQuery($query, $types, $firstName, $lastName, $userName, $email, $hashedPassword, 
                         $dob, $gender, $nationality, $phone, $street, $city, $state, $zip); // Execute the query with the provided parameters
         Logger::log("registerUser result for email: $email - " . ($result['success'] ? "Success" : "Failed: {$result['message']}"));
         return $result;     // Return the result of the query execution
@@ -84,7 +85,7 @@ class UserModel {
             return ["success" => false, "message" => "User not found"]; // Check if the user exists
         }
 
-        if (password_verify($currentPassword, $user[0]['password'])) {
+        if (password_verify($currentPassword, $user[0]['password'])) { //value of the field stored in first row of the array
             Logger::log("Password verified for identifier: $identifier");
             return ["success" => true, "message" => "Password verified"]; // Verify the password using password_verify
         } else {
@@ -113,7 +114,7 @@ class UserModel {
         }
 
         // Check if the user has a valid email address
-        $userEmail = $isEmail ? $identifier : $result[0]['email'];
+        $userEmail = $isEmail ? $identifier : $result[0]['email']; //value of the field stored in first row of the array
         if (!filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
             Logger::log("No valid email for identifier: $identifier");
             return ["success" => false, "message" => "No email associated with this account"]; 
@@ -121,7 +122,7 @@ class UserModel {
 // Generate a 6-digit OTP
         $otp = str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);
         $otpMessage = "OTP for $identifier: $otp (valid for 10 minutes)\n";
-        file_put_contents(__DIR__ . "/../logs/otp.log", $otpMessage, FILE_APPEND);
+        file_put_contents(__DIR__ . "/../logs/otp.log", $otpMessage, FILE_APPEND); //store otp in otp.log file
         Logger::log("OTP generated for identifier: $identifier - OTP: $otp");
 
         // Store the OTP in the database

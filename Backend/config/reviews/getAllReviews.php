@@ -2,13 +2,6 @@
 // Path: Wanderlusttrails/Backend/config/reviews/getAllReviews.php
 // Retrieves all reviews from the database via GET request, returns JSON response.
 
-// Prevent PHP errors from being output in the response
-ini_set('display_errors', 0);
-ini_set('display_startup_errors', 0);
-error_reporting(E_ALL);
-ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/../error_log.txt');
-
 header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET, OPTIONS");
@@ -27,10 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 try {
     require_once __DIR__ . "/inc_reviewModel.php"; // Include the review model for database operations
+    require_once __DIR__ . "/../inc_validationClass.php"; // Include the validation class
 } catch (Exception $e) {
-    Logger::log("Error loading inc_reviewModel.php: {$e->getMessage()}");
+    Logger::log("Error loading required files: {$e->getMessage()}");
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => "Server error: Unable to load review model"]);
+    echo json_encode(["success" => false, "message" => "Server error: Unable to load required files"]);
     exit;
 }
 // Check if the request method is GET

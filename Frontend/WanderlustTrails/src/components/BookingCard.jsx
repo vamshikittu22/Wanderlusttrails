@@ -252,20 +252,22 @@ const BookingCard = ({
                     )}
                 </div>
             </div>
-            {isAdminView ? (
-                <div className="mt-4">
+            {isAdminView  ? (
+              
+                    <div className="mt-4">
                     <label className="font-semibold text-gray-300">Status:</label>
                     <select
                         value={booking.status}
                         onChange={(e) => onStatusChange(booking.id, e.target.value)}
                         className="mt-1 bg-gray-700 text-white border border-gray-400 rounded px-2 py-1 w-full focus:outline-none focus:border-blue-500"
-                        disabled={updatingStatus}
+                        disabled={updatingStatus || booking.status === 'canceled'}
                     >
                         <option value="pending">Pending</option>
                         <option value="confirmed">Confirmed</option>
                         <option value="canceled">Canceled</option>
                     </select>
                 </div>
+            
             ) : (
                 <div className="mt-3 flex space-x-2">
                     <button
