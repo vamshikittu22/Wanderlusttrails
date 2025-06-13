@@ -1,7 +1,10 @@
+// path : Frontend/WanderlustTrails/src/hooks/useBookings.js
+
 import { useState, useEffect } from 'react';
 import $ from 'jquery';
 import { toast } from 'react-toastify';
 
+// Custom hook to manage bookings (fetch, filter, edit, cancel)
 const useBookings = (user, isAuthenticated, fetchAll = false) => {
     const [bookings, setBookings] = useState([]);
     const [filteredBookings, setFilteredBookings] = useState([]);
@@ -10,7 +13,7 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('all');
 
-    // Parse booking details (centralized function)
+    // Helper: Convert raw booking data into structured format
     const parseBookingDetails = (booking) => {
         const flightDetails = typeof booking.flight_details === 'string' ? JSON.parse(booking.flight_details) : booking.flight_details || {};
         const hotelDetails = typeof booking.hotel_details === 'string' ? JSON.parse(booking.hotel_details) : booking.hotel_details || {};
@@ -52,6 +55,7 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
         };
     };
 
+    // On mount or auth/user change, fetch bookings
     useEffect(() => {
         if (!isAuthenticated || !user?.id) {
             setLoading(false);
@@ -60,6 +64,7 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
         fetchBookings();
     }, [user, isAuthenticated, fetchAll]);
 
+    // Fetch user or all bookings from backend
     const fetchBookings = () => {
         if (!user?.id) {
             console.error("Cannot fetch bookings: user.id is missing");
@@ -76,10 +81,12 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
             type: 'GET',
             dataType: 'json',
             contentType: fetchAll ? 'application/json' : undefined,
+
+            // On successful response
             success: function (response) {
                 if (response.success) {
                     const parsedBookings = response.data.map(parseBookingDetails);
-                    const sortedBookings = parsedBookings.sort((a, b) => a.id - b.id); // Initial sort by ID
+                    const sortedBookings = parsedBookings.sort((a, b) => a.id - b.id); // Sort by ID
                     setBookings(sortedBookings);
                     setFilteredBookings(sortedBookings);
 
@@ -89,6 +96,7 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
                     });
                     setPaymentLoading(initialPaymentLoading);
 
+                    // Fetch payment info for each booking
                     if (sortedBookings.length > 0) {
                         Promise.all(
                             sortedBookings.map(booking =>
@@ -105,8 +113,7 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
                             const newPaymentDetails = {};
                             results.forEach(result => {
                                 if (result.data && result.data.length > 0) {
-                                    // Take the most recent payment (last in the array, since getPaymentDetails.php sorts by payment_date DESC)
-                                    newPaymentDetails[result.bookingId] = result.data[result.data.length - 1];
+                                    newPaymentDetails[result.bookingId] = result.data[result.data.length - 1]; // Latest payment
                                 }
                             });
                             setPaymentDetails(newPaymentDetails);
@@ -119,6 +126,8 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
                     toast.error(response.message || 'Failed to fetch bookings');
                 }
             },
+
+            // On error response
             error: function (xhr) {
                 let errorMessage = 'Error fetching bookings: Server error';
                 try {
@@ -129,12 +138,14 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
                 }
                 toast.error(errorMessage);
             },
+
             complete: function () {
                 setLoading(false);
             }
         });
     };
 
+    // Fetch payment details for given booking ID
     const fetchPaymentDetails = (bookingId) => {
         return new Promise((resolve, reject) => {
             $.ajax({
@@ -155,6 +166,7 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
         });
     };
 
+    // Edit an existing booking
     const editBooking = (bookingId, payload, callback) => {
         if (!payload || !payload.booking_id || !payload.user_id || !payload.changes || Object.keys(payload.changes).length === 0) {
             toast.error('Invalid submission data');
@@ -170,8 +182,8 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
             success: function (response) {
                 if (response.success) {
                     toast.success(response.message);
-                    fetchBookings();
-                    if (callback) callback();
+                    fetchBookings(); // Refresh bookings
+                    if (callback) callback(); // Run callback if given
                 } else {
                     toast.error(response.message);
                 }
@@ -189,6 +201,7 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
         });
     };
 
+    // Cancel a booking
     const cancelBooking = (bookingId, callback) => {
         $.ajax({
             url: 'http://localhost/WanderlustTrails/Backend/config/booking/cancelBooking.php',
@@ -199,7 +212,7 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
             success: function (response) {
                 if (response.success) {
                     toast.success('Booking canceled successfully!');
-                    fetchBookings();
+                    fetchBookings(); // Refresh after cancel
                     if (callback) callback();
                 } else {
                     toast.error(response.message || 'Failed to cancel booking.');
@@ -218,6 +231,7 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
         });
     };
 
+    // Filter bookings based on status
     const applyFilters = () => {
         let filtered = [...bookings];
         if (statusFilter !== 'all') {
@@ -227,7 +241,7 @@ const useBookings = (user, isAuthenticated, fetchAll = false) => {
     };
 
     useEffect(() => {
-        applyFilters();
+        applyFilters(); // Apply filters whenever bookings or filter value changes
     }, [statusFilter, bookings]);
 
     return {

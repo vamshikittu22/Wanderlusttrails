@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import $ from 'jquery';
-import { toast } from 'react-toastify';
-import useBookings from '../../hooks/useBookings';
-import { useUser } from '../../context/UserContext';
-import BookingCard from '../BookingCard';
-import FilterSortBar from '../FilterSortBar';
-import Pagination from './../Pagination';
+import React, { useState, useEffect, useMemo } from 'react'; // Import React hooks and core functionality
+import $ from 'jquery'; // Import jQuery for AJAX requests
+import { toast } from 'react-toastify'; // Import toast notification library
+import useBookings from '../../hooks/useBookings'; // Custom hook for bookings
+import { useUser } from '../../context/UserContext'; // Import User context for authentication
+import BookingCard from '../BookingCard'; // Import BookingCard component
+import FilterSortBar from '../FilterSortBar'; // Import filter and sort component
+import Pagination from './../Pagination'; // Import pagination component
 
-const useDebounce = (value, delay) => {
-    const [debouncedValue, setDebouncedValue] = useState(value);
+const useDebounce = (value, delay) => { // Custom hook for debouncing
+    const [debouncedValue, setDebouncedValue] = useState(value); // State for debounced value
 
-    useEffect(() => {
+    useEffect(() => { // Effect to handle debouncing
         const handler = setTimeout(() => {
             setDebouncedValue(value);
         }, delay);
@@ -21,7 +21,7 @@ const useDebounce = (value, delay) => {
     }, [value, delay]);
 
     return debouncedValue;
-}; // Custom hook for debouncing
+}; // Return debounced value
 
 function ManageBookings() {
     const { user, isAuthenticated } = useUser(); // Get user and authentication status from context
@@ -33,7 +33,6 @@ function ManageBookings() {
 
     const debouncedSearchQuery = useDebounce(searchQuery, 300); // Debounce the search query to avoid excessive re-renders
 
-    
     const {
         bookings,
         filteredBookings,
@@ -41,11 +40,10 @@ function ManageBookings() {
         paymentLoading,
         loading,
         fetchBookings
-    } = useBookings(user, isAuthenticated, true);  // Fetch bookings and payment details
+    } = useBookings(user, isAuthenticated, true); // Fetch bookings and payment details
 
-    
     // This function generates a searchable string from the booking object
-    const getSearchableText = (booking) => { 
+    const getSearchableText = (booking) => {
         const fields = [
             booking.id.toString(),
             booking.userFullName || '',
@@ -94,25 +92,24 @@ function ManageBookings() {
         ]; // Create an array of fields to be searched
 
         return fields
-            .filter(field => field !== null && field !== undefined) 
+            .filter(field => field !== null && field !== undefined)
             .map(field => field.toString().toLowerCase())
-            .join(' '); 
-            // Filter out null or undefined fields
-            // Convert all fields to lowercase and join them into a single string
-    };  // Generate a searchable string by joining all fields with spaces
- 
-    //
+            .join(' ');
+    }; // Generate a searchable string by joining all fields with spaces
+
     const searchedBookings = useMemo(() => { // Memoize the searched bookings to avoid unnecessary re-computation
-        return filteredBookings.filter(booking => { 
-            if (!debouncedSearchQuery) return true; 
-            const searchLower = debouncedSearchQuery.toLowerCase(); 
-            const searchableText = getSearchableText(booking); 
-            return searchableText.includes(searchLower); 
-        });// Filter bookings based on the debounced search query
-    }, [filteredBookings, debouncedSearchQuery, paymentDetails]);  
+        console.log('[Debug] Debounced Search Query:', debouncedSearchQuery); // Debug search query
+        return filteredBookings.filter(booking => {
+            if (!debouncedSearchQuery) return true;
+            const searchLower = debouncedSearchQuery.toLowerCase();
+            const searchableText = getSearchableText(booking);
+            console.log('[Debug] Searching:', { bookingId: booking.id, searchableText, searchLower }); // Debug search process
+            return searchableText.includes(searchLower);
+        });
+    }, [filteredBookings, debouncedSearchQuery, paymentDetails]); // Filter bookings based on the debounced search query
 
     // Define filter options for bookings with useMemo to avoid re-computation
-    const filterOptions = useMemo(() => [ 
+    const filterOptions = useMemo(() => [
         {
             key: 'status-all',
             label: 'All',
@@ -133,8 +130,8 @@ function ManageBookings() {
             label: 'Canceled',
             filterFunction: booking => booking.status === 'canceled'
         }
-    ], []); 
- 
+    ], []);
+
     // Define sort options for bookings with useMemo to avoid re-computation
     const sortOptions = useMemo(() => [
         {
@@ -177,36 +174,52 @@ function ManageBookings() {
             label: 'User Name (Z-A)',
             sortFunction: (a, b) => (b.userFullName || '').localeCompare(a.userFullName || '')
         }
-    ], []); 
-
+    ], []);
 
     const totalItems = filteredBookingsWithSearch.length; // Total number of items after filtering and searching
     const startIndex = (currentPage - 1) * itemsPerPage; // Calculate the start index for pagination
     const endIndex = startIndex + itemsPerPage; // Calculate the end index for pagination
     const currentBookings = filteredBookingsWithSearch.slice(startIndex, endIndex); // Get the current bookings for the current page
- 
-    //function to handle status change of booking
+
+    // Function to handle status change of booking
     const handleStatusChange = (bookingId, newStatus) => {
         if (!confirm(`Are you sure you want to change the status to ${newStatus}?`)) return; // Confirm status change
 
-        setUpdatingStatus(true); 
+        setUpdatingStatus(true);
         const currentBooking = bookings.find(b => b.id === bookingId); // Find the current booking by ID
         if (!currentBooking) {
             toast.error(`Booking #${bookingId} not found`);
             setUpdatingStatus(false);
-            return;  // Check if booking exists
-        } 
-        
-        
+            return; // Check if booking exists
+        }
+
+        const currentDate = new Date().toISOString().split('T')[0]; // Current date in YYYY-MM-DD
+        const startDate = currentBooking.start_date;
+        const endDate = currentBooking.end_date;
+
+        console.log('[Debug] Date Check:', { currentDate, startDate, endDate }); // Debug date comparison
+
+        if (startDate && startDate < currentDate) {
+            toast.error('Cannot change status: Start date is in the past.');
+            setUpdatingStatus(false);
+            return;
+        }
+        if (endDate && endDate < currentDate) {
+            toast.error('Cannot change status: End date is in the past.');
+            setUpdatingStatus(false);
+            return;
+        }
+
         const oldPrice = currentBooking.total_price; // Store the old price for comparison
         const userId = currentBooking.user_id; // Get the user ID from the booking
         const pendingChanges = currentBooking.pending_changes || {}; // Get the pending changes from the booking
-        
+
+        console.log('[Debug] Status Change Initiated:', { bookingId, newStatus, userId, pendingChanges }); // Debug initiation
 
         const formattedPendingChanges = { ...pendingChanges }; // Create a copy of pending changes to avoid mutating the original object
         if (pendingChanges.startDate) {
             formattedPendingChanges.start_date = new Date(pendingChanges.startDate).toISOString().split('T')[0];
-            delete formattedPendingChanges.startDate; 
+            delete formattedPendingChanges.startDate;
         } // Format the start date to YYYY-MM-DD
         if (pendingChanges.endDate) {
             formattedPendingChanges.end_date = new Date(pendingChanges.endDate).toISOString().split('T')[0];
@@ -231,6 +244,8 @@ function ManageBookings() {
             pending_changes: formattedPendingChanges,
         }; // Create the payload for the AJAX request
 
+        console.log('[Debug] AJAX Payload:', payload); // Debug payload
+
         // Send AJAX request to update booking status and pending changes
         $.ajax({
             url: 'http://localhost/WanderlustTrails/Backend/config/booking/updateBookingStatus.php',
@@ -239,6 +254,7 @@ function ManageBookings() {
             data: JSON.stringify(payload),
             dataType: 'json',
             success: function (response) { // Handle successful response
+                console.log('[Debug] AJAX Success Response:', response); // Debug response
                 if (response.success) {
                     if (response.message === "Status unchanged") {
                         toast.info("Status is already " + newStatus);
@@ -247,42 +263,95 @@ function ManageBookings() {
                         fetchBookings();
                         const updatedBooking = bookings.find(b => b.id === bookingId);
                         const newPrice = updatedBooking ? updatedBooking.total_price : oldPrice;
-                        if (newStatus === 'confirmed' && oldPrice !== newPrice) {
+                        if (newPrice !== oldPrice) {
                             const priceChange = newPrice - oldPrice;
                             toast.info(`Price updated: ${priceChange >= 0 ? '+' : ''}$${priceChange.toFixed(2)} (New total: $${newPrice.toFixed(2)})`);
                         }
                     }
                 } else { // Handle error response
+                    console.error('[Debug] AJAX Error Response:', response.message); // Debug error
                     toast.error(response.message || 'Failed to update booking status or pending changes');
                 }
             },
             error: function (xhr) { // Handle AJAX error
-                let errorMessage = `Error updating booking status: ${xhr.status} ${xhr.statusText}`; 
+                console.error('[Debug] AJAX Error:', xhr); // Debug error details
+                let errorMessage = `Error updating booking status: ${xhr.status} ${xhr.statusText}`;
                 try {
                     const response = JSON.parse(xhr.responseText);
                     errorMessage += ` - ${response.message || 'Server error'}`;
+                    console.log('[Debug] Parsed Error Response:', response); // Debug parsed response
                 } catch (e) {
                     errorMessage += ' - Unable to parse server response';
+                    console.error('[Debug] Parse Error:', e); // Debug parse failure
                 }
                 toast.error(errorMessage);
             },
-            complete: function () { 
+            complete: function () {
+                console.log('[Debug] AJAX Complete:', { bookingId, newStatus }); // Debug completion
                 setUpdatingStatus(false);
             }
         });
-    }; 
+    };
 
-    //handle search input change
+    // Function to handle sending a booking reminder
+    const handleSendReminder = (bookingId) => {
+        const currentBooking = bookings.find(b => b.id === bookingId);
+        if (!currentBooking) {
+            toast.error(`Booking #${bookingId} not found`);
+            return;
+        }
+
+        const payload = {
+            booking_id: Number(bookingId),
+            user_id: Number(currentBooking.user_id),
+            userFullName: currentBooking.userFullName,
+            start_date: currentBooking.start_date,
+            end_date: currentBooking.end_date
+        };
+
+        console.log('[Debug] Send Reminder Initiated:', { bookingId, payload }); // Debug initiation
+
+        $.ajax({
+            url: 'http://localhost/WanderlustTrails/Backend/config/booking/sendBookingReminder.php',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            dataType: 'json',
+            success: function (response) {
+                console.log('[Debug] Send Reminder Response:', response); // Debug response
+                if (response.success) {
+                    toast.success('Reminder sent successfully!');
+                } else {
+                    console.error('[Debug] Send Reminder Error:', response.message); // Debug error
+                    toast.error(response.message || 'Failed to send reminder');
+                }
+            },
+            error: function (xhr) {
+                console.error('[Debug] Send Reminder AJAX Error:', xhr); // Debug error
+                let errorMessage = `Error sending reminder: ${xhr.status} ${xhr.statusText}`;
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    errorMessage += ` - ${response.message || 'Server error'}`;
+                    console.log('[Debug] Parsed Send Reminder Error:', response); // Debug parsed response
+                } catch (e) {
+                    errorMessage += ' - Unable to parse server response';
+                    console.error('[Debug] Parse Send Reminder Error:', e); // Debug parse failure
+                }
+                toast.error(errorMessage);
+            }
+        });
+    };
+
+    // Handle search input change
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
         setCurrentPage(1);
     };
 
     if (loading) {
-        return <div className="text-center p-4 text-white">Loading bookings...</div>;
-    } // Show loading message while fetching bookings
+        return <div className="text-center p-4 text-white">Loading bookings...</div>; // Show loading message while fetching bookings
+    }
 
-    //
     return (
         <div className="max-w-7xl mx-auto p-6 bg-gray-700 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-6">
@@ -328,6 +397,7 @@ function ManageBookings() {
                                 paymentDetails={paymentDetails}
                                 paymentLoading={paymentLoading}
                                 onStatusChange={handleStatusChange}
+                                onSendReminder={handleSendReminder}
                                 updatingStatus={updatingStatus}
                                 isAdminView={true}
                             />

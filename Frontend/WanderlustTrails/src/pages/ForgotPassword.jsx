@@ -1,18 +1,26 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx 
+// path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ForgotPassword.jsx
 import React, { useState } from 'react';
 import $ from 'jquery';
 import { toast } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
 
 const ForgotPassword = () => {
+    // State for email or phone input
     const [emailOrPhone, setEmailOrPhone] = useState('');
+    // State for OTP input
     const [otp, setOtp] = useState('');
+    // State for new password input
     const [newPassword, setNewPassword] = useState('');
+    // State for confirm password input
     const [confirmPassword, setConfirmPassword] = useState('');
+    // Controls display of OTP verification form
     const [showVerification, setShowVerification] = useState(false);
+    // Loading state to disable inputs and show progress
     const [loading, setLoading] = useState(false);
+
     const navigate = useNavigate();
 
+    // Handles submitting email/phone to receive OTP
     const handleSubmitIdentifier = (e) => {
         e.preventDefault();
         setLoading(true);
@@ -51,10 +59,12 @@ const ForgotPassword = () => {
         });
     };
 
+    // Handles OTP verification and password reset
     const handleVerifyOtp = (e) => {
         e.preventDefault();
         setLoading(true);
 
+        // Client-side validation for password and OTP inputs
         if (newPassword !== confirmPassword) {
             toast.error('Passwords do not match');
             setLoading(false);
@@ -81,11 +91,13 @@ const ForgotPassword = () => {
                 console.log('Verify response:', response); // Debug
                 if (response.success) {
                     toast.success(response.message);
+                    // Clear form fields and reset UI
                     setEmailOrPhone('');
                     setOtp('');
                     setNewPassword('');
                     setConfirmPassword('');
                     setShowVerification(false);
+                    // Redirect to login after successful reset
                     navigate('/login');
                 } else {
                     toast.error(response.message);
@@ -114,6 +126,7 @@ const ForgotPassword = () => {
                 <h2 className="text-2xl font-bold text-center mb-6 text-orange-600">Forgot Password</h2>
 
                 {!showVerification ? (
+                    // Form for entering email or phone to request OTP
                     <form onSubmit={handleSubmitIdentifier} noValidate>
                         <div className="mb-4">
                             <label htmlFor="emailOrPhone" className="block text-gray-700 font-bold mb-2">
@@ -144,6 +157,7 @@ const ForgotPassword = () => {
                         </p>
                     </form>
                 ) : (
+                    // Form for entering OTP and resetting password
                     <form onSubmit={handleVerifyOtp} noValidate>
                         <div className="mb-4">
                             <label htmlFor="otp" className="block text-gray-700 font-bold mb-2">

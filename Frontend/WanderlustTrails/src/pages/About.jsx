@@ -1,32 +1,40 @@
-//path: Frontend/WanderlustTrails/src/pages/About.jsx
+// Frontend/WanderlustTrails/src/pages/About.jsx
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 function About() {
+  // State to store fetched GitHub user data
   const [data, setData] = useState(null);
+  // State to indicate loading status
   const [isLoading, setIsLoading] = useState(true);
+  // State to capture any fetch errors
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Fetch GitHub profile data on component mount
     fetch('https://api.github.com/users/vamshikittu22')
       .then((response) => {
         if (!response.ok) {
+          // Throw error if response not ok
           throw new Error('Failed to fetch GitHub data');
         }
         return response.json();
       })
       .then((data) => {
-        // Minimal log for debugging
+        // Log followers count for debugging
         console.log('GitHub data fetched: Followers:', data.followers);
+        // Store the fetched data in state
         setData(data);
-        setIsLoading(false);
+        setIsLoading(false); // Loading done
       })
       .catch((err) => {
+        // Log and set error state on failure
         console.error('GitHub fetch error:', err.message);
         setError(err.message);
-        setIsLoading(false);
+        setIsLoading(false); // Loading done even if error
       });
-  }, []);
+  }, []); // Empty dependency array ensures this runs once on mount
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-200 py-12 px-4 sm:px-6 lg:px-8">
@@ -47,12 +55,15 @@ function About() {
             Meet the Creator
           </h2>
           {isLoading ? (
+            // Loading message while fetching
             <p className="text-center">Loading GitHub profile...</p>
           ) : error ? (
+            // Error message if fetch failed
             <p className="text-center text-red-400">
               {error}. Please try again later.
             </p>
           ) : data ? (
+            // Display GitHub avatar, intro text, and follower count
             <div className="flex flex-col items-center">
               <img
                 src={data.avatar_url}
@@ -69,6 +80,7 @@ function About() {
               </p>
             </div>
           ) : (
+            // Fallback if no data available
             <p className="text-center">No data available.</p>
           )}
         </div>
@@ -79,6 +91,7 @@ function About() {
             Why WanderlustTrails?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Feature Cards */}
             <div className="bg-gray-800 p-6 rounded-lg border border-red-900">
               <h3 className="text-xl font-medium text-orange-700 mb-2">
                 Customized Itineraries

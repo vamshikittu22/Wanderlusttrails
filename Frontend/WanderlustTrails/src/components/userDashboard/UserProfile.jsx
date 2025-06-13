@@ -1,24 +1,33 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/components/userDashboard/UserProfile.jsx
+// path: Wanderlusttrails/Frontend/WanderlustTrails/src/components/userDashboard/UserProfile.jsx
 
 import React, { useState, useEffect } from "react";
 import $ from "jquery"; 
 import { toast } from "react-toastify";
 import UserForm from "./../forms/UserForm.jsx";
 
-// UserProfile component
+// UserProfile component: handles displaying and editing user profile info, and changing password with OTP verification
 const UserProfile = () => {
-  // State to manage user data and form visibility
-  const [user, setUser] = useState(null); // Initialize user state to null
-  const [isEditing, setIsEditing] = useState(false); // State to manage editing mode
-  const [isChangingPassword, setIsChangingPassword] = useState(false); // State to manage password change mode
+  // State to store user object (profile info)
+  const [user, setUser] = useState(null); // null until fetched from backend
+
+  // State to toggle edit mode for profile info
+  const [isEditing, setIsEditing] = useState(false);
+
+  // State to toggle password change mode
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // State to store password fields and OTP during password change
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmNewPassword: "",
     otp: "",
-  }); // State to manage password data
-  const [otpSent, setOtpSent] = useState(false); // State to manage OTP sent status
+  });
 
+  // State to track if OTP has been sent (used for password change flow)
+  const [otpSent, setOtpSent] = useState(false);
+
+  // State to hold user profile form data, initially empty strings (will be set from backend data)
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
@@ -32,24 +41,27 @@ const UserProfile = () => {
     city: "",
     state: "",
     zip: "",
-  }); // State to manage profile data
+  });
 
-  // Fetch user profile on mount
+  // Fetch user profile data from backend on component mount
   useEffect(() => {
     const fetchUserProfile = () => {
+      // Retrieve logged-in userId from localStorage
       const userId = localStorage.getItem("userId");
       if (!userId) {
         toast.error("Please log in to view your profile.");
         return;
       }
 
-      $.ajax({ // Fetch user profile data from the server
+      // AJAX GET request to fetch user profile data
+      $.ajax({
         url: `http://localhost/WanderlustTrails/Backend/config/UserDashboard/manageUserProfile/viewProfile.php?userID=${userId}`,
         type: "GET",
         dataType: "json",
         success: function (response) {
           console.log("Fetched user data:", response);
           if (response.success) {
+            // Set user and profileData state with the first data object returned
             const userData = response.data[0];
             setUser(userData);
             setProfileData(userData);
@@ -57,8 +69,8 @@ const UserProfile = () => {
             toast.error("Failed to fetch profile: " + response.message);
           }
         },
-        // Handle error response
         error: function (xhr) {
+          // On error, attempt to parse and display error message or fallback to status text
           console.error("Error fetching profile:", xhr);
           let errorMessage = "Error fetching profile: Server error";
           try {
@@ -73,15 +85,22 @@ const UserProfile = () => {
     };
 
     fetchUserProfile();
-  }, []); // Fetch user profile data on component mount
+  }, []); // Empty dependency array ensures this runs once on mount
 
-  // Handle profile update submission
+  /**
+   * Handle profile update form submission.
+   * Sends updated profile data to backend via POST request.
+   * @param {Event} e - Form submission event
+   * @param {Object} updatedProfileData - Data from the form to update profile
+   */
   const handleProfileSubmit = (e, updatedProfileData) => {
     e.preventDefault();
     const userId = localStorage.getItem("userId");
 
     console.log("Submitting profile data:", updatedProfileData);
-    $.ajax({ // Send updated profile data to the server
+
+    // AJAX POST request to update profile info
+    $.ajax({
       url: "http://localhost/WanderlustTrails/Backend/config/UserDashboard/manageUserProfile/editProfile.php",
       type: "POST",
       contentType: "application/json",
@@ -90,14 +109,14 @@ const UserProfile = () => {
       success: function (response) {
         console.log("Edit response:", response);
         if (response.success) {
-          setUser({ ...user, ...updatedProfileData }); // Update user state with new data
+          // Update local user state with updated profile data and exit editing mode
+          setUser({ ...user, ...updatedProfileData });
           setIsEditing(false);
           toast.success("Profile updated successfully!");
         } else {
           toast.error("Failed to update profile: " + response.message);
         }
       },
-      // Handle error response
       error: function (xhr) {
         console.error("Error updating profile:", xhr);
         let errorMessage = "Error updating profile: Server error";
@@ -112,15 +131,21 @@ const UserProfile = () => {
     });
   };
 
-  // Verify current password and send OTP
+  /**
+   * Handle form submission to verify current password before sending OTP for password change.
+   * @param {Event} e - Form submission event
+   */
   const handlePasswordVerification = (e) => {
     e.preventDefault();
+
+    // Validate current password is entered
     if (!passwordData.currentPassword) {
       toast.error("Current password is required");
       return;
     }
 
-    $.ajax({ // Verify current password
+    // AJAX POST request to verify current password
+    $.ajax({
       url: "http://localhost/WanderlustTrails/Backend/config/auth/verifyPassword.php",
       type: "POST",
       contentType: "application/json",
@@ -129,7 +154,8 @@ const UserProfile = () => {
       success: function (verifyResponse) {
         console.log("Verification response:", verifyResponse);
         if (verifyResponse.success) {
-          $.ajax({ // Send OTP to the user's email
+          // If verified, send OTP to user's email
+          $.ajax({
             url: "http://localhost/WanderlustTrails/Backend/config/auth/forgotPassword.php",
             type: "POST",
             contentType: "application/json",
@@ -138,13 +164,12 @@ const UserProfile = () => {
             success: function (otpResponse) {
               console.log("OTP response:", otpResponse);
               if (otpResponse.success) {
-                setOtpSent(true);
+                setOtpSent(true); // Mark that OTP has been sent
                 toast.success("OTP sent to your email!");
               } else {
                 toast.error("Failed to send OTP: " + otpResponse.message);
               }
             },
-            // Handle error response
             error: function (xhr) {
               console.error("Error sending OTP:", xhr);
               let errorMessage = "Error sending OTP: Server error";
@@ -161,7 +186,6 @@ const UserProfile = () => {
           toast.error("Verification failed: " + verifyResponse.message);
         }
       },
-      // Handle error response
       error: function (xhr) {
         console.error("Error verifying password:", xhr);
         let errorMessage = "Error verifying password: Server error";
@@ -176,11 +200,15 @@ const UserProfile = () => {
     });
   };
 
-  // Handle password change submission with OTP verification
+  /**
+   * Handle submission of new password with OTP verification.
+   * Validates password inputs before sending request to change password.
+   * @param {Event} e - Form submission event
+   */
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
 
-    // Validate password fields
+    // Basic validation for new password and OTP fields
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
       toast.error("New passwords do not match");
       return;
@@ -194,7 +222,8 @@ const UserProfile = () => {
       return;
     }
 
-    $.ajax({ // Verify OTP and change password
+    // AJAX POST request to verify OTP and update password
+    $.ajax({
       url: "http://localhost/WanderlustTrails/Backend/config/auth/verifyOtp.php",
       type: "POST",
       contentType: "application/json",
@@ -207,6 +236,7 @@ const UserProfile = () => {
       success: function (response) {
         console.log("Verify response:", response);
         if (response.success) {
+          // Reset states on successful password change
           setIsChangingPassword(false);
           setOtpSent(false);
           setPasswordData({ currentPassword: "", newPassword: "", confirmNewPassword: "", otp: "" });
@@ -215,7 +245,6 @@ const UserProfile = () => {
           toast.error("Failed to change password: " + response.message);
         }
       },
-      // Handle error response
       error: function (xhr) {
         console.error("Error changing password:", xhr);
         let errorMessage = "Error changing password: Server error";
@@ -230,19 +259,25 @@ const UserProfile = () => {
     });
   };
 
-  // Handle input changes for password fields
+  /**
+   * Update passwordData state on input field changes.
+   * @param {Event} e - Input change event
+   */
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Show loading state if user data is not available
+  // Display loading message while user data is being fetched
   if (!user) return <div className="p-8 text-white">Loading...</div>; 
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-3xl p-6 bg-gray-700 text-white rounded-lg shadow-md">
+        {/* Heading */}
         <h2 className="text-2xl text-orange-600 font-bold mb-6 text-center">Edit Profile</h2>
+
+        {/* UserForm component to edit profile data */}
         <UserForm
           formData={profileData}
           setFormData={setProfileData}
@@ -251,6 +286,8 @@ const UserProfile = () => {
           submitLabel="Save Changes"
           cancelAction={() => setIsEditing(false)}
         />
+
+        {/* Buttons to toggle edit mode and password change mode */}
         {!isEditing && (
           <div className="text-center mt-6 space-x-2">
             <button
@@ -268,9 +305,11 @@ const UserProfile = () => {
           </div>
         )}
 
+        {/* Password change form */}
         {isChangingPassword && (
           <div className="mt-6">
             <h3 className="text-xl text-orange-600 font-bold mb-4 text-center">Change Password</h3>
+            {/* Show form to enter current password and send OTP */}
             {!otpSent ? (
               <form onSubmit={handlePasswordVerification} noValidate>
                 <div className="mb-4 relative">
@@ -297,6 +336,7 @@ const UserProfile = () => {
                 </div>
               </form>
             ) : (
+              /* Show form to enter OTP and new password */
               <form onSubmit={handlePasswordSubmit} noValidate>
                 <div className="mb-4 relative">
                   <label htmlFor="otp" className="block text-sm text-sky-300 font-bold mb-2">

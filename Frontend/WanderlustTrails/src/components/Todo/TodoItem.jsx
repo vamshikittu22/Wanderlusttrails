@@ -1,27 +1,29 @@
+//path: Frontend/WanderlustTrails/src/components/Todo/TodoItem.jsx
 import React from 'react';
 import { useState } from 'react';
 import { useTodo } from '../../context/TodoContext';
 
 // Component to display and manage individual todo items
 function TodoItem({ todo }) {
-    const [isTodoEditable, setIsTodoEditable] = useState(false); // State to toggle edit mode
-    const [todoMsg, setTodoMsg] = useState(todo.task || ""); // State for todo task text, defaults to todo.task
-    const [dueDate, setDueDate] = useState(todo.due_date || ""); // State for due date, defaults to todo.due_date
+    const [isTodoEditable, setIsTodoEditable] = useState(false); // State to toggle edit mode for this todo item
+    const [todoMsg, setTodoMsg] = useState(todo.task || ""); // State for the todo task text, initialized from prop
+    const [dueDate, setDueDate] = useState(todo.due_date || ""); // State for the todo due date, initialized from prop
 
-    const { updateTodo, deleteTodo, toggleComplete, sendEmailReminder } = useTodo(); // Access todo context functions
+    // Destructure context functions for updating, deleting, toggling completion, and sending email reminders
+    const { updateTodo, deleteTodo, toggleComplete, sendEmailReminder } = useTodo();
 
-    // Handle saving edits to the todo
+    // Function to save edits made to the todo item
     const editTodo = () => {
-        updateTodo(todo.id, { ...todo, task: todoMsg, due_date: dueDate });
-        setIsTodoEditable(false);
+        updateTodo(todo.id, { ...todo, task: todoMsg, due_date: dueDate }); // Update todo with new task and due date
+        setIsTodoEditable(false); // Exit edit mode
     };
 
-    // Handle toggling the completion status of the todo
+    // Function to toggle the completion status of the todo
     const toggleCompleted = () => {
         toggleComplete(todo.id);
     };
 
-    // Handle sending an email reminder for the todo
+    // Function to send an email reminder for the todo
     const handleSendEmail = () => {
         sendEmailReminder(todo.id);
     };
@@ -30,6 +32,7 @@ function TodoItem({ todo }) {
         <div
             className={`flex border border-black/10 rounded-lg px-3 py-1.5 gap-x-3 shadow-sm shadow-white/50 duration-300 text-black ${todo.completed ? "bg-[#c6e9a7]" : "bg-[#ccbed7]"}`}
         >
+            {/* Checkbox to mark todo as completed */}
             <input
                 type="checkbox"
                 className="cursor-pointer"
@@ -37,43 +40,48 @@ function TodoItem({ todo }) {
                 onChange={toggleCompleted}
             />
             <div className="flex flex-col w-full">
+                {/* Input for todo task text, editable only in edit mode */}
                 <input
                     type="text"
                     className={`border outline-none w-full bg-transparent rounded-lg ${isTodoEditable ? "border-blue/10 px-2" : "border-transparent"}`}
-                    style={{ textDecoration: todo.completed ? "line-through" : "none" }}
+                    style={{ textDecoration: todo.completed ? "line-through" : "none" }} // Line-through if completed
                     value={todoMsg}
                     onChange={(e) => setTodoMsg(e.target.value)}
-                    readOnly={!isTodoEditable}
+                    readOnly={!isTodoEditable} // Make input readonly if not editing
                 />
                 <div className="flex items-center gap-2 mt-1">
                     <label className="text-sm text-black">Due:</label>
+                    {/* Input for due date, editable only in edit mode */}
                     <input
                         type="date"
                         className={`border outline-none bg-transparent rounded-lg text-sm ${isTodoEditable ? "border-blue/10 px-2" : "border-transparent"}`}
                         value={dueDate}
                         onChange={(e) => setDueDate(e.target.value)}
-                        readOnly={!isTodoEditable}
+                        readOnly={!isTodoEditable} // Make input readonly if not editing
                     />
                 </div>
             </div>
+            {/* Edit button toggles edit mode or saves changes */}
             <button
                 className="inline-flex w-8 h-8 rounded-lg text-sm border border-black/10 justify-center items-center bg-gray-50 hover:bg-gray-100 shrink-0 disabled:opacity-50"
                 onClick={() => {
-                    if (todo.completed) return;
+                    if (todo.completed) return; // Disable edit if completed
                     if (isTodoEditable) {
-                        editTodo();
-                    } else setIsTodoEditable((prev) => !prev);
+                        editTodo(); // Save edits if currently editing
+                    } else setIsTodoEditable((prev) => !prev); // Enter edit mode
                 }}
                 disabled={todo.completed}
             >
-                {isTodoEditable ? "📁" : "✏️"}
+                {isTodoEditable ? "📁" : "✏️"} {/* Icon changes based on edit mode */}
             </button>
+            {/* Delete button removes the todo */}
             <button
                 className="inline-flex w-8 h-8 rounded-lg text-sm border border-black/10 justify-center items-center bg-gray-50 hover:bg-gray-100 shrink-0"
                 onClick={() => deleteTodo(todo.id)}
             >
                 ❌
             </button>
+            {/* Email reminder button sends an email */}
             <button
                 className="inline-flex w-8 h-8 rounded-lg text-sm border border-black/10 justify-center items-center bg-gray-50 hover:bg-gray-100 shrink-0"
                 onClick={handleSendEmail}

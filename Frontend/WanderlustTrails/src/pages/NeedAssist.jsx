@@ -1,19 +1,23 @@
-//path: Frontend/WanderlustTrails/src/pages/NeedAssist.jsx
+// Path: Frontend/WanderlustTrails/src/pages/NeedAssist.jsx
+
 import React from 'react';
 import mockData from '../data/mockData';
 
+// Component to display language phrases and tourist tips
 const LanguageAndTouristAssist = () => {
+  // Log mock data for debugging
   console.log('LanguageAndTouristAssist rendered with mock data:', mockData.language);
 
   return (
     <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
+        {/* Page Title */}
         <h1 className="text-3xl font-bold text-indigo-300 mb-8 text-center">
           Language & Tourist Assistance
         </h1>
 
         <div className="bg-gray-800 rounded-xl p-6 shadow-lg space-y-8">
-          {/* Phrases */}
+          {/* Useful Phrases Section */}
           <div>
             <h2 className="text-xl font-medium text-orange-700 mb-4">Useful Phrases</h2>
             {mockData.language.phrases.length > 0 ? (
@@ -31,7 +35,7 @@ const LanguageAndTouristAssist = () => {
             )}
           </div>
 
-          {/* Tips */}
+          {/* Tourist Tips Section */}
           <div>
             <h2 className="text-xl font-medium text-orange-700 mb-4">Tourist Tips</h2>
             {mockData.language.tips.length > 0 ? (

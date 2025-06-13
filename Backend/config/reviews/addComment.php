@@ -2,15 +2,25 @@
 // Path: Wanderlusttrails/Backend/config/reviews/addComment.php
 // Adds a comment to a review in the database via POST request, expects JSON data.
 
+// Set CORS header to allow requests only from the frontend app running on localhost:5173
 header("Access-Control-Allow-Origin: http://localhost:5173");
+
+// Specify that the response will be JSON and UTF-8 encoded
 header("Content-Type: application/json; charset=UTF-8");
+
+// Allow HTTP POST and OPTIONS methods (OPTIONS for CORS preflight)
 header("Access-Control-Allow-Methods: POST, OPTIONS");
+
+// Allow Content-Type header in incoming requests
 header("Access-Control-Allow-Headers: Content-Type");
 
-require_once __DIR__ . "/../inc_logger.php"; // Include the logger for logging purposes
+// Include the logger to track API activity and errors
+require_once __DIR__ . "/../inc_logger.php";
 
+// Log that the API endpoint was hit and which method was used
 Logger::log("addComment API Started - Method: {$_SERVER['REQUEST_METHOD']}");
-// Preflight test for CORS
+
+// Handle preflight CORS OPTIONS request by responding with 200 OK and exit
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     Logger::log("Handling OPTIONS request for addComment");
     http_response_code(200);
@@ -19,15 +29,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 try {
-    require_once __DIR__ . "/inc_reviewModel.php"; // Include the review model for database operations
-    require_once __DIR__ . "/../inc_validationClass.php"; // Include the validation class
+    // Include the review model for database interactions and validation class for input checks
+    require_once __DIR__ . "/inc_reviewModel.php";
+    require_once __DIR__ . "/../inc_validationClass.php";
 } catch (Exception $e) {
+    // Log and respond with 500 if includes fail
     Logger::log("Error loading required files: {$e->getMessage()}");
     http_response_code(500);
     echo json_encode(["success" => false, "message" => "Server error: Unable to load required files"]);
     exit;
 }
-// Check if the request method is POST
+
+// Only allow POST requests for adding comments
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
     http_response_code(405);
@@ -35,26 +48,33 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$rawInput = file_get_contents("php://input"); // Get the raw input from the request body
-$data = json_decode($rawInput, true); // Decode the JSON input
+// Get raw JSON input from request body
+$rawInput = file_get_contents("php://input");
+
+// Decode JSON input to associative array
+$data = json_decode($rawInput, true);
+
+// Validate JSON decoding success
 if (!$data) {
     Logger::log("Invalid JSON input: " . ($rawInput ?: 'empty'));
     http_response_code(400);
     echo json_encode(["success" => false, "message" => "Invalid or missing JSON data"]);
     exit;
 }
-// Get the data from the request
+
+// Extract fields with defaults
 $userId = $data['userId'] ?? '';
 $reviewId = $data['reviewId'] ?? '';
 $comment = $data['comment'] ?? '';
 $parentId = $data['parentId'] ?? null;
 
+// Log received input (truncate comment to first 100 chars for log brevity)
 Logger::log("Received data - userId: $userId, reviewId: $reviewId, parentId: " . ($parentId ?? 'null') . ", comment: " . substr($comment, 0, 100));
 
-// Initialize validation class
+// Instantiate validation class
 $validator = new ValidationClass();
 
-// Validate required fields
+// Validate required fields presence
 $requiredFields = ['userId', 'reviewId', 'comment'];
 $requiredValidation = $validator->validateRequiredFields($data, $requiredFields);
 if (!$requiredValidation['success']) {
@@ -64,10 +84,10 @@ if (!$requiredValidation['success']) {
     exit;
 }
 
-// Validate numeric fields
+// Validate that userId and reviewId are numeric and valid
 $numericValidations = [
-    $validator->validateNumeric($userId, 'User ID'), // Ensure userId is numeric and positive
-    $validator->validateNumeric($reviewId, 'Review ID') // Ensure reviewId is numeric and positive
+    $validator->validateNumeric($userId, 'User ID'),
+    $validator->validateNumeric($reviewId, 'Review ID')
 ];
 foreach ($numericValidations as $validation) {
     if (!$validation['success']) {
@@ -78,7 +98,7 @@ foreach ($numericValidations as $validation) {
     }
 }
 
-// Validate user exists
+// Validate user existence in database
 $userValidation = $validator->validateUserExists($userId);
 if (!$userValidation['success']) {
     Logger::log("Validation failed: {$userValidation['message']}");
@@ -87,16 +107,16 @@ if (!$userValidation['success']) {
     exit;
 }
 
-// Validate admin role
-$adminValidation = $validator->validateAdminRole($userId);
-if (!$adminValidation['success']) {
-    Logger::log("Validation failed: {$adminValidation['message']}");
-    http_response_code(400);
-    echo json_encode($adminValidation);
-    exit;
-}
+// Optionally, validate admin role if comments require admin permissions (currently commented out)
+// $adminValidation = $validator->validateAdminRole($userId);
+// if (!$adminValidation['success']) {
+//     Logger::log("Validation failed: {$adminValidation['message']}");
+//     http_response_code(400);
+//     echo json_encode($adminValidation);
+//     exit;
+// }
 
-// Validate review exists
+// Validate that the review exists
 $reviewValidation = $validator->validateReviewId($reviewId);
 if (!$reviewValidation['success']) {
     Logger::log("Validation failed: {$reviewValidation['message']}");
@@ -105,7 +125,7 @@ if (!$reviewValidation['success']) {
     exit;
 }
 
-// Validate parent comment (if provided)
+// Validate parent comment if parentId is provided (must belong to the same review)
 $parentValidation = $validator->validateParentComment($parentId, $reviewId);
 if (!$parentValidation['success']) {
     Logger::log("Validation failed: {$parentValidation['message']}");
@@ -115,17 +135,22 @@ if (!$parentValidation['success']) {
 }
 
 try {
-    $reviewModel = new ReviewModel(); // Create an instance of the ReviewModel class
-    $result = $reviewModel->addComment($userId, $reviewId, $comment, $parentId); // Call the addComment method to save the comment
+    // Instantiate ReviewModel and attempt to add the comment
+    $reviewModel = new ReviewModel();
+    $result = $reviewModel->addComment($userId, $reviewId, $comment, $parentId);
 
+    // Log result for debugging
     Logger::log("addComment result: " . json_encode($result));
 
+    // Respond with 201 Created if success, else 400 Bad Request
     http_response_code($result['success'] ? 201 : 400);
-    echo json_encode($result); // Return the result as JSON
+    echo json_encode($result);
 } catch (Exception $e) {
+    // Log any exceptions and return 500 error
     Logger::log("Exception in addComment: {$e->getMessage()}");
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => "Server error: {$e->getMessage()}"]); // Return error message
+    echo json_encode(["success" => false, "message" => "Server error: {$e->getMessage()}"]);
 }
+
 exit;
 ?>

@@ -1,64 +1,46 @@
+// path: Frontend/WanderlustTrails/src/components/SortingComponent.jsx
 import React, { useState } from 'react';
 
 const SortingComponent = ({ items, setSortedItems, sortOptions }) => {
-    const [sortKey, setSortKey] = useState(sortOptions[0]?.key || '');
+  // State to keep track of the currently selected sort key
+  const [sortKey, setSortKey] = useState(sortOptions[0]?.key || '');
 
-    const handleSortChange = (e) => {
-        const selectedKey = e.target.value;
-        setSortKey(selectedKey);
+  // Handler for when the user changes the sort option
+  const handleSortChange = (e) => {
+    const selectedKey = e.target.value;
+    setSortKey(selectedKey);
 
-        const selectedOption = sortOptions.find(opt => opt.key === selectedKey);
-        if (!selectedOption) return;
+    // Find the corresponding sort option object based on the key
+    const selectedOption = sortOptions.find(opt => opt.key === selectedKey);
+    if (!selectedOption) return;
 
-        const { sortFunction } = selectedOption;
-        const sortedItems = [...items].sort(sortFunction);
-        setSortedItems(sortedItems);
-    };
+    // Destructure the sort function from the selected option
+    const { sortFunction } = selectedOption;
 
-    return (
-        <div className="flex items-center space-x-2">
-            <label className="text-gray-200 font-semibold">Sort by:</label>
-            <select
-                value={sortKey}
-                onChange={handleSortChange}
-                className="bg-gray-700 border border-gray-300 rounded px-3 py-1 text-white focus:outline-none focus:border-blue-500"
-            >
-                {sortOptions.map(option => (
-                    <option key={option.key} value={option.key}>
-                        {option.label}
-                    </option>
-                ))}
-            </select>
-        </div>
-    );
+    // Create a copy of items and sort using the provided sort function
+    const sortedItems = [...items].sort(sortFunction);
+
+    // Update the sorted items in the parent component state
+    setSortedItems(sortedItems);
+  };
+
+  return (
+    <div className="flex items-center space-x-2">
+      <label className="text-gray-200 font-semibold">Sort by:</label>
+      <select
+        value={sortKey}
+        onChange={handleSortChange}
+        className="bg-gray-700 border border-gray-300 rounded px-3 py-1 text-white focus:outline-none focus:border-blue-500"
+      >
+        {/* Render sort options as select dropdown options */}
+        {sortOptions.map(option => (
+          <option key={option.key} value={option.key}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
 };
 
 export default SortingComponent;
-
-// Example usage:
-/*
-<SortingComponent
-    items={filteredBookings}
-    setSortedItems={setFilteredBookings}
-    sortOptions={[
-        {
-            key: 'id-asc',
-            label: 'Booking ID (Asc)',
-            sortFunction: (a, b) => a.id - b.id
-        },
-        {
-            key: 'id-desc',
-            label: 'Booking ID (Desc)',
-            sortFunction: (a, b) => b.id - a.id
-        },
-        {
-            key: 'status',
-            label: 'Status',
-            sortFunction: (a, b) => {
-                const statusOrder = { confirmed: 1, pending: 2, canceled: 3 };
-                return statusOrder[a.status] - statusOrder[b.status];
-            }
-        }
-    ]}
-/>
-*/

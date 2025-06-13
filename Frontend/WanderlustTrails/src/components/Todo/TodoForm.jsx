@@ -1,3 +1,5 @@
+//path Frontend/WanderlustTrails/src/Todo/TodoForm.jsx
+
 import React from 'react';
 import { useState } from 'react';
 import { useTodo } from '../../context/TodoContext';
@@ -10,11 +12,11 @@ function TodoForm() {
 
     // Handle form submission to add a new todo
     const add = (e) => {
-        e.preventDefault();
+        e.preventDefault(); // Prevent default form submission behavior
         if (!todo || !dueDate) return; // Prevent submission if fields are empty
-        addTodo({ todo, completed: false, due_date: dueDate });
-        setTodo(""); // Reset todo input
-        setDueDate(""); // Reset due date input
+        addTodo({ todo, completed: false, due_date: dueDate }); // Add new todo with default 'completed' false
+        setTodo(""); // Reset todo input field
+        setDueDate(""); // Reset due date input field
     };
 
     return (
@@ -24,8 +26,8 @@ function TodoForm() {
                     type="text"
                     placeholder="Enter Todo task to remember..."
                     className="w-full border border-black/10 rounded-l-lg px-3 outline-none duration-150 bg-white/20 py-1.5"
-                    value={todo}
-                    onChange={(e) => setTodo(e.target.value)}
+                    value={todo} // Bind input value to todo state
+                    onChange={(e) => setTodo(e.target.value)} // Update todo state on input change
                 />
                 <button
                     type="submit"
@@ -39,10 +41,10 @@ function TodoForm() {
                 <input
                     type="date"
                     className="border border-black/10 rounded-lg px-3 outline-none duration-150 bg-white/20 py-1.5 text-white"
-                    min={new Date().toISOString().split("T")[0]} // Prevent past dates
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    required
+                    min={new Date().toISOString().split("T")[0]} // Prevent selection of past dates by setting minimum to today's date
+                    value={dueDate} // Bind input value to dueDate state
+                    onChange={(e) => setDueDate(e.target.value)} // Update dueDate state on input change
+                    required // Make due date input required
                 />
             </div>
         </form>

@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Backend/config/signupuser.php
+// path: Wanderlusttrails/Backend/config/signupuser.php
 // This file handles user registration by accepting POST requests with user data.
 // It validates the data, encrypts the password, and stores the user information in the database.
 
@@ -23,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . "/inc_userModel.php"; // Include user model for database operations
 require_once __DIR__ . "/../inc_validationClass.php"; // Include validation class for validation operations
 
-// Include the logger for logging purposes
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Get the data sent with the POST request
     $data = json_decode(file_get_contents("php://input"), true); 
@@ -100,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $lastName = trim($data['lastName']);
     $userName = trim($data['userName']);
     $email = filter_var($data['email'], FILTER_SANITIZE_EMAIL);
-    $password = $data['password']; //do not trim
+    $password = $data['password']; // do not trim password
     $dob = trim($data['dob'] ?? '');  
     $gender = trim($data['gender'] ?? '');
     $nationality = trim($data['nationality'] ?? '');
@@ -111,21 +110,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $zip = trim($data['zip'] ?? '');
 
     // Instantiate UserModel class to interact with the database for user registration
-    $userModel = new UserModel(); // Create an instance of the UserModel class
-    $result = $userModel->registerUser($firstName, $lastName,$userName, $email, $password, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip); 
+    $userModel = new UserModel();
+    $result = $userModel->registerUser($firstName, $lastName, $userName, $email, $password, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip); 
 
     // Log the result of the user registration process
     Logger::log("signupuser result for email: $email - " . ($result['success'] ? "Success: {$result['message']}" : "Failed: {$result['message']}"));
 
     // Send the response based on the success or failure of the registration process
     http_response_code($result['success'] ? 201 : 400);  // HTTP 201 for success, 400 for failure
-    echo json_encode($result);  // Return the result of the registration
+    echo json_encode($result);
     exit;
 }
 
 // If the request method is not POST, log the invalid method and send a 405 Method Not Allowed response
 Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
-http_response_code(405);  // Method Not Allowed
+http_response_code(405);
 echo json_encode(["success" => false, "message" => "Method not allowed"]);
 exit;
 ?>

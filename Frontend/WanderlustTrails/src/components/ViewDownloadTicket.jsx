@@ -1,3 +1,4 @@
+// path: Frontend/WanderlustTrails/src/components/ViewDownloadTicket.jsx
 import React, { useRef } from 'react';
 import html2pdf from 'html2pdf.js';
 import Barcode from 'react-barcode';

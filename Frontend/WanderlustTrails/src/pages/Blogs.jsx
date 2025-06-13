@@ -1,28 +1,36 @@
+
+// path to: Frontend/WanderlustTrails/src/pages/Blogs.jsx
+
 import React, { useState, useEffect } from 'react';
-import BlogForm from './../components/forms/BlogForm';
-import FilterSortBar from '../components/FilterSortBar';
-import Pagination from '../components/Pagination';
+import BlogForm from './../components/forms/BlogForm'; // Blog form component for create/edit
+import FilterSortBar from '../components/FilterSortBar'; // Component to handle sorting/filtering UI
+import Pagination from '../components/Pagination'; // Pagination UI component
 
 const Blogs = () => {
-  // State for blogs, form data, popups, sorting, and pagination
-  const [blogs, setBlogs] = useState([]);
-  const [error, setError] = useState(null);
-  const [currentUserId, setCurrentUserId] = useState(localStorage.getItem('userId') || '1');
+  // State declarations for blog data, errors, current user, form, popup modals, filtered/sorted blogs, and pagination
+  const [blogs, setBlogs] = useState([]); // All blogs fetched from backend
+  const [error, setError] = useState(null); // To store any errors during fetch or actions
+  const [currentUserId, setCurrentUserId] = useState(localStorage.getItem('userId') || '1'); // Current logged in user ID from localStorage, default '1' if missing
+
+  // Form state for blog creation/editing, includes content, title, status, media etc.
   const [formData, setFormData] = useState({
-    blogId: null,
+    blogId: null,          // Null for new blogs; populated with blog id when editing
     title: '',
     content: '',
-    status: 'draft',
-    existing_media: [],
-    files: [],
+    status: 'draft',       // draft or published
+    existing_media: [],    // media already uploaded for blog (used in edit)
+    files: [],             // new files to upload
   });
-  const [popup, setPopup] = useState(null);
-  const [selectedBlog, setSelectedBlog] = useState(null);
-  const [filteredBlogs, setFilteredBlogs] = useState([]); // For filtered and sorted blogs
-  const [currentPage, setCurrentPage] = useState(1);
-  const [blogsPerPage] = useState(6); // Number of blogs per page
 
-  // Fetch blogs on component mount
+  const [popup, setPopup] = useState(null);       // Tracks which popup/modal is open ('create', 'edit', 'view', 'delete', or null)
+  const [selectedBlog, setSelectedBlog] = useState(null); // Blog selected for viewing, editing, or deleting
+
+  // Blogs after filtering and sorting, used for display and pagination
+  const [filteredBlogs, setFilteredBlogs] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);  // Current page number for pagination
+  const [blogsPerPage] = useState(6);                 // Blogs per page, fixed at 6
+
+  // Fetch blogs from backend API on component mount (runs once)
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
@@ -31,19 +39,21 @@ const Blogs = () => {
         });
         const result = await response.json();
         if (result.success) {
-          setBlogs(result.data);
+          setBlogs(result.data); // Store fetched blogs in state
         } else {
-          setError(result.message || 'Failed to fetch blogs');
+          setError(result.message || 'Failed to fetch blogs'); // Handle backend errors
         }
       } catch (err) {
-        setError('Error fetching blogs: ' + err.message);
+        setError('Error fetching blogs: ' + err.message); // Handle fetch/network errors
       }
     };
 
     fetchBlogs();
   }, []);
 
-  // Filter blogs based on status and user, then apply sorting
+  // Filter blogs to show:
+  // - All published blogs (any user)
+  // - Draft blogs only if owned by current user
   useEffect(() => {
     const filtered = blogs.filter((blog) => {
       const isOwner = Number(blog.userId) === Number(currentUserId);
@@ -54,45 +64,55 @@ const Blogs = () => {
     setFilteredBlogs(filtered);
   }, [blogs, currentUserId]);
 
-  // Handle Quill content change
+  // Handle content changes from Quill editor inside BlogForm
   const handleQuillChange = (value) => {
     setFormData((prev) => ({ ...prev, content: value }));
   };
 
-  // Handle form submission (create or update blog)
+  // Submit handler for blog create or update
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
+    // Prepare FormData to support file uploads
     const data = new FormData();
-    if (formData.blogId) data.append('blogId', formData.blogId);
+    if (formData.blogId) data.append('blogId', formData.blogId); // For editing existing blog
     data.append('userId', currentUserId);
     data.append('title', formData.title);
     data.append('content', formData.content);
     data.append('status', formData.status);
+
+    // Include existing media URLs if any (only for editing)
     if (formData.existing_media.length > 0) {
       data.append('existing_media', JSON.stringify(formData.existing_media));
     }
+
+    // Append new files selected for upload
     formData.files.forEach((file) => {
       data.append('media[]', file);
     });
 
     try {
+      // Choose API endpoint depending on create or update
       const url = formData.blogId
         ? 'http://localhost/Wanderlusttrails/Backend/config/blogs/updateBlog.php'
         : 'http://localhost/Wanderlusttrails/Backend/config/blogs/createBlog.php';
+
       const response = await fetch(url, {
         method: 'POST',
         body: data,
       });
+
       const result = await response.json();
       if (result.success) {
+        // Refresh blogs list after successful create/update
         const fetchResponse = await fetch('http://localhost/Wanderlusttrails/Backend/config/blogs/getBlogs.php');
         const fetchResult = await fetchResponse.json();
         if (fetchResult.success) {
           setBlogs(fetchResult.data);
         }
-        setPopup(null);
+        setPopup(null); // Close modal
+        // Reset form data to defaults
         setFormData({
           blogId: null,
           title: '',
@@ -109,7 +129,7 @@ const Blogs = () => {
     }
   };
 
-  // Handle delete blog
+  // Handle deleting a blog post
   const handleDelete = async () => {
     try {
       const response = await fetch('http://localhost/Wanderlusttrails/Backend/config/blogs/deleteBlog.php', {
@@ -117,8 +137,10 @@ const Blogs = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ blogId: selectedBlog.id, userId: currentUserId }),
       });
+
       const result = await response.json();
       if (result.success) {
+        // Remove deleted blog from state
         setBlogs(blogs.filter((blog) => blog.id !== selectedBlog.id));
         setPopup(null);
         setSelectedBlog(null);
@@ -130,7 +152,7 @@ const Blogs = () => {
     }
   };
 
-  // Define sort options (no filter options since we only need sorting)
+  // Sorting options with keys, labels, and sort functions
   const sortOptions = [
     { key: "none", label: "No Sorting", sortFunction: () => 0 },
     { key: "title_asc", label: "Title (A-Z)", sortFunction: (a, b) => a.title.localeCompare(b.title) },
@@ -139,7 +161,7 @@ const Blogs = () => {
     { key: "date_oldest", label: "Oldest First", sortFunction: (a, b) => new Date(a.createdAt) - new Date(b.createdAt) },
   ];
 
-  // Pagination logic
+  // Pagination calculations: determine which blogs to show on current page
   const indexOfLastBlog = currentPage * blogsPerPage;
   const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
   const currentBlogs = filteredBlogs.slice(indexOfFirstBlog, indexOfLastBlog);
@@ -151,28 +173,30 @@ const Blogs = () => {
           Blogs
         </h1>
 
-        {/* Display error message if any */}
+        {/* Show error messages if any */}
         {error && (
           <p className="text-red-400 text-center mb-8">
             {error}
           </p>
         )}
 
-        {/* Blog tiles container */}
+        {/* Container for blog list with sorting controls */}
         <div className="bg-gray-700 rounded-xl p-6 shadow-lg mb-8">
           <FilterSortBar
             items={filteredBlogs}
             setFilteredItems={setFilteredBlogs}
-            filterOptions={[]} // Empty array to hide filter section
+            filterOptions={[]} // No filters, only sorting
             sortOptions={sortOptions}
           />
 
+          {/* No blogs message */}
           {filteredBlogs.length === 0 ? (
             <p className="text-gray-300 text-center col-span-full">
               No blogs available.
             </p>
           ) : (
             <>
+              {/* Grid of blog cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentBlogs.map((blog) => (
                   <div
@@ -185,6 +209,8 @@ const Blogs = () => {
                     <p className="text-gray-400 text-sm mb-3">
                       By: {blog.firstName} {blog.lastName}
                     </p>
+
+                    {/* Show media thumbnail if available */}
                     {blog.media_urls && blog.media_urls.length > 0 && (
                       <div className="mb-3">
                         {blog.media_urls[0].match(/\.(jpeg|jpg|png|gif)$/i) ? (
@@ -201,7 +227,10 @@ const Blogs = () => {
                         )}
                       </div>
                     )}
+
+                    {/* Action buttons */}
                     <div className="flex flex-wrap gap-2">
+                      {/* If current user owns the blog, show Edit & Delete */}
                       {Number(blog.userId) === Number(currentUserId) ? (
                         <>
                           <button
@@ -215,7 +244,7 @@ const Blogs = () => {
                                 existing_media: blog.media_urls || [],
                                 files: [],
                               });
-                              setPopup('edit');
+                              setPopup('edit'); // Open edit modal
                             }}
                             className="bg-indigo-600 hover:bg-indigo-700 text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
                           >
@@ -224,7 +253,7 @@ const Blogs = () => {
                           <button
                             onClick={() => {
                               setSelectedBlog(blog);
-                              setPopup('delete');
+                              setPopup('delete'); // Open delete confirmation
                             }}
                             className="bg-red-600 hover:bg-red-700 text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
                           >
@@ -232,6 +261,7 @@ const Blogs = () => {
                           </button>
                         </>
                       ) : (
+                        // Otherwise show just View button
                         <button
                           onClick={() => {
                             setSelectedBlog(blog);
@@ -247,6 +277,7 @@ const Blogs = () => {
                 ))}
               </div>
 
+              {/* Pagination controls */}
               <Pagination
                 totalItems={filteredBlogs.length}
                 itemsPerPage={blogsPerPage}
@@ -257,7 +288,7 @@ const Blogs = () => {
           )}
         </div>
 
-        {/* Write Your Blog button container */}
+        {/* Button to open blog creation form */}
         <div className="bg-gray-700 rounded-xl p-4 shadow-lg text-center">
           <button
             onClick={() => {
@@ -269,7 +300,7 @@ const Blogs = () => {
                 existing_media: [],
                 files: [],
               });
-              setPopup('create');
+              setPopup('create'); // Open create modal
             }}
             className="bg-indigo-600 hover:bg-indigo-700 text-gray-200 font-medium py-3 px-6 rounded-lg transition-colors duration-200"
           >
@@ -277,9 +308,10 @@ const Blogs = () => {
           </button>
         </div>
 
-        {/* Popups */}
+        {/* Popup for viewing a blog */}
         {popup === 'view' && selectedBlog && (
           <div className="fixed inset-0 flex items-center justify-center z-50">
+            {/* Overlay background */}
             <div className="absolute inset-0 bg-black bg-opacity-80" onClick={() => setPopup(null)}></div>
             <div className="relative w-full max-w-3xl bg-gray-800 rounded-xl p-6 space-y-4 z-50 max-h-[90vh] overflow-y-auto">
               <h2 className="text-2xl font-bold text-indigo-300 mb-2">
@@ -288,10 +320,12 @@ const Blogs = () => {
               <p className="text-gray-400 text-sm mb-4">
                 By: {selectedBlog.firstName} {selectedBlog.lastName} | Posted on: {new Date(selectedBlog.createdAt).toLocaleDateString()}
               </p>
+              {/* Blog content rendered as HTML */}
               <div
                 className="text-gray-200 prose prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: selectedBlog.content }}
               />
+              {/* Display all media items */}
               {selectedBlog.media_urls && selectedBlog.media_urls.length > 0 && (
                 <div className="flex flex-wrap gap-4 mb-4">
                   {selectedBlog.media_urls.map((url, index) => (
@@ -313,6 +347,7 @@ const Blogs = () => {
                   ))}
                 </div>
               )}
+              {/* Close button */}
               <div className="flex justify-end">
                 <button
                   onClick={() => setPopup(null)}
@@ -325,6 +360,7 @@ const Blogs = () => {
           </div>
         )}
 
+        {/* Popup for creating or editing blog */}
         {(popup === 'edit' || popup === 'create') && (
           <BlogForm
             formData={formData}
@@ -337,8 +373,10 @@ const Blogs = () => {
           />
         )}
 
+        {/* Popup for confirming blog deletion */}
         {popup === 'delete' && selectedBlog && (
           <div className="fixed inset-0 flex items-center justify-center z-50">
+            {/* Overlay background */}
             <div className="absolute inset-0 bg-black bg-opacity-80" onClick={() => setPopup(null)}></div>
             <div className="relative w-full max-w-md bg-gray-800 rounded-xl p-6 space-y-4 z-50">
               <h2 className="text-2xl font-bold text-indigo-300 mb-2">
@@ -347,6 +385,7 @@ const Blogs = () => {
               <p className="text-gray-200">
                 Are you sure you want to delete "{selectedBlog.title}"?
               </p>
+              {/* Delete confirmation buttons */}
               <div className="flex space-x-4">
                 <button
                   onClick={handleDelete}

@@ -5,10 +5,14 @@ import { useNavigate } from 'react-router-dom';
 const Unauthorized = () => {
   const navigate = useNavigate();
 
+  // Redirect to login page after 3 seconds when component mounts
   React.useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       navigate('/login');  // Redirect after a timeout
     }, 3000);
+
+    // Clear timeout if component unmounts before redirect
+    return () => clearTimeout(timer);
   }, [navigate]);
 
   return (

@@ -1,4 +1,5 @@
-//path: Frontend/WanderlustTrails/src/pages/TravelPackages.jsx
+// Path: Frontend/WanderlustTrails/src/pages/TravelPackages.jsx
+
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -9,25 +10,28 @@ import FilterSortBar from "../components/FilterSortBar";
 import Pagination from "../components/Pagination";
 import ReactCardFlip from "react-card-flip";
 
-// Components
+// Main component to display and manage travel packages
 const TravelPackages = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useUser();
-  const [packages, setPackages] = useState([]);
-  const [sortedPackages, setSortedPackages] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(""); // Add searchQuery state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [packagesPerPage] = useState(9);
+  const { isAuthenticated, user } = useUser(); // Access authentication and user info
+  const [packages, setPackages] = useState([]); // All packages fetched
+  const [sortedPackages, setSortedPackages] = useState([]); // Packages after search/sort
+  const [searchQuery, setSearchQuery] = useState(""); // Search input state
+  const [currentPage, setCurrentPage] = useState(1); // Pagination current page
+  const [packagesPerPage] = useState(9); // Packages per page for pagination
 
+  // Custom hook to fetch package data from backend
   const { data, loading, error } = useAjaxFetch(
     `http://localhost/WanderlustTrails/backend/config/AdminDashboard/manageDestinations/viewPackage.php`
   );
 
-  // Check if the user is authenticated and has a valid user ID
+  // Effect to process fetched data
   useEffect(() => {
     console.log("[TravelPackages] Component mounted:", { isAuthenticated, userId: user?.id });
+
     if (data) {
       if (Array.isArray(data)) {
+        // Map raw data to formatted package objects
         const formattedPackages = data.map(item => ({
           id: item.id,
           name: item.name,
@@ -37,8 +41,9 @@ const TravelPackages = () => {
           imageUrl: item.image_url,
         }));
         setPackages(formattedPackages);
-        console.log("[TravelPackages] Packages fetched:", formattedPackages);
         setSortedPackages(formattedPackages);
+        console.log("[TravelPackages] Packages fetched:", formattedPackages);
+
         if (!formattedPackages.length) {
           toast.info("No packages found.");
         }
@@ -48,7 +53,7 @@ const TravelPackages = () => {
     }
   }, [data]);
 
-  // Function to extract searchable text from a package
+  // Helper function to combine searchable fields into a single string
   const getSearchableText = (pkg) => {
     const fields = [
       pkg.id?.toString() || "",
@@ -57,45 +62,44 @@ const TravelPackages = () => {
       pkg.location || "",
       pkg.price?.toString() || "",
     ];
-
     return fields
       .filter(field => field !== null && field !== undefined)
       .map(field => field.toString().toLowerCase())
       .join(" ");
   };
 
-  // Memoize the searched packages to prevent recalculation on every render
+  // Memoized filtered packages based on search query
   const searchedPackages = useMemo(() => {
     return packages.filter(pkg => {
-      if (!searchQuery) return true;
+      if (!searchQuery) return true; // No filtering if empty search
       const searchLower = searchQuery.toLowerCase();
       const searchableText = getSearchableText(pkg);
       return searchableText.includes(searchLower);
     });
   }, [packages, searchQuery]);
 
-  // Update sortedPackages whenever searchedPackages changes
+  // Update sortedPackages and reset page when search results change
   useEffect(() => {
     setSortedPackages(searchedPackages);
-    setCurrentPage(1); // Reset to first page when search query changes
+    setCurrentPage(1);
   }, [searchedPackages]);
 
-  // Function to handle booking a package
-  const handleBooking = pkg => {
+  // Handle user clicking "Book now"
+  const handleBooking = (pkg) => {
     console.log("[TravelPackages] handleBooking:", { pkg, isAuthenticated, userId: user?.id });
-    sessionStorage.setItem("selectedPackage", JSON.stringify(pkg));
-    navigate("/PackageBookingDetails");
+    sessionStorage.setItem("selectedPackage", JSON.stringify(pkg)); // Store package in sessionStorage
+    navigate("/PackageBookingDetails"); // Navigate to booking details page
   };
 
-  // Function to load image URL
-  const loadImage = imageName => {
+  // Build full image URL or fallback to default image
+  const loadImage = (imageName) => {
     const baseUrl = "http://localhost/WanderlustTrails/Assets/Images/packages/";
-    return `${baseUrl}${imageName}`;
+    return imageName ? `${baseUrl}${imageName}` : defaultImage;
   };
 
   const defaultImage = "http://localhost/WanderlustTrails/Assets/Images/packages/default.jpg";
 
-  // Function to handle sorting
+  // Sorting options available in UI
   const sortOptions = [
     { key: "none", label: "No Sorting", sortFunction: () => 0 },
     { key: "price_asc", label: "Price (Low to High)", sortFunction: (a, b) => a.price - b.price },
@@ -104,26 +108,28 @@ const TravelPackages = () => {
     { key: "name_desc", label: "Name (Z-A)", sortFunction: (a, b) => b.name.localeCompare(a.name) },
   ];
 
-  // Sort the packages based on the selected sort option
+  // Pagination slicing indexes
   const indexOfLastPackage = currentPage * packagesPerPage;
   const indexOfFirstPackage = indexOfLastPackage - packagesPerPage;
   const currentPackages = sortedPackages.slice(indexOfFirstPackage, indexOfLastPackage);
 
-  // Function to handle sort option change
+  // Update search query state
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  // Function to clear the search input
+  // Clear search input and reset page
   const handleClearSearch = () => {
     setSearchQuery("");
     setCurrentPage(1);
   };
 
+  // Loading UI
   if (loading) {
     return <div className="text-center p-4 text-gray-200">Loading packages...</div>;
   }
 
+  // Error UI with retry button
   if (error) {
     return (
       <div className="text-center p-4 text-red-500">
@@ -146,7 +152,7 @@ const TravelPackages = () => {
           Explore Our Travel Packages
         </h2>
 
-        {/* Dynamic Search Input */}
+        {/* Search input with clear button */}
         <div className="flex items-center justify-center mb-6">
           <div className="flex w-full max-w-lg">
             <input
@@ -167,6 +173,7 @@ const TravelPackages = () => {
           </div>
         </div>
 
+        {/* Filter and Sort bar */}
         <FilterSortBar
           items={sortedPackages}
           setFilteredItems={setSortedPackages}
@@ -174,10 +181,12 @@ const TravelPackages = () => {
           sortOptions={sortOptions}
         />
 
+        {/* Show message if no packages */}
         {sortedPackages.length === 0 ? (
           <p className="text-center text-gray-200">No packages found.</p>
         ) : (
           <>
+            {/* Grid of package cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {currentPackages.map(pkg => (
                 <DynamicPackageCard
@@ -190,6 +199,7 @@ const TravelPackages = () => {
               ))}
             </div>
 
+            {/* Pagination controls */}
             <Pagination
               totalItems={sortedPackages.length}
               itemsPerPage={packagesPerPage}
@@ -203,18 +213,18 @@ const TravelPackages = () => {
   );
 };
 
-// Dynamic Package Card Component
+// Individual package card with flip animation for details
 const DynamicPackageCard = ({ pkg, loadImage, defaultImage, handleBooking }) => {
   const [imageSrc, setImageSrc] = useState(defaultImage);
   const [isFlipped, setIsFlipped] = useState(false);
 
-  // Load the image when the component mounts or when the image URL changes
+  // Load the image when pkg.imageUrl changes
   useEffect(() => {
     const imagePath = loadImage(pkg.imageUrl) || defaultImage;
     setImageSrc(imagePath);
   }, [pkg.imageUrl, loadImage, defaultImage]);
 
-  
+  // Toggle card flip
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
   };
@@ -222,6 +232,7 @@ const DynamicPackageCard = ({ pkg, loadImage, defaultImage, handleBooking }) => 
   return (
     <div className="bg-orange-100 rounded-lg shadow-md overflow-hidden">
       <ReactCardFlip isFlipped={isFlipped} flipDirection="horizontal">
+        {/* Front side of card */}
         <div key="front" onClick={handleFlip} className="cursor-pointer">
           <img src={imageSrc} alt={pkg.name} className="w-full h-40 object-cover" />
           <div className="p-6">
@@ -232,6 +243,7 @@ const DynamicPackageCard = ({ pkg, loadImage, defaultImage, handleBooking }) => 
           </div>
         </div>
 
+        {/* Back side of card */}
         <div key="back" onClick={handleFlip} className="cursor-pointer">
           <div
             className="p-6 bg-cover bg-center w-auto h-80"
@@ -245,7 +257,7 @@ const DynamicPackageCard = ({ pkg, loadImage, defaultImage, handleBooking }) => 
             <button
               className="text-gray-300 bg-gray-500 font-serif font-bold mt-4 px-4 py-2 rounded"
               onClick={e => {
-                e.stopPropagation();
+                e.stopPropagation(); // Prevent flipping back on button click
                 handleBooking(pkg);
               }}
             >

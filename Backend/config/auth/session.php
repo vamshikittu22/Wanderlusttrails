@@ -1,9 +1,10 @@
 <?php
-//path: Wanderlusttrails/Backend/config/auth/session.php
+// path: Wanderlusttrails/Backend/config/auth/session.php
 // This file checks if a user is logged in by verifying the session data.
 // It returns a JSON response indicating the login status and user information if logged in.
 
 session_start();
+
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 

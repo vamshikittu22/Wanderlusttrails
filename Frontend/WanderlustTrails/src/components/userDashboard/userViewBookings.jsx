@@ -1,6 +1,8 @@
+// Importing required dependencies and components
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import $ from 'jquery'; // Import jQuery for AJAX
 import useBookings from '../../hooks/useBookings';
 import { useUser } from '../../context/UserContext';
 import EditBookingForm from './../forms/EditBookingForm';
@@ -10,7 +12,7 @@ import Pagination from './../Pagination';
 import ViewDownloadTicket from './../ViewDownloadTicket';
 import Popup from './../Popup';
 
-// Custom hook for debouncing
+// Custom hook to debounce a value (used in search input)
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -20,14 +22,14 @@ const useDebounce = (value, delay) => {
         }, delay);
 
         return () => {
-            clearTimeout(handler);
+            clearTimeout(handler); // Clear timeout on cleanup
         };
     }, [value, delay]);
 
     return debouncedValue;
 };
 
-// Header component for the main page
+// Component to display the bookings header section
 const BookingHeader = ({ totalBookings }) => (
     <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-4">
@@ -42,17 +44,17 @@ const BookingHeader = ({ totalBookings }) => (
     </div>
 );
 
-// Search Bar component with debouncing
+// Component to render the search bar with debouncing
 const SearchBar = ({ searchQuery, setSearchQuery, setCurrentPage }) => {
     const [inputValue, setInputValue] = useState(searchQuery);
     const debouncedSearchQuery = useDebounce(inputValue, 300);
 
     useEffect(() => {
         setSearchQuery(debouncedSearchQuery);
-        setCurrentPage(1);
-    }, [debouncedSearchQuery, setSearchQuery, setCurrentPage]); // Update search query and reset page when input changes
+        setCurrentPage(1); // Reset to first page on search change
+    }, [debouncedSearchQuery, setSearchQuery, setCurrentPage]);
 
-    //handleSearchChange function to handle search input changes
+    // Handler for updating search input
     const handleSearchChange = (e) => {
         setInputValue(e.target.value);
     };
@@ -70,8 +72,8 @@ const SearchBar = ({ searchQuery, setSearchQuery, setCurrentPage }) => {
     );
 };
 
-// Booking List component
-const BookingList = ({ currentBookings, paymentDetails, paymentLoading, handleViewTicket, handleEditClick, handleCancelClick }) => (
+// Component to render list of bookings using BookingCard
+const BookingList = ({ currentBookings, paymentDetails, paymentLoading, handleViewTicket, handleEditClick, handleCancelClick, handleSendReminder }) => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {currentBookings.map((booking) => (
             <BookingCard
@@ -79,49 +81,57 @@ const BookingList = ({ currentBookings, paymentDetails, paymentLoading, handleVi
                 booking={booking}
                 paymentDetails={paymentDetails}
                 paymentLoading={paymentLoading}
-                onViewTicket={handleViewTicket}
-                onEditClick={handleEditClick}
-                onCancelClick={handleCancelClick}
+                onViewTicket={() => handleViewTicket(booking)}
+                onEditClick={() => handleEditClick(booking)}
+                onCancelClick={() => handleCancelClick(booking.id)}
+                onSendReminder={() => handleSendReminder(booking.id)}
                 isAdminView={false}
+                disabled={!booking.status || booking.status !== 'confirmed'} // Disable View Ticket if not confirmed
             />
         ))}
     </div>
 );
 
-// Main UserViewBookings component
+// Main component for displaying user bookings
 const UserViewBookings = () => {
-    const navigate = useNavigate(); // Use useNavigate to navigate
-    const { user, isAuthenticated } = useUser(); // Get user and authentication status from context
-    const [selectedBooking, setSelectedBooking] = useState(null); // State to manage selected booking for viewing
-    const [isViewPopupOpen, setIsViewPopupOpen] = useState(false);  // State to manage view ticket popup
-    const [editBooking, setEditBooking] = useState(null); // State to manage booking for editing
-    const [isEditPopupOpen, setIsEditPopupOpen] = useState(false); // State to manage edit booking popup
-    const [cancelBookingId, setCancelBookingId] = useState(null); // State to manage booking ID for cancellation
-    const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false); // State to manage cancel booking popup
-    const [searchQuery, setSearchQuery] = useState(''); // State to manage search query
-    const [currentPage, setCurrentPage] = useState(1); // State to manage current page for pagination
-    const [filteredBookingsWithSearch, setFilteredBookingsWithSearch] = useState([]); // State to manage filtered bookings with search
-    const itemsPerPage = 6; // Number of items to display per page
+    const navigate = useNavigate(); // For programmatic navigation
+    const { user, isAuthenticated } = useUser(); // Get user data from context
 
+    // Local state declarations
+    const [selectedBooking, setSelectedBooking] = useState(null);
+    const [isViewPopupOpen, setIsViewPopupOpen] = useState(false);
+    const [editBooking, setEditBooking] = useState(null);
+    const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
+    const [cancelBookingId, setCancelBookingId] = useState(null);
+    const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [filteredBookingsWithSearch, setFilteredBookingsWithSearch] = useState([]);
+
+    const itemsPerPage = 6;
+
+    // Redirect to login if user is not authenticated
     useEffect(() => {
         if (!isAuthenticated || !user?.id) {
             toast.error('Please log in to view your bookings.');
             navigate('/login');
         }
-    }, [isAuthenticated, user, navigate]); // Redirect to login if not authenticated
+    }, [isAuthenticated, user, navigate]);
 
+    // Prevent render if not authenticated
     if (!isAuthenticated || !user?.id) return null;
 
-    const { 
-        bookings, 
-        paymentDetails, 
-        loading, 
-        paymentLoading, 
-        editBooking: handleEditSubmit, 
-        cancelBooking: handleCancelBooking 
-    } = useBookings(user, isAuthenticated); // Custom hook to fetch bookings and payment details
+    // Custom hook to retrieve booking data
+    const {
+        bookings,
+        paymentDetails,
+        loading,
+        paymentLoading,
+        editBooking: handleEditSubmit,
+        cancelBooking: handleCancelBooking
+    } = useBookings(user, isAuthenticated);
 
-    // Function to get booking name based on booking type
+    // Generate booking name based on booking type
     const getBookingName = (booking) => {
         if (booking.booking_type === 'package') return booking.package_name || 'Unnamed Package';
         if (booking.booking_type === 'itinerary') return booking.package_name || 'Custom Itinerary';
@@ -131,21 +141,20 @@ const UserViewBookings = () => {
         return `Flight from ${from} to ${to}, Hotel: ${hotelName}`;
     };
 
-//Memoized function to filter bookings based on search query
-    const searchedBookings = useMemo(() => { 
+    // Filter bookings using the search query
+    const searchedBookings = useMemo(() => {
         return bookings.filter((booking) => {
             const searchLower = searchQuery.toLowerCase();
             const bookingIdMatch = booking.id.toString().includes(searchLower);
             const bookingNameMatch = getBookingName(booking).toLowerCase().includes(searchLower);
-            const packageNameMatch = (booking.booking_type === 'package' || booking.booking_type === 'itinerary') && booking.package_name
-                ? booking.package_name.toLowerCase().includes(searchLower)
-                : false;
-            const transactionIdMatch = paymentDetails[booking.id]?.transaction_id?.toLowerCase().includes(searchLower) || false;
-            return bookingIdMatch || bookingNameMatch || packageNameMatch || transactionIdMatch; // return true if any of the conditions match
-        }); //
-    }, [bookings, searchQuery, paymentDetails]); 
+            const packageNameMatch = (booking.booking_type === 'package' || booking.booking_type === 'itinerary') &&
+                booking.package_name?.toLowerCase().includes(searchLower);
+            const transactionIdMatch = paymentDetails[booking.id]?.transaction_id?.toLowerCase().includes(searchLower);
+            return bookingIdMatch || bookingNameMatch || packageNameMatch || transactionIdMatch;
+        });
+    }, [bookings, searchQuery, paymentDetails]);
 
-    //filteroptions and sortOptions for filter and sort functionality
+    // Predefined filter options
     const filterOptions = useMemo(() => [
         { key: 'status-all', label: 'All', filterFunction: () => true },
         { key: 'status-pending', label: 'Pending', filterFunction: booking => booking.status === 'pending' },
@@ -153,6 +162,7 @@ const UserViewBookings = () => {
         { key: 'status-canceled', label: 'Canceled', filterFunction: booking => booking.status === 'canceled' },
     ], []);
 
+    // Predefined sorting options
     const sortOptions = useMemo(() => [
         { key: 'id-asc', label: 'Booking ID (Asc)', sortFunction: (a, b) => a.id - b.id },
         { key: 'id-desc', label: 'Booking ID (Desc)', sortFunction: (a, b) => b.id - a.id },
@@ -162,32 +172,35 @@ const UserViewBookings = () => {
         { key: 'createdAt-desc', label: 'Created At (Desc)', sortFunction: (a, b) => new Date(b.created_at) - new Date(a.created_at) },
     ], []);
 
-    //pagination 
+    // Pagination calculations
     const totalItems = filteredBookingsWithSearch.length;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentBookings = filteredBookingsWithSearch.slice(startIndex, endIndex);
-    
 
-    //handleviewticket function to handle viewing ticket details
+    // View ticket handler with status check
     const handleViewTicket = (booking) => {
+        if (!booking.status || booking.status !== 'confirmed') {
+            toast.error('View Ticket is only available for confirmed bookings.', { autoClose: 3000 });
+            return;
+        }
         setSelectedBooking(booking);
         setIsViewPopupOpen(true);
     };
 
-    //handleEditClick function to handle editing booking details
+    // Edit booking handler
     const handleEditClick = (booking) => {
         setEditBooking(booking);
         setIsEditPopupOpen(true);
     };
 
-    //handleCancelClick function to handle booking cancellation
+    // Cancel booking handler
     const handleCancelClick = (bookingId) => {
         setCancelBookingId(bookingId);
         setIsCancelPopupOpen(true);
     };
 
-    //handleConfirmCancel function to handle booking cancellation
+    // Confirm cancellation handler
     const handleConfirmCancel = () => {
         if (cancelBookingId) {
             handleCancelBooking(cancelBookingId, () => {
@@ -197,25 +210,86 @@ const UserViewBookings = () => {
         }
     };
 
-    // Reset popup states when closing to ensure data consistency
+    // Send reminder handler
+    const handleSendReminder = (bookingId) => {
+        const currentBooking = bookings.find(b => b.id === bookingId);
+        if (!currentBooking) {
+            toast.error(`Booking #${bookingId} not found`);
+            return;
+        }
+
+        const currentDate = new Date().toISOString().split('T')[0];
+        const startDate = currentBooking.start_date;
+        const endDate = currentBooking.end_date;
+
+        if (startDate && startDate < currentDate) {
+            toast.error('Cannot send reminder: Start date is in the past.');
+            return;
+        }
+        if (endDate && endDate < currentDate) {
+            toast.error('Cannot send reminder: End date is in the past.');
+            return;
+        }
+
+        const payload = {
+            booking_id: Number(bookingId),
+            user_id: Number(user.id),
+            userFullName: user.fullName || 'Guest',
+            start_date: currentBooking.start_date,
+            end_date: currentBooking.end_date
+        };
+
+        $.ajax({
+            url: 'http://localhost/WanderlustTrails/Backend/config/booking/sendBookingReminder.php',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    toast.success('Reminder sent successfully!');
+                } else {
+                    toast.error(response.message || 'Failed to send reminder');
+                }
+            },
+            error: function (xhr) {
+                let errorMessage = `Error sending reminder: ${xhr.status} ${xhr.statusText}`;
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    errorMessage += ` - ${response.message || 'Server error'}`;
+                } catch (e) {
+                    errorMessage += ' - Unable to parse server response';
+                }
+                toast.error(errorMessage);
+            }
+        });
+    };
+
+    // Close view popup
     const handleCloseViewPopup = () => {
         setIsViewPopupOpen(false);
         setSelectedBooking(null);
     };
-    
-    //handleCloseEditPopup function to handle closing edit booking popup
+
+    // Close edit popup
     const handleCloseEditPopup = () => {
         setIsEditPopupOpen(false);
         setEditBooking(null);
     };
 
-    // looding state to show loading message
+    // Show loading while fetching bookings
     if (loading) return <div className="text-center text-gray-600">Loading bookings...</div>;
 
+    // Render main UI
     return (
         <div className="max-w-6xl mx-auto p-4 bg-gray-700 shadow-md rounded-lg">
             <BookingHeader totalBookings={filteredBookingsWithSearch.length} />
-            <FilterSortBar items={searchedBookings} setFilteredItems={setFilteredBookingsWithSearch} filterOptions={filterOptions} sortOptions={sortOptions} />
+            <FilterSortBar
+                items={searchedBookings}
+                setFilteredItems={setFilteredBookingsWithSearch}
+                filterOptions={filterOptions}
+                sortOptions={sortOptions}
+            />
             <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} setCurrentPage={setCurrentPage} />
             <div className="relative">
                 {filteredBookingsWithSearch.length === 0 ? (
@@ -229,17 +303,29 @@ const UserViewBookings = () => {
                             handleViewTicket={handleViewTicket}
                             handleEditClick={handleEditClick}
                             handleCancelClick={handleCancelClick}
+                            handleSendReminder={handleSendReminder}
                         />
-                        <Pagination totalItems={totalItems} itemsPerPage={itemsPerPage} currentPage={currentPage} onPageChange={(page) => setCurrentPage(page)} />
+                        <Pagination
+                            totalItems={totalItems}
+                            itemsPerPage={itemsPerPage}
+                            currentPage={currentPage}
+                            onPageChange={(page) => setCurrentPage(page)}
+                        />
                     </>
                 )}
-                {/* Ticket View Popup - Only render when both isOpen and selectedBooking are valid */}
+
+                {/* View Ticket Popup */}
                 {isViewPopupOpen && selectedBooking && (
                     <Popup isOpen={isViewPopupOpen} onClose={handleCloseViewPopup}>
-                        <ViewDownloadTicket booking={selectedBooking} paymentDetails={paymentDetails} paymentLoading={paymentLoading} />
+                        <ViewDownloadTicket
+                            booking={selectedBooking}
+                            paymentDetails={paymentDetails}
+                            paymentLoading={paymentLoading}
+                        />
                     </Popup>
                 )}
-                {/* Edit Booking Popup - Only render when both isOpen and editBooking are valid */}
+
+                {/* Edit Booking Popup */}
                 {isEditPopupOpen && editBooking && (
                     <Popup isOpen={isEditPopupOpen} onClose={handleCloseEditPopup}>
                         <EditBookingForm
@@ -258,15 +344,22 @@ const UserViewBookings = () => {
                         />
                     </Popup>
                 )}
-                {/* Cancel Confirmation Popup */}
+
+                {/* Cancel Booking Confirmation Popup */}
                 <Popup isOpen={isCancelPopupOpen} onClose={() => setIsCancelPopupOpen(false)}>
                     <h2 className="text-lg font-semibold text-gray-800 mb-4">Confirm Cancellation</h2>
                     <p className="text-gray-600 mb-6">Are you sure you want to cancel Booking #{cancelBookingId}?</p>
                     <div className="flex space-x-4">
-                        <button onClick={handleConfirmCancel} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors">
+                        <button
+                            onClick={handleConfirmCancel}
+                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+                        >
                             Yes, Cancel
                         </button>
-                        <button onClick={() => setIsCancelPopupOpen(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors">
+                        <button
+                            onClick={() => setIsCancelPopupOpen(false)}
+                            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
+                        >
                             No
                         </button>
                     </div>

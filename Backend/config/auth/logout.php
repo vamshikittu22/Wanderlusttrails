@@ -1,5 +1,5 @@
 <?php
-//path: Wanderlusttrails/Backend/config/auth/logout.php
+// path: Wanderlusttrails/Backend/config/auth/logout.php
 // This file handles user logout by destroying the session.
 // It returns a JSON response indicating the logout status.
 
@@ -10,6 +10,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-W
 
 require_once __DIR__ . "/../inc_logger.php";
 Logger::log("logout API Started - Method: {$_SERVER['REQUEST_METHOD']}");
+
 // Check if the request method is OPTIONS (preflight request)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     Logger::log("Handling OPTIONS request for logout");

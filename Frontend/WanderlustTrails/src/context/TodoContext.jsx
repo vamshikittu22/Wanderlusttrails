@@ -3,33 +3,33 @@ import $ from 'jquery';
 import { toast } from 'react-toastify';
 import { useUser } from './UserContext';
 
-// Context for managing todo-related state and functions
+// Create context with default structure for todos
 const TodoContext = createContext({
-    todos: [], // Initial state for todos array
-    addTodo: () => {}, // Function to add a new todo
-    updateTodo: () => {}, // Function to update an existing todo
-    deleteTodo: () => {}, // Function to delete a todo
-    toggleComplete: () => {}, // Function to toggle todo completion status
-    sendEmailReminder: () => {}, // Function to send an email reminder
-    checkAndSendDueDateReminders: () => {} // Function to check and send reminders
+    todos: [],
+    addTodo: () => {},
+    updateTodo: () => {},
+    deleteTodo: () => {},
+    toggleComplete: () => {},
+    sendEmailReminder: () => {},
+    checkAndSendDueDateReminders: () => {}
 });
 
 export function TodoProvider({ children }) {
-    const [todos, setTodos] = useState([]); // State to store the list of todos
-    const { user, isAuthenticated } = useUser(); // Access user authentication state
+    const [todos, setTodos] = useState([]); // State to store todo items
+    const { user, isAuthenticated } = useUser(); // Access current authenticated user
 
-    // Normalize todo data by mapping is_completed to completed
+    // Normalize todos by converting is_completed (0/1) to completed (boolean)
     const normalizeTodos = (todosData) => {
         return todosData.map(todo => ({
             ...todo,
-            completed: !!todo.is_completed // Convert 0/1 to boolean
+            completed: !!todo.is_completed
         }));
     };
 
-    // Memoize the normalized todos to prevent unnecessary transformations
+    // Memoize normalized todos to optimize performance
     const normalizedTodos = useMemo(() => normalizeTodos(todos), [todos]);
 
-    // Effect to load todos from localStorage and fetch from backend on mount or auth change
+    // Load todos from localStorage on mount or when auth state changes
     useEffect(() => {
         const storedTodos = JSON.parse(localStorage.getItem('todos')) || [];
         if (storedTodos.length > 0) {
@@ -38,12 +38,13 @@ export function TodoProvider({ children }) {
             console.log('[TodoContext] Loaded todos from localStorage:', normalized);
         }
 
+        // Fetch from backend if authenticated
         if (isAuthenticated && user && user.id) {
             fetchTodos();
         }
     }, [isAuthenticated, user]);
 
-    // Effect to sync todos state with localStorage whenever it changes
+    // Save todos to localStorage when they change
     useEffect(() => {
         if (todos.length > 0) {
             localStorage.setItem('todos', JSON.stringify(todos));
@@ -51,7 +52,7 @@ export function TodoProvider({ children }) {
         }
     }, [todos]);
 
-    // Fetch todos from the backend
+    // Fetch todos from backend
     const fetchTodos = () => {
         if (!user || !user.id) {
             toast.error('User ID not available. Please log in again.');
@@ -71,7 +72,6 @@ export function TodoProvider({ children }) {
                     localStorage.setItem('todos', JSON.stringify(response.data));
                     console.log('[TodoContext] Set todos:', normalized);
                     toast.success('Todos fetched successfully!');
-                    // Check and send reminders after fetching todos
                     checkAndSendDueDateReminders();
                 } else {
                     console.error('[TodoContext] Fetch failed:', response.message);
@@ -85,7 +85,7 @@ export function TodoProvider({ children }) {
         });
     };
 
-    // Add a new todo to the database and update state
+    // Add new todo to backend and update local state
     const addTodo = (todo) => {
         if (!user || !user.id) {
             toast.error('User ID not available. Please log in again.');
@@ -107,7 +107,7 @@ export function TodoProvider({ children }) {
                         task: todo.todo,
                         due_date: todo.due_date,
                         completed: false,
-                        is_completed: 0, // Ensure backend-compatible field
+                        is_completed: 0,
                         user_id: userId
                     };
                     setTodos((prev) => [newTodo, ...prev]);
@@ -125,7 +125,7 @@ export function TodoProvider({ children }) {
         });
     };
 
-    // Update an existing todo in the database and state
+    // Update an existing todo and sync with backend
     const updateTodo = (id, updatedTodo) => {
         if (!user || !user.id) {
             toast.error('User ID not available. Please log in again.');
@@ -141,7 +141,7 @@ export function TodoProvider({ children }) {
             data: JSON.stringify({ id, task: updatedTodo.task, due_date: updatedTodo.due_date }),
             success: function (response) {
                 if (response.success) {
-                    // Fetch the updated todo to ensure sync with backend
+                    // Fetch updated todos to stay in sync
                     $.ajax({
                         url: `http://localhost/WanderlustTrails/Backend/config/todos/getTodos.php?user_id=${user.id}`,
                         type: 'GET',
@@ -152,7 +152,6 @@ export function TodoProvider({ children }) {
                                 localStorage.setItem('todos', JSON.stringify(fetchResponse.data));
                                 console.log('[TodoContext] Synced todos with backend after update for id:', id);
                                 toast.success('Todo updated and synced successfully!');
-                                // Check and send reminders after update
                                 checkAndSendDueDateReminders();
                             } else {
                                 console.error('[TodoContext] Failed to fetch updated todos:', fetchResponse.message);
@@ -176,7 +175,7 @@ export function TodoProvider({ children }) {
         });
     };
 
-    // Delete a todo from the database and state
+    // Delete a todo from backend and remove from state
     const deleteTodo = (id) => {
         $.ajax({
             url: 'http://localhost/WanderlustTrails/Backend/config/todos/deleteTodo.php',
@@ -200,7 +199,7 @@ export function TodoProvider({ children }) {
         });
     };
 
-    // Toggle the completion status of a todo
+    // Toggle completed status of a todo
     const toggleComplete = (id) => {
         const todo = todos.find((t) => t.id === id);
         if (!todo) return;
@@ -234,7 +233,7 @@ export function TodoProvider({ children }) {
         });
     };
 
-    // Send an email reminder for a specific todo
+    // Send email reminder for a single todo
     const sendEmailReminder = (todoId) => {
         return new Promise((resolve, reject) => {
             if (!todoId) {
@@ -273,7 +272,7 @@ export function TodoProvider({ children }) {
         });
     };
 
-    // Check due dates and send reminders one day before for all todos concurrently
+    // Check due todos for today and tomorrow and send reminders
     const checkAndSendDueDateReminders = async () => {
         if (!user || !user.id || !isAuthenticated) {
             console.log('[TodoContext] User not authenticated or ID not available, skipping reminders');
@@ -281,30 +280,28 @@ export function TodoProvider({ children }) {
         }
 
         const today = new Date();
+        today.setMinutes(today.getMinutes() - today.getTimezoneOffset()); // Adjust to UTC
+        const todayStr = today.toISOString().split('T')[0];
         const tomorrow = new Date(today);
         tomorrow.setDate(today.getDate() + 1);
-        const tomorrowStr = tomorrow.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-        console.log('[TodoContext] Checking due dates, tomorrow is:', tomorrowStr);
+        console.log('[TodoContext] Checking due dates, today is:', todayStr, 'tomorrow is:', tomorrowStr);
 
-        // Filter todos that are due tomorrow and haven't had a reminder sent
-        const todosToRemind = todos.filter(todo => 
-            todo.due_date === tomorrowStr && todo.reminder_sent === 0
+        const todosToRemind = todos.filter(todo =>
+            (todo.due_date === todayStr || todo.due_date === tomorrowStr) && todo.reminder_sent === 0
         );
 
         if (todosToRemind.length === 0) {
-            console.log('[TodoContext] No todos due tomorrow with reminder_sent = 0');
-            toast.info('No reminders to send for tomorrow.');
+            console.log('[TodoContext] No todos due today or tomorrow with reminder_sent = 0');
+            toast.info('No reminders to send for today or tomorrow.');
             return;
         }
 
         console.log('[TodoContext] Todos to remind:', todosToRemind);
 
-        // Send all reminders concurrently using Promise.all
         try {
-            const sendPromises = todosToRemind.map(todo => 
-                sendEmailReminder(todo.id)
-            );
+            const sendPromises = todosToRemind.map(todo => sendEmailReminder(todo.id));
             await Promise.all(sendPromises);
             console.log('[TodoContext] All reminders sent successfully');
             toast.success('All reminders sent successfully!');
@@ -314,6 +311,7 @@ export function TodoProvider({ children }) {
         }
     };
 
+    // Provide todo-related state and functions to consumers
     return (
         <TodoContext.Provider value={{ todos: normalizedTodos, addTodo, updateTodo, deleteTodo, toggleComplete, sendEmailReminder, checkAndSendDueDateReminders }}>
             {children}
@@ -321,6 +319,7 @@ export function TodoProvider({ children }) {
     );
 }
 
+// Custom hook to consume TodoContext
 export function useTodo() {
-    return useContext(TodoContext); // Hook to access todo context
+    return useContext(TodoContext);
 }

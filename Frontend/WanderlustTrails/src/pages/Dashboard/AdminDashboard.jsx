@@ -1,3 +1,5 @@
+//path to: Frontend/WanderlustTrails/src/pages/Dashboard/AdminDashboard.jsx
+
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useUser } from "../../context/UserContext";
@@ -7,35 +9,37 @@ import ManageBookings from "../../components/adminDashboard/manageBookings";
 import Sidebar from "./../../components/SideBar.jsx"; // Adjust path as needed
 import MainContent from "./MainContent.jsx"; // Adjust path as needed
 
-// AdminDashboard component
+// AdminDashboard component - main admin panel with sidebar and main content
 const AdminDashboard = () => {
-    const navigate = useNavigate(); // Use useNavigate to navigate
-    const { user, isAuthenticated } = useUser(); // Get user and authentication status from context
-    const [searchParams, setSearchParams] = useSearchParams(); // Use useSearchParams to manage URL parameters
-    const isAdmin = isAuthenticated && user?.role === "admin";  // Check if the user is an admin
+    const navigate = useNavigate(); // Navigate programmatically between routes
+    const { user, isAuthenticated } = useUser(); // Get current user and authentication state from context
+    const [searchParams, setSearchParams] = useSearchParams(); // For reading and updating URL query params
+    const isAdmin = isAuthenticated && user?.role === "admin";  // Check if user is authenticated admin
 
+    // Initialize activeSection state based on URL param "section"
     const [activeSection, setActiveSection] = useState(() => {
-        const section = searchParams.get("section"); // Get the section from URL parameters
+        const section = searchParams.get("section"); // Get "section" query param from URL
         if (section && ["destinations", "users", "bookings"].includes(section)) {
             return section;
         }
-        return "destinations"; // Default to "destinations" for admins
+        return "destinations"; // Default section
     });
 
-   
+    // Optional redirect if user is not admin (currently commented out)
     // useEffect(() => {
     //     if (!isAdmin) {
-    //         navigate("/AdminDashboard"); //
+    //         navigate("/AdminDashboard"); // Could redirect to login or no-access page
     //     }
-    // }, [isAdmin, navigate]); 
+    // }, [isAdmin, navigate]);
 
-
+    // Sync activeSection state to URL query parameters
     useEffect(() => {
         if (isAdmin) {
             setSearchParams({ section: activeSection });
         }
-    }, [activeSection, setSearchParams, isAdmin]); // Update URL parameters when activeSection changes
+    }, [activeSection, setSearchParams, isAdmin]);
 
+    // Render admin content based on active section
     const renderContent = () => {
         switch (activeSection) {
             case "destinations":
@@ -47,15 +51,14 @@ const AdminDashboard = () => {
             default:
                 return <ManageDestinations />;
         }
-    };  // Render content based on the active section
+    };
 
-
-    // Define the sections for the sidebar
+    // Sections for sidebar navigation
     const adminSections = [
         { key: "destinations", label: "Destinations" },
         { key: "users", label: "Users" },
         { key: "bookings", label: "Bookings" },
-    ]; 
+    ];
 
     return (
         <div className="flex h-screen font-sans relative">

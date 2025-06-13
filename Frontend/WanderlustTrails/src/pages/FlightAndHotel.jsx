@@ -2,21 +2,23 @@
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { toast } from 'react-toastify';
-import $ from 'jquery'; // Add jQuery import for $.ajax
+import $ from 'jquery'; // Add jQuery import for AJAX calls
 import FlightAndHotelForm from '../components/forms/FlightAndHotelForm';
 
 function FlightAndHotel() {
-  const navigate = useNavigate();
-  const { user } = useUser();
+  const navigate = useNavigate(); // Hook to programmatically navigate
+  const { user } = useUser(); // Get current user info from context
 
+  // Handles form submission for booking flight and hotel
   const handleSubmit = async (formData) => {
+    // Check if user is logged in
     if (!user?.id) {
       toast.error('Please log in to book.');
-      navigate('/Login');
+      navigate('/Login'); // Redirect to login if not authenticated
       return;
     }
   
-    // Validate dates before accessing toISOString
+    // Validate start and end dates before processing
     const startDate = formData.start_date ? new Date(formData.start_date) : null;
     const endDate = formData.end_date ? new Date(formData.end_date) : null;
   
@@ -25,11 +27,13 @@ function FlightAndHotel() {
       return;
     }
   
+    // If round-trip, validate end date
     if (formData.roundTrip && (!endDate || isNaN(endDate.getTime()))) {
       toast.error('Invalid end date. Please select a valid date for round-trip.');
       return;
     }
   
+    // Prepare payload object to send to backend API
     const payload = {
       user_id: user.id,
       booking_type: 'flight_hotel',
@@ -48,7 +52,7 @@ function FlightAndHotel() {
         amenities: formData.hotel_details.amenities,
         car_rental: formData.hotel_details.car_rental,
       },
-      start_date: startDate.toISOString().split('T')[0],
+      start_date: startDate.toISOString().split('T')[0], // Format date as YYYY-MM-DD
       end_date: formData.roundTrip && endDate ? endDate.toISOString().split('T')[0] : null,
       persons: parseInt(formData.persons),
       total_price: formData.total_price,
@@ -56,6 +60,7 @@ function FlightAndHotel() {
   
     console.log('Payload:', payload);
     
+    // AJAX POST request to create booking on backend
     $.ajax({
       url: 'http://localhost/WanderlustTrails/Backend/config/booking/createBooking.php',
       method: 'POST',
@@ -65,17 +70,18 @@ function FlightAndHotel() {
         console.log('Booking response:', response);
 
         if (response.success) {
+          // Store booking data in session storage for later use (e.g., payment)
           const updatedBookingData = { ...payload, booking_id: response.booking_id, total_price: formData.total_price };
           sessionStorage.setItem('bookingData', JSON.stringify(updatedBookingData));
           toast.success('Booking saved! Proceed to payment.', { position: 'top-center', autoClose: 1000 });
-          navigate('/Payment');
+          navigate('/Payment'); // Navigate to payment page
         } else {
           toast.error('Error saving booking: ' + response.message);
         }
       },
       error: (xhr, status, error) => {
         console.error('Booking error:', { status, error, response: xhr.responseText });
-        // Attempt to parse the response text as JSON for a more detailed error message
+        // Try parsing backend error message from response JSON
         let errorMessage = 'Error saving booking: ';
         try {
           const errorResponse = JSON.parse(xhr.responseText);
@@ -88,13 +94,15 @@ function FlightAndHotel() {
     });
   };
 
+  // Handler for cancel button - go back to previous page
   const handleCancel = () => {
-    navigate(-1); // Go back
+    navigate(-1);
   };
 
   return (
     <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
+        {/* Step indicator UI */}
         <div className="flex justify-center mb-8">
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
@@ -112,6 +120,7 @@ function FlightAndHotel() {
         <h2 className="text-3xl font-bold text-indigo-300 mb-8 text-center">
           Book Flight + Hotel
         </h2>
+        {/* Render the booking form and pass handlers */}
         <FlightAndHotelForm
           onSubmit={handleSubmit}
           onCancel={handleCancel}

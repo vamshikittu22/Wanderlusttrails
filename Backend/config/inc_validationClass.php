@@ -190,14 +190,14 @@ class ValidationClass {
     }
 
     // Validate if user is not an admin
-    public function validateAdminRole($userId) {
-        $query = "SELECT role FROM users WHERE id = ?"; // Query to check user role
-        $result = $this->db->fetchQuery($query, "i", $userId);
-        if (!empty($result) && $result[0]['role'] === 'admin') {
-            return ["success" => false, "message" => "Admins are not allowed to comment on reviews"];
-        }
-        return ["success" => true];
-    }
+    // public function validateAdminRole($userId) {
+    //     $query = "SELECT role FROM users WHERE id = ?"; // Query to check user role
+    //     $result = $this->db->fetchQuery($query, "i", $userId);
+    //     if (!empty($result) && $result[0]['role'] === 'admin') {
+    //         return ["success" => false, "message" => "Admins are not allowed to comment on reviews"];
+    //     }
+    //     return ["success" => true];
+    // }
 
     // Validate if parent comment exists
     public function validateParentComment($parentId, $reviewId) {
