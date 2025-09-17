@@ -31,21 +31,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$data || !isset($data['identifier'])) {
         Logger::log("Missing identifier");
         http_response_code(400);
-        echo json_encode(["success" => false, "message" => "Email or phone is required"]);
+        echo json_encode(["success" => false, "message" => "Email, phone, or username is required"]);
         exit;
     }
 
     $identifier = trim($data['identifier']);
     
-    // Create validation instance and validate identifier as email or phone
+    // Create validation instance
     $validator = new ValidationClass();
+    
+    // First check if identifier is a username (no strict validation needed)
+    $isUsername = true; // Assume it's a username
+    
+    // If not a username, check if it's an email or phone
     $emailCheck = $validator->validateEmail($identifier);
     $phoneCheck = $validator->validatePhone($identifier);
+    
     if (!$emailCheck['success'] && !$phoneCheck['success']) {
-        Logger::log("Invalid identifier format: $identifier");
-        http_response_code(400);
-        echo json_encode(["success" => false, "message" => "Invalid email or phone format"]);
-        exit;
+        // If not email or phone, treat as username
+        $isUsername = true;
+    } else {
+        $isUsername = false;
     }
 
     // Use UserModel to send OTP for password reset

@@ -22,14 +22,30 @@ const UserForm = ({
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await axios.get("https://restcountries.com/v3.1/all");
-        setCountries(response.data.sort((a, b) => a.name.common.localeCompare(b.name.common)));
+        const response = await axios.get("https://restcountries.com/v2/all?fields=name,alpha2Code", {
+          timeout: 3000
+        });
+        
+        if (response.data && Array.isArray(response.data)) {
+          const sortedCountries = response.data
+            .map(country => ({
+              name: country.name,
+              code: country.alpha2Code
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+          setCountries(sortedCountries);
+        } else {
+          throw new Error('Invalid response format');
+        }
       } catch (error) {
         console.error("Error fetching countries:", error);
+        // No fallback countries, just set an empty array
+        setCountries([]);
       }
     };
+
     fetchCountries();
-  }, []); // Fetch countries on component mount
+  }, []);
 
   useEffect(() => {
     setFormData(initialFormData);
@@ -84,7 +100,7 @@ const UserForm = ({
             placeholder="First Name"
             value={formData.firstName || ""}
             onChange={handleChange}
-            disabled
+            disabled={!isEditing}
             className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
           {errors.firstName && <p className="text-red-500 text-xs italic font-bold">{errors.firstName}</p>}
@@ -98,7 +114,7 @@ const UserForm = ({
             placeholder="Last Name"
             value={formData.lastName || ""}
             onChange={handleChange}
-            disabled
+            disabled={!isEditing}
             className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
           {errors.lastName && <p className="text-red-500 text-xs italic font-bold">{errors.lastName}</p>}
@@ -259,8 +275,8 @@ const UserForm = ({
         >
           <option value="">Select Nationality</option>
           {countries.map((country) => (
-            <option key={country.cca2} value={country.name.common}>
-              {country.name.common}
+            <option key={country.code} value={country.name}>
+              {country.name}
             </option>
           ))}
         </select>

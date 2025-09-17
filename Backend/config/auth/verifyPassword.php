@@ -39,16 +39,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identifier = trim($data['identifier']);
     $currentPassword = $data['currentPassword']; // Do not trim password to avoid altering it
 
-    // Validate identifier format as email or phone
+    // Create validation instance
     $validator = new ValidationClass();
-    $emailCheck = $validator->validateEmail($identifier);
-    $phoneCheck = $validator->validatePhone($identifier);
-    if (!$emailCheck['success'] && !$phoneCheck['success']) {
-        Logger::log("Invalid identifier format: $identifier");
-        http_response_code(400);
-        echo json_encode(["success" => false, "message" => "Invalid email or phone format"]);
-        exit;
-    }
+    
+    // Check if identifier is email, phone, or username
+    $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+    $isPhone = preg_match('/^[0-9]{10}$/', $identifier);
+    
+    // If not email or phone, assume it's a username
+    $field = $isEmail ? "email" : ($isPhone ? "phone" : "userName");
 
     // Verify password via UserModel method
     $userModel = new UserModel();

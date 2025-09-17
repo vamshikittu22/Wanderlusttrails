@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
     "csv-parse": "^5.6.0",

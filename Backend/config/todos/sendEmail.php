@@ -38,99 +38,128 @@ if ($conn->connect_error) {
 }
 
 // Log successful DB connection for debugging
-error_log('[sendBookingReminder.php] Database connection established');
+error_log('[sendEmail.php] Database connection established');
 
 // Read JSON POST data from request body
 $data = json_decode(file_get_contents('php://input'), true);
 
 // Log received data for debugging
-error_log('[sendBookingReminder.php] Received data: ' . print_r($data, true));
+error_log('[sendEmail.php] Received data: ' . print_r($data, true));
 
-// Extract booking_id from the decoded JSON, cast to int; fallback to null if missing
-$bookingId = isset($data['booking_id']) ? (int)$data['booking_id'] : null;
+// Check if this is a todo reminder or booking reminder
+if (isset($data['todo_id'])) {
+    // Handle todo reminder
+    $todoId = (int)$data['todo_id'];
+    
+    // Validate that todo_id is provided and valid
+    if (!$todoId) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Todo ID is required']);
+        exit;
+    }
+    
+    // Get todo details
+    $sql = "SELECT t.*, u.email, u.firstName, u.lastName 
+            FROM todos t 
+            JOIN users u ON t.user_id = u.id 
+            WHERE t.id = ?";
+    $stmt = $conn->prepare($sql);
+    
+    if (!$stmt) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Failed to prepare SQL statement: ' . $conn->error]);
+        exit;
+    }
+    
+    $stmt->bind_param("i", $todoId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Todo not found']);
+        exit;
+    }
+    
+    $todo = $result->fetch_assoc();
+    $email = $todo['email'];
+    $firstName = $todo['firstName'] ?? 'User';
+    $task = $todo['task'];
+    $dueDate = $todo['due_date'];
+    
+    // Format the email
+    $subject = "Reminder: Upcoming Todo - " . htmlspecialchars($task);
+    $message = "
+    <html>
+    <head>
+        <title>Todo Reminder</title>
+    </head>
+    <body>
+        <h2>Todo Reminder</h2>
+        <p>Hello {$firstName},</p>
+        <p>This is a reminder about your upcoming todo:</p>
+        <p><strong>Task:</strong> " . htmlspecialchars($task) . "</p>
+        <p><strong>Due Date:</strong> " . htmlspecialchars($dueDate) . "</p>
+        <p>Please complete it on time!</p>
+        <p>Best regards,<br>Wanderlust Trails Team</p>
+    </body>
+    </html>
+    ";
+    
+} elseif (isset($data['booking_id'])) {
+    // Handle booking reminder
+    $bookingId = (int)$data['booking_id'];
+    
+    if (!$bookingId) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Booking ID is required']);
+        exit;
+    }
+    
+    // Prepare SQL to get booking details and associated user's email and name
+    $sql = "SELECT b.*, u.email, u.firstName, u.lastName 
+            FROM bookings b 
+            JOIN users u ON b.user_id = u.id 
+            WHERE b.id = ?";
+    $stmt = $conn->prepare($sql);
 
-// Validate that booking_id is provided, otherwise respond with 400 error
-if (!$bookingId) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Booking ID is required']);
-    exit;
-}
+    // Check for SQL prepare errors
+    if (!$stmt) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Failed to prepare SQL statement: ' . $conn->error]);
+        exit;
+    }
 
-// Extract optional fields
-$userId = isset($data['user_id']) ? (int)$data['user_id'] : null;
-$userFullName = $data['userFullName'] ?? 'Guest';
-$startDate = $data['start_date'] ?? '';
-$endDate = $data['end_date'] ?? '';
+    // Bind booking_id parameter to the prepared statement and execute
+    $stmt->bind_param("i", $bookingId);
+    $stmt->execute();
 
-// Prepare SQL to get booking details and associated user's email and name
-$sql = "SELECT b.*, u.email, u.firstName, u.lastName 
-        FROM bookings b 
-        JOIN users u ON b.user_id = u.id 
-        WHERE b.id = ?";
-$stmt = $conn->prepare($sql);
+    // Get the result set from the executed query
+    $result = $stmt->get_result();
 
-// Check for SQL prepare errors
-if (!$stmt) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Failed to prepare SQL statement: ' . $conn->error]);
-    exit;
-}
+    // Check if booking exists; if not, respond with 404
+    if ($result->num_rows === 0) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Booking not found']);
+        exit;
+    }
 
-// Bind booking_id parameter to the prepared statement and execute
-$stmt->bind_param("i", $bookingId);
-$stmt->execute();
+    // Fetch booking record data
+    $booking = $result->fetch_assoc();
 
-// Get the result set from the executed query
-$result = $stmt->get_result();
+    // Extract email, booking details, and user name from result
+    $email = $booking['email'];
+    $bookingType = $booking['booking_type'] ?? 'Unknown';
+    $totalPrice = $booking['total_price'] ?? 0;
+    $firstName = $booking['firstName'] ?? '';
+    $lastName = $booking['lastName'] ?? '';
+    $name = trim("$firstName $lastName") ?: substr($email, 0, strpos($email, '@'));
+    $startDate = $data['start_date'] ?? '';
+    $endDate = $data['end_date'] ?? '';
 
-// Check if booking exists; if not, respond with 404
-if ($result->num_rows === 0) {
-    http_response_code(404);
-    echo json_encode(['success' => false, 'message' => 'Booking not found']);
-    exit;
-}
-
-// Fetch booking record data
-$booking = $result->fetch_assoc();
-
-// Extract email, booking details, and user name from result
-$email = $booking['email'];
-$bookingType = $booking['booking_type'] ?? 'Unknown';
-$totalPrice = $booking['total_price'] ?? 0;
-$firstName = $booking['firstName'] ?? '';
-$lastName = $booking['lastName'] ?? '';
-$name = trim("$firstName $lastName") ?: substr($email, 0, strpos($email, '@'));
-
-// Close the select statement
-$stmt->close();
-
-// Create a new PHPMailer instance
-$mail = new PHPMailer(true);
-
-try {
-    // Set up SMTP configuration for sending mail via Gmail SMTP server
-    $mail->isSMTP();
-    $mail->Host = 'smtp.gmail.com';
-    $mail->SMTPAuth = true;
-    $mail->Username = 'wanderlusttrailsproject@gmail.com'; // SMTP username (email)
-    $mail->Password = 'rlpw frou gnni ftmv'; // SMTP password (app password)
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Enable TLS encryption
-    $mail->Port = 587; // SMTP port
-
-    // Set the sender's email and name
-    $mail->setFrom('wanderlusttrailsproject@gmail.com', 'WanderlustTrails');
-
-    // Add recipient email and name
-    $mail->addAddress($email, $name);
-
-    // Set email format to HTML
-    $mail->isHTML(true);
-
-    // Email subject
-    $mail->Subject = "Booking Reminder for #$bookingId";
-
-    // HTML email body
-    $mail->Body = "
+    // Format the email
+    $subject = "Booking Reminder for #$bookingId";
+    $message = "
         <h2>Booking Reminder</h2>
         <p>Dear {$name},</p>
         <p>This is a reminder for your upcoming booking:</p>
@@ -145,41 +174,74 @@ try {
         <p>Best regards,<br>WanderlustTrails Team</p>
     ";
 
-    // Plain text email body for non-HTML email clients
-    $mail->AltBody = "Booking Reminder for #$bookingId\n\nDear {$name},\n\nThis is a reminder for your upcoming booking:\nBooking Type: {$bookingType}\nStart Date: {$startDate}\nEnd Date: {$endDate}\nTotal Price: $${number_format($totalPrice, 2)}\n\nPlease ensure you are prepared for your trip. Contact us if you need to make changes.\n\nBest regards,\nWanderlustTrails Team";
+} else {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Either todo_id or booking_id is required']);
+    exit;
+}
 
-    // Send the email
+// Send the email using PHPMailer
+try {
+    $mail = new PHPMailer(true);
+    
+    // Server settings
+    $mail->isSMTP();
+    $mail->Host = 'smtp.gmail.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = 'wanderlusttrailsproject@gmail.com'; // SMTP username (email)
+    $mail->Password = 'rlpw frou gnni ftmv'; // SMTP password (app password)
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port = 587;
+    
+    // Recipients
+    $mail->setFrom('wanderlusttrailsproject@gmail.com', 'WanderlustTrails');
+    $mail->addAddress($email, $firstName);
+    
+    // Content
+    $mail->isHTML(true);
+    $mail->Subject = $subject;
+    $mail->Body = $message;
+    
     $mail->send();
+    
+    // If it was a todo reminder, update the reminder_sent flag
+    if (isset($todoId)) {
+        $updateSql = "UPDATE todos SET reminder_sent = 1 WHERE id = ?";
+        $updateStmt = $conn->prepare($updateSql);
+        $updateStmt->bind_param("i", $todoId);
+        $updateStmt->execute();
+    } elseif (isset($bookingId)) {
+        // Update the booking's reminder_sent flag to 1 after successful email sending
+        $update_sql = "UPDATE bookings SET reminder_sent = 1 WHERE id = ?";
+        $update_stmt = $conn->prepare($update_sql);
 
-    // Update the booking's reminder_sent flag to 1 after successful email sending
-    $update_sql = "UPDATE bookings SET reminder_sent = 1 WHERE id = ?";
-    $update_stmt = $conn->prepare($update_sql);
+        // Check update SQL preparation failure
+        if (!$update_stmt) {
+            error_log('[sendEmail.php] Failed to prepare update SQL statement: ' . $conn->error);
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Failed to update reminder status: ' . $conn->error]);
+            exit;
+        }
 
-    // Check update SQL preparation failure
-    if (!$update_stmt) {
-        error_log('[sendBookingReminder.php] Failed to prepare update SQL statement: ' . $conn->error);
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Failed to update reminder status: ' . $conn->error]);
-        exit;
+        // Bind booking_id parameter and execute update query
+        $update_stmt->bind_param("i", $bookingId);
+        $update_stmt->execute();
+        $update_stmt->close();
     }
-
-    // Bind booking_id parameter and execute update query
-    $update_stmt->bind_param("i", $bookingId);
-    $update_stmt->execute();
-    $update_stmt->close();
-
-    // Log success for debug
-    error_log("[sendBookingReminder.php] Reminder sent and updated for booking_id: $bookingId");
-
-    // Respond with success JSON
-    http_response_code(200);
-    echo json_encode(['success' => true, 'message' => 'Reminder sent successfully']);
+    
+    echo json_encode([
+        'success' => true, 
+        'message' => 'Email reminder sent successfully',
+        'todo_id' => $todoId ?? null,
+        'booking_id' => $bookingId ?? null
+    ]);
+    
 } catch (Exception $e) {
-    // Log error if mail sending fails
-    error_log('[sendBookingReminder.php] Email could not be sent. Mailer Error: ' . $mail->ErrorInfo);
-    // Respond with failure JSON and error message
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => "Email could not be sent. Mailer Error: {$mail->ErrorInfo}"]);
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Message could not be sent. Mailer Error: ' . $mail->ErrorInfo
+    ]);
 }
 
 // Close database connection

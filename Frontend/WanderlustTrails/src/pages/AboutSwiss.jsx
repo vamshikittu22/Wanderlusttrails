@@ -1,33 +1,9 @@
-// Frontend/WanderlustTrails/src/pages/About.jsx
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { GlobeAltIcon, MapIcon, SparklesIcon, UserGroupIcon, CodeBracketIcon, TicketIcon, ClockIcon, StarIcon, FlagIcon } from '@heroicons/react/24/outline';
 import { FaGithub, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
 
-function About() {
-  const [githubData, setGithubData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetch('https://api.github.com/users/vamshikittu22')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch GitHub data');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setGithubData(data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setIsLoading(false);
-      });
-  }, []);
-
+function AboutSwiss() {
   const features = [
     {
       icon: <GlobeAltIcon className="h-8 w-8 text-orange-700" />,
@@ -53,24 +29,24 @@ function About() {
 
   const stats = [
     { 
-      value: githubData?.public_repos || "20+", 
-      label: "GitHub Repos",
-      icon: <CodeBracketIcon className="h-6 w-6 text-orange-600" />
+      value: "1,247+", 
+      label: "Trips Booked",
+      icon: <TicketIcon className="h-6 w-6 text-orange-600" />
     },
     { 
-      value: githubData?.followers || "10+", 
-      label: "GitHub Followers",
-      icon: <UserGroupIcon className="h-6 w-6 text-orange-600" />
+      value: "7.3", 
+      label: "Avg. Trip Duration (days)",
+      icon: <ClockIcon className="h-6 w-6 text-orange-600" />
     },
     { 
-      value: githubData?.public_gists || "5+", 
-      label: "Code Gists",
-      icon: <CodeBracketIcon className="h-6 w-6 text-orange-600" />
-    },
-    { 
-      value: new Date().getFullYear() - 2020 + "+", 
-      label: "Years of Experience",
+      value: "4.8", 
+      label: "Average Rating",
       icon: <StarIcon className="h-6 w-6 text-orange-600" />
+    },
+    { 
+      value: "42", 
+      label: "Countries Covered",
+      icon: <FlagIcon className="h-6 w-6 text-orange-600" />
     }
   ];
 
@@ -101,78 +77,33 @@ function About() {
     }
   ];
 
-  if (isLoading) return <div className="min-h-screen bg-gray-900 flex items-center justify-center">Loading...</div>;
-  if (error) return <div className="min-h-screen bg-gray-900 text-red-500 flex items-center justify-center">Error: {error}</div>;
-
   return (
     <div className="min-h-screen bg-gray-900 text-gray-200 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-orange-700 mb-4">About Wanderlust Trails</h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Your journey begins with a single step. We're here to make sure every step is an adventure.
-          </p>
-        </div>
-{/* Creator Section with Social Links */}
-<div className="bg-gray-800 rounded-xl p-8 border border-red-900 shadow-lg mb-12">
-          <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
-            <div className="relative group">
-              <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-orange-700 flex-shrink-0">
-                <img
-                  src={githubData?.avatar_url || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=256'}
-                  alt="Vamshi Krishna P"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=256';
-                  }}
-                />
+      <div className="max-w-6xl mx-auto">
+        {/* Header Section */}
+        <h1 className="text-4xl font-bold text-center text-orange-700 mb-8">
+          About WanderlustTrails
+        </h1>
+        <p className="text-lg text-center mb-12">
+          Welcome to WanderlustTrails, your companion for exploring the world's wonders! 
+          We're passionate about inspiring travel dreams and making trip planning seamless, 
+          whether you're chasing adventures, cultures, or hidden gems.
+        </p>
+
+        {/* Feature Grid */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-semibold text-indigo-300 text-center mb-6">
+            Why Choose Us?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {features.map((feature, index) => (
+              <div key={index} className="bg-gray-800 p-6 rounded-lg border border-red-900">
+                <div className="mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-medium text-orange-700 mb-2">{feature.title}</h3>
+                <p className="text-gray-300">{feature.description}</p>
               </div>
-              <div className="absolute inset-0 w-32 h-32 rounded-full bg-orange-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <span className="text-white font-medium">@{githubData?.login || 'vamshikittu22'}</span>
-              </div>
-            </div>
-            <div className="text-center md:text-left">
-              <h2 className="text-2xl font-semibold text-orange-700 mb-2">
-                Vamshi Krishna Pullaiahgari
-                <span className="block text-lg text-indigo-300 mt-1">Founder & Developer</span>
-              </h2>
-              <p className="text-gray-300 mb-4">
-                As a passionate traveler and technology enthusiast, I created Wanderlust Trails 
-                to bridge the gap between adventure and seamless planning. Every line of code 
-                is crafted with the traveler's experience in mind.
-              </p>
-              <div className="flex space-x-4 justify-center md:justify-start">
-                {socialLinks.map((social, index) => (
-                  <a
-                    key={index}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`text-gray-400 ${social.color} transition-colors duration-200`}
-                    aria-label={social.name}
-                    title={social.name}
-                  >
-                    {social.icon}
-                  </a>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
-        
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-          {features.map((feature, index) => (
-            <div key={index} className="bg-gray-800 p-6 rounded-xl border border-red-900">
-              <div className="w-12 h-12 bg-orange-900/30 rounded-full flex items-center justify-center mb-4">
-                {feature.icon}
-              </div>
-              <h3 className="text-xl font-semibold text-orange-500 mb-2">{feature.title}</h3>
-              <p className="text-gray-300">{feature.description}</p>
-            </div>
-          ))}
         </div>
 
         {/* By The Numbers Section */}
@@ -195,14 +126,15 @@ function About() {
           </div>
         </div>
 
-
         {/* GitHub Integration Section */}
         <div className="bg-gray-800 rounded-xl p-8 border border-red-900 mb-12">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 mb-6 md:mb-0 md:pr-8">
               <div className="flex items-center mb-4">
                 <CodeBracketIcon className="h-8 w-8 text-orange-700 mr-2" />
-                <h2 className="text-2xl font-semibold text-indigo-300">Open Source Project</h2>
+                <h2 className="text-2xl font-semibold text-indigo-300">
+                  Open Source Project
+                </h2>
               </div>
               <p className="text-gray-300 mb-6">
                 WanderlustTrails is an open-source project. Feel free to explore the code, 
@@ -239,7 +171,53 @@ function About() {
           </div>
         </div>
 
-        
+        {/* Creator Section with Social Links */}
+        <div className="bg-gray-800 rounded-xl p-8 border border-red-900 shadow-lg mb-12">
+          <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
+            <div className="relative group">
+              <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-orange-700 flex-shrink-0">
+                <img
+                  src="https://github.com/vamshikittu22.png"
+                  alt="Vamshi Krishna P"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=256';
+                  }}
+                />
+              </div>
+              <div className="absolute inset-0 w-32 h-32 rounded-full bg-orange-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <span className="text-white font-medium">@vamshikittu22</span>
+              </div>
+            </div>
+            <div className="text-center md:text-left">
+              <h2 className="text-2xl font-semibold text-orange-700 mb-2">
+                Vamshi Krishna Pullaiahgari
+                <span className="block text-lg text-indigo-300 mt-1">Founder & Developer</span>
+              </h2>
+              <p className="text-gray-300 mb-4">
+                As a passionate traveler and technology enthusiast, I created Wanderlust Trails 
+                to bridge the gap between adventure and seamless planning. Every line of code 
+                is crafted with the traveler's experience in mind.
+              </p>
+              <div className="flex space-x-4 justify-center md:justify-start">
+                {socialLinks.map((social, index) => (
+                  <a
+                    key={index}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`text-gray-400 ${social.color} transition-colors duration-200`}
+                    aria-label={social.name}
+                    title={social.name}
+                  >
+                    {social.icon}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -251,7 +229,7 @@ function About() {
           </Link>
           <Link
             to="/contact"
-            className="px-6 py-3 bg-transparent border-2 border-indigo-700 text-indigo-400 hover:bg-indigo-900/20 font-medium rounded-lg text-center transition-colors duration-200"
+            className="px-6 py-3 bg-transparent border-2 border-orange-700 text-orange-700 hover:bg-orange-900/20 font-medium rounded-lg text-center transition-colors duration-200"
           >
             Contact Us
           </Link>
@@ -261,4 +239,4 @@ function About() {
   );
 }
 
-export default About;
+export default AboutSwiss;

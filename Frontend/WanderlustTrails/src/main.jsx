@@ -51,6 +51,7 @@ import CustomizedItinerary from './pages/CustomizedIternerary.jsx';
 import HelpAndSupport from './pages/Help.jsx';
 import PackageBookingDetails from './pages/PackageBookingDetails.jsx';
 import Todolist from './pages/Todolist.jsx';
+import AboutSwiss from './pages/AboutSwiss.jsx';
 
 // Dashboard views
 import AdminDashboard from './pages/Dashboard/AdminDashboard.jsx';
@@ -72,7 +73,8 @@ const router = createBrowserRouter(
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgotpassword" element={<ForgotPassword />} />
       <Route path="needassist" element={<LanguageAndTouristAssist />} />
-      <Route path="About" element={<About />} />
+      <Route path="about" element={<About />} />
+      <Route path="about-swiss" element={<AboutSwiss />} />
       <Route path="contactus" element={<ContactUs />} />
       <Route path="help" element={<HelpAndSupport />} />
       <Route path="test2" element={<Test2 />} />

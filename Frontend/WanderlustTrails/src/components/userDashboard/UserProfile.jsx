@@ -64,7 +64,21 @@ const UserProfile = () => {
             // Set user and profileData state with the first data object returned
             const userData = response.data[0];
             setUser(userData);
-            setProfileData(userData);
+            // Ensure all required fields are set, including nationality
+            setProfileData({
+              firstName: userData.firstName || "",
+              lastName: userData.lastName || "",
+              userName: userData.userName || "",
+              email: userData.email || "",
+              dob: userData.dob || "",
+              gender: userData.gender || "",
+              nationality: userData.nationality || "",
+              phone: userData.phone || "",
+              street: userData.street || "",
+              city: userData.city || "",
+              state: userData.state || "",
+              zip: userData.zip || ""
+            });
           } else {
             toast.error("Failed to fetch profile: " + response.message);
           }
@@ -144,12 +158,22 @@ const UserProfile = () => {
       return;
     }
 
+    // Get the username from the user object
+    const username = user.userName;
+    if (!username) {
+      toast.error("Username not found. Please log in again.");
+      return;
+    }
+
     // AJAX POST request to verify current password
     $.ajax({
       url: "http://localhost/WanderlustTrails/Backend/config/auth/verifyPassword.php",
       type: "POST",
       contentType: "application/json",
-      data: JSON.stringify({ identifier: user.email, currentPassword: passwordData.currentPassword }),
+      data: JSON.stringify({ 
+        identifier: user.userName, 
+        currentPassword: passwordData.currentPassword 
+      }),
       dataType: "json",
       success: function (verifyResponse) {
         console.log("Verification response:", verifyResponse);
@@ -165,38 +189,38 @@ const UserProfile = () => {
               console.log("OTP response:", otpResponse);
               if (otpResponse.success) {
                 setOtpSent(true); // Mark that OTP has been sent
-                toast.success("OTP sent to your email!");
+                toast.success("OTP sent to your email");
               } else {
-                toast.error("Failed to send OTP: " + otpResponse.message);
+                toast.error(otpResponse.message || "Failed to send OTP");
               }
             },
             error: function (xhr) {
               console.error("Error sending OTP:", xhr);
-              let errorMessage = "Error sending OTP: Server error";
+              let errorMessage = "Error sending OTP";
               try {
                 const response = JSON.parse(xhr.responseText);
-                errorMessage = "Error sending OTP: " + (response.message || "Server error");
+                errorMessage = response.message || errorMessage;
               } catch (e) {
-                errorMessage = xhr.statusText || "Server error";
+                errorMessage = xhr.statusText || errorMessage;
               }
               toast.error(errorMessage);
-            },
+            }
           });
         } else {
-          toast.error("Verification failed: " + verifyResponse.message);
+          toast.error(verifyResponse.message || "Password verification failed");
         }
       },
       error: function (xhr) {
         console.error("Error verifying password:", xhr);
-        let errorMessage = "Error verifying password: Server error";
+        let errorMessage = "Error verifying password";
         try {
           const response = JSON.parse(xhr.responseText);
-          errorMessage = "Error verifying password: " + (response.message || "Server error");
+          errorMessage = response.message || errorMessage;
         } catch (e) {
-          errorMessage = xhr.statusText || "Server error";
+          errorMessage = xhr.statusText || errorMessage;
         }
         toast.error(errorMessage);
-      },
+      }
     });
   };
 

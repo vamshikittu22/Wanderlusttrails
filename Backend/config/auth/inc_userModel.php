@@ -30,11 +30,12 @@ class UserModel {
             return ["success" => false, "message" => "Invalid email format. use the correct email again"];
         }
 
+        // Removed email uniqueness check to allow multiple accounts with same email
         // Check if email is already taken
-        if ($this->isEmailTaken($email)) {
-            Logger::log("Email already in use: $email");
-            return ["success" => false, "message" => "Email is already in use. try with a new email"];
-        }
+        // if ($this->isEmailTaken($email)) {
+        //     Logger::log("Email already in use: $email");
+        //     return ["success" => false, "message" => "Email is already in use. try with a new email"];
+        // }
 
         // Hash the password securely
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
@@ -81,22 +82,23 @@ class UserModel {
         return false; // Email does not exist
     }
 
-    // Method to verify the user's current password using email or phone as identifier
+    // Method to verify the user's current password using username or email
     public function verifyPassword($identifier, $currentPassword) {
         Logger::log("verifyPassword started for identifier: $identifier");
 
-        // Validate if identifier is email or phone
-        $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
-        $isPhone = preg_match('/^[0-9]{10}$/', $identifier);
-
-        if (!$isEmail && !$isPhone) {
-            Logger::log("Invalid identifier format: $identifier");
-            return ["success" => false, "message" => "Invalid email or phone format"];
+        // Validate identifier is not empty
+        if (empty(trim($identifier))) {
+            Logger::log("Empty identifier provided");
+            return ["success" => false, "message" => "Username or email is required"];
         }
 
-        // Prepare SQL to get password based on identifier type
-        $query = "SELECT password FROM users WHERE " . ($isEmail ? "email = ?" : "phone = ?");
-        $user = $this->db->fetchQuery($query, "s", $identifier); // Fetch user password
+        // Check if identifier is an email
+        $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+        $field = $isEmail ? "email" : "userName";
+
+        // Prepare SQL to get user by username or email
+        $query = "SELECT id, password FROM users WHERE $field = ?";
+        $user = $this->db->fetchQuery($query, "s", $identifier);
 
         if (empty($user)) {
             Logger::log("User not found for identifier: $identifier");
@@ -108,7 +110,7 @@ class UserModel {
             Logger::log("Password verified for identifier: $identifier");
             return ["success" => true, "message" => "Password verified"];
         } else {
-            Logger::log("Incorrect current password for identifier: $identifier");
+            Logger::log("Incorrect password for identifier: $identifier");
             return ["success" => false, "message" => "Incorrect current password"];
         }
     }
@@ -117,17 +119,15 @@ class UserModel {
     public function sendOtp($identifier) {
         Logger::log("sendOtp started for identifier: $identifier");
 
-        // Validate identifier as email or phone
+        // Check if identifier is email, phone, or username
         $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
         $isPhone = preg_match('/^[0-9]{10}$/', $identifier);
-
-        if (!$isEmail && !$isPhone) {
-            Logger::log("Invalid identifier format: $identifier");
-            return ["success" => false, "message" => "Invalid email or phone format"];
-        }
+        
+        // If not email or phone, assume it's a username
+        $field = $isEmail ? "email" : ($isPhone ? "phone" : "userName");
 
         // Fetch user details based on identifier type
-        $query = "SELECT id, email FROM users WHERE " . ($isEmail ? "email = ?" : "phone = ?");
+        $query = "SELECT id, email FROM users WHERE $field = ?";
         $result = $this->db->fetchQuery($query, "s", $identifier);
 
         if (empty($result)) {
