@@ -389,7 +389,7 @@ function ManageBookings() {
                 <p className="text-center text-gray-300">No bookings found.</p>
             ) : (
                 <>
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                         {currentBookings.map((booking) => (
                             <BookingCard
                                 key={booking.id}

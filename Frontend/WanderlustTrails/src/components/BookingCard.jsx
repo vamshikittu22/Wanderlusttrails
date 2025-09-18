@@ -53,13 +53,16 @@ const BookingCard = ({
     const isPastDate = (booking.start_date && booking.start_date < currentDate) || (booking.end_date && booking.end_date < currentDate);
 
     return (
-        <div
+        <div    
             className={`rounded-lg shadow-lg p-6 relative border-l-4 ${
-                isAdminView ? 'bg-gray-800 text-white border-orange-800' : 'bg-gray-200 text-gray-800 border-green-600'
-            }`}
+                isAdminView 
+                  ? 'bg-blue-100 text-orange-900 border-orange-400' 
+                  : 'bg-blue-100 text-green-900 border-green-600'
+              }`}
+              
         >
             <div className="flex justify-between items-center mb-4">
-                <h3 className={`text-lg font-bold ${isAdminView ? 'text-orange-600' : 'text-gray-800'}`}>
+                <h3 className={`text-lg font-bold ${isAdminView ? 'text-orange-600' : 'text-green-800'}`}>
                     Booking #{booking.id}
                 </h3>
                 <span
@@ -83,7 +86,7 @@ const BookingCard = ({
 
             <div className="space-y-2">
                 <p>
-                    <span className={`font-semibold ${isAdminView ? 'text-gray-300' : 'text-gray-700'}`}>Type:</span>{' '}
+                    <span className={`font-semibold`}>Type:</span>{' '}
                     {booking.booking_type}
                 </p>
 
@@ -160,11 +163,11 @@ const BookingCard = ({
                             <p><span className="font-semibold">Transaction ID:</span> {payment.transaction_id || 'N/A'}</p>
                             <p><span className="font-semibold">Payment Method:</span> {payment.payment_method || 'N/A'}</p>
                             <p>
-                                <span className="font-semibold">Status:</span>{' '}
+                                <span className="font-semibold">Payment Status:</span>{' '}
                                 <span className={
-                                    payment.payment_status === 'completed' ? 'text-green-500' :
-                                    payment.payment_status === 'pending' ? 'text-yellow-500' :
-                                    'text-red-500'
+                                    payment.payment_status === 'completed' ? 'text-green-600' :
+                                    payment.payment_status === 'pending' ? 'text-yellow-600' :
+                                    'text-red-600'
                                 }>
                                     {payment.payment_status?.charAt(0).toUpperCase() + payment.payment_status.slice(1) || 'N/A'}
                                 </span>
@@ -178,7 +181,7 @@ const BookingCard = ({
             </div>
 
             {!isAdminView ? (
-                <div className="mt-3 flex space-x-2">
+                <div className="mt-3 grid grid-cols-2 gap-2">
                     <button
                         onClick={() => onViewTicket(booking)}
                         className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
@@ -211,7 +214,7 @@ const BookingCard = ({
                         onClick={() => onSendReminder(booking.id)}
                         disabled={isPastDate}
                         className={`px-3 py-1 rounded ${
-                            isPastDate
+                            (booking.status === 'canceled' ||isPastDate)
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : 'bg-green-500 text-white hover:bg-green-600'
                         }`}
@@ -221,7 +224,7 @@ const BookingCard = ({
                 </div>
             ) : (
                 <div className="mt-4">
-                    <label className="font-semibold text-gray-300">Status:</label>
+                    <label className="font-semibold text-orange-600">Status:</label>
                     <select
                         value={booking.status}
                         onChange={(e) => onStatusChange(booking.id, e.target.value)}
