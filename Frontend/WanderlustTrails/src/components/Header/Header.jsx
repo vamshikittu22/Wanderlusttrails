@@ -99,7 +99,8 @@ export default function Header() {
                                         <CustomDropdown title="Plan" items={planItems} />
                                         <CustomDropdown title="View" items={viewItems} />
                                         <CustomDropdown title="About" items={aboutItems} />
-                                        {/* <SearchBar /> */}
+                                        {/* <SearchBar /> */} 
+                                        
                                     </Nav>
                                 </Navbar.Collapse>
                             </Container>
