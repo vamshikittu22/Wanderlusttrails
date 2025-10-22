@@ -1,69 +1,61 @@
 <?php
-// path: Wanderlusttrails/Backend/config/auth/verifyPassword.php
+// path: Backend/config/auth/verifyPassword.php
+// Verifies user password before sensitive operations
 
-// Allow CORS from frontend and set response content type to JSON
 header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// Include logger, user model, and validation class for necessary operations
 require_once __DIR__ . "/../inc_logger.php";
-require_once __DIR__ . "/inc_userModel.php";
-require_once __DIR__ . "/../inc_validationClass.php";
+require_once __DIR__ . "/inc_authHelper.php";
 
-Logger::log("verifyPassword API Started - Method: {$_SERVER['REQUEST_METHOD']}");
+Logger::log("verifyPassword API Started");
 
-// Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    Logger::log("Handling OPTIONS request for verifyPassword");
     http_response_code(200);
     echo json_encode(["message" => "OPTIONS request successful"]);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Parse JSON input data
-    $data = json_decode(file_get_contents("php://input"), true);
-    Logger::log("POST Data - Identifier: " . ($data['identifier'] ?? 'none'));
-
-    // Check required fields
-    if (!$data || !isset($data['identifier']) || !isset($data['currentPassword'])) {
-        Logger::log("Missing identifier or currentPassword");
-        http_response_code(400);
-        echo json_encode(["success" => false, "message" => "Identifier and current password are required"]);
-        exit;
-    }
-
-    // Sanitize inputs
-    $identifier = trim($data['identifier']);
-    $currentPassword = $data['currentPassword']; // Do not trim password to avoid altering it
-
-    // Create validation instance
-    $validator = new ValidationClass();
-    
-    // Check if identifier is email, phone, or username
-    $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
-    $isPhone = preg_match('/^[0-9]{10}$/', $identifier);
-    
-    // If not email or phone, assume it's a username
-    $field = $isEmail ? "email" : ($isPhone ? "phone" : "userName");
-
-    // Verify password via UserModel method
-    $userModel = new UserModel();
-    $result = $userModel->verifyPassword($identifier, $currentPassword);
-
-    // Log and respond accordingly
-    Logger::log("verifyPassword result for identifier: $identifier - " . ($result['success'] ? "Success: {$result['message']}" : "Failed: {$result['message']}"));
-    // 200 on success, 404 if user not found, 401 for auth failure
-    http_response_code($result['success'] ? 200 : ($result['message'] === "User not found" ? 404 : 401));
-    echo json_encode($result);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(["success" => false, "message" => "Method not allowed"]);
     exit;
 }
 
-// Method not allowed for other HTTP verbs
-Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
-http_response_code(405);
-echo json_encode(["success" => false, "message" => "Method not allowed"]);
+// Get data
+$data = json_decode(file_get_contents("php://input"), true);
+$identifier = $data['identifier'] ?? '';
+$password = $data['currentPassword'] ?? '';
+
+// Validate input
+if (empty($identifier) || empty($password)) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Identifier and password are required"]);
+    exit;
+}
+
+// Get user using helper
+$authHelper = new AuthHelper();
+$user = $authHelper->getUserByIdentifier($identifier);
+
+if (!$user) {
+    Logger::log("User not found: $identifier");
+    http_response_code(404);
+    echo json_encode(["success" => false, "message" => "User not found"]);
+    exit;
+}
+
+// Verify password
+if (password_verify($password, $user['password'])) {
+    Logger::log("Password verified for: $identifier");
+    http_response_code(200);
+    echo json_encode(["success" => true, "message" => "Password verified"]);
+} else {
+    Logger::log("Incorrect password for: $identifier");
+    http_response_code(401);
+    echo json_encode(["success" => false, "message" => "Incorrect password"]);
+}
 exit;
 ?>

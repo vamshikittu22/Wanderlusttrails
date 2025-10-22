@@ -2,6 +2,7 @@
 // path: Wanderlusttrails/Backend/config/signupuser.php
 // This file handles user registration by accepting POST requests with user data.
 // It validates the data, encrypts the password, and stores the user information in the database.
+// After successful registration, it sends a welcome email to the user.
 
 // Allow cross-origin requests and set content-type to JSON
 header("Access-Control-Allow-Origin: http://localhost:5173");
@@ -22,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . "/inc_userModel.php"; // Include user model for database operations
 require_once __DIR__ . "/../inc_validationClass.php"; // Include validation class for validation operations
+require_once __DIR__ . "/../config/incMailerHelper.php"; // Include reusable mail helper for sending emails
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Get the data sent with the POST request
@@ -116,9 +118,48 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Log the result of the user registration process
     Logger::log("signupuser result for email: $email - " . ($result['success'] ? "Success: {$result['message']}" : "Failed: {$result['message']}"));
 
-    // Send the response based on the success or failure of the registration process
-    http_response_code($result['success'] ? 201 : 400);  // HTTP 201 for success, 400 for failure
-    echo json_encode($result);
+    // If registration is successful, send a welcome email
+    if ($result['success']) {
+        // Prepare welcome email subject and body
+        $subject = "Welcome to Wanderlust Trails!";
+        $body = "
+            <h2>Welcome to Wanderlust Trails, $firstName!</h2>
+            <p>Hello $firstName $lastName,</p>
+            <p>Thank you for signing up with Wanderlust Trails. We're excited to have you on board!</p>
+            <p>Your account has been created successfully with the following details:</p>
+            <ul>
+                <li><strong>Username:</strong> $userName</li>
+                <li><strong>Email:</strong> $email</li>
+            </ul>
+            <p>You can now log in and start exploring our travel packages and services.</p>
+            <p>If you have any questions, feel free to reach out to our support team.</p>
+            <p>Best regards,<br>Wanderlust Trails Team</p>
+        ";
+        $altBody = "Welcome to Wanderlust Trails!\n\nHello $firstName $lastName,\n\nThank you for signing up. Your account has been created successfully.\n\nUsername: $userName\nEmail: $email\n\nBest regards,\nWanderlust Trails Team";
+
+        // Send welcome email using the reusable mail helper
+        $mailResult = sendMail($email, $firstName, $subject, $body, $altBody);
+
+        // Log the email sending result
+        if ($mailResult["success"]) {
+            Logger::log("Welcome email sent successfully to: $email");
+        } else {
+            Logger::log("Failed to send welcome email to: $email - Error: {$mailResult['message']}");
+        }
+
+        // Send response with registration success and email status
+        http_response_code(201);  // HTTP 201 for successful creation
+        echo json_encode([
+            "success" => true,
+            "message" => $result['message'],
+            "mailSuccess" => $mailResult["success"],
+            "mailMessage" => $mailResult["message"]
+        ]);
+    } else {
+        // Registration failed, send error response
+        http_response_code(400);  // HTTP 400 for bad request
+        echo json_encode($result);
+    }
     exit;
 }
 

@@ -1,7 +1,21 @@
 //path: Frontend/WanderlustTrails/src/components/forms/UserForm.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { PasswordInput, ConfirmPasswordInput } from '../PasswordValidator'; // Import validators
 
+/**
+ * UserForm Component - Reusable form for user registration and profile editing
+ * Handles form validation, password strength checking, and submission
+ * @param {Object} formData - Initial form data
+ * @param {Function} setFormData - Function to update parent form data
+ * @param {Function} handleSubmit - Parent submit handler
+ * @param {Object} errors - Initial validation errors
+ * @param {Boolean} isEditing - Whether form is in edit mode
+ * @param {String} submitLabel - Label for submit button
+ * @param {Function} cancelAction - Optional cancel button handler
+ * @param {Boolean} includePassword - Whether to show password fields (for signup)
+ * @param {Boolean} includeChangePassword - Whether to show password change fields (for profile)
+ */
 const UserForm = ({
   formData: initialFormData,
   setFormData: setParentFormData,
@@ -11,14 +25,24 @@ const UserForm = ({
   submitLabel = "Submit",
   cancelAction = null,
   includePassword = false,
-  includeChangePassword = false, // New prop for UserProfile
+  includeChangePassword = false,
 }) => {
-  const [formData, setFormData] = useState(initialFormData); //state to hold form data
-  const [errors, setErrors] = useState(initialErrors); //state to hold validation errors
-  const [countries, setCountries] = useState([]); //state to hold country data
-  const [showPassword, setShowPassword] = useState(false); //state to toggle password visibility
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); //state to toggle confirm password visibility
- 
+  // State to hold form data locally
+  const [formData, setFormData] = useState(initialFormData);
+  
+  // State to hold validation errors
+  const [errors, setErrors] = useState(initialErrors);
+  
+  // State to hold list of countries for nationality dropdown
+  const [countries, setCountries] = useState([]);
+  
+  // State to track if password meets all requirements
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
+  
+  /**
+   * Fetch countries from REST API on component mount
+   * Used to populate the nationality dropdown
+   */
   useEffect(() => {
     const fetchCountries = async () => {
       try {
@@ -27,6 +51,7 @@ const UserForm = ({
         });
         
         if (response.data && Array.isArray(response.data)) {
+          // Sort countries alphabetically by name
           const sortedCountries = response.data
             .map(country => ({
               name: country.name,
@@ -39,60 +64,94 @@ const UserForm = ({
         }
       } catch (error) {
         console.error("Error fetching countries:", error);
-        // No fallback countries, just set an empty array
-        setCountries([]);
+        setCountries([]); // Set empty array if fetch fails
       }
     };
 
     fetchCountries();
   }, []);
 
+  /**
+   * Update form data when parent passes new initial data
+   * This ensures form stays in sync with parent component
+   */
   useEffect(() => {
     setFormData(initialFormData);
-  }, [initialFormData]); // Update form data when initialFormData changes
+  }, [initialFormData]);
 
+  /**
+   * Handle input changes for all form fields
+   * Updates both local and parent form state
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     const updatedFormData = { ...formData, [name]: value };
     setFormData(updatedFormData);
-    setParentFormData(updatedFormData);
-  }; // Update parent form data on change
+    setParentFormData(updatedFormData); // Keep parent in sync
+  };
 
-  // Validation function to check for errors in the form data
+  /**
+   * Check if passwords match
+   * Used for submit button disable state and validation
+   */
+  const passwordsMatch = formData.password && formData.confirmPassword && 
+                         formData.password === formData.confirmPassword;
+
+  /**
+   * Validate all form fields
+   * Returns true if all validations pass, false otherwise
+   */
   const validate = () => {
-    const newErrors = {}; // Object to hold validation errors
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Regex for email validation
-    const phonePattern = /^[0-9]{10}$/; // Regex for phone number validation
+    const newErrors = {};
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phonePattern = /^[0-9]{10}$/;
 
+    // Required field validations
     if (!formData.firstName) newErrors.firstName = "*First Name is required";
     if (!formData.lastName) newErrors.lastName = "*Last Name is required";
     if (!formData.userName) newErrors.userName = "*User Name is required";
-    if (!emailPattern.test(formData.email)) newErrors.email = "*Invalid email format correct Email required";
-    if ((includePassword || includeChangePassword) && formData.password && formData.password.length < 8)
-      newErrors.password = "*Password must be at least 8 characters";
-    if ((includePassword || includeChangePassword) && formData.password && formData.password !== formData.confirmPassword)
-      newErrors.confirmPassword = "*Passwords do not match";
+    if (!emailPattern.test(formData.email)) newErrors.email = "*Invalid email format";
+    
+    // Password validations (only if password fields are shown)
+    if ((includePassword || includeChangePassword) && formData.password) {
+      if (!isPasswordValid) {
+        newErrors.password = "*Password does not meet all requirements";
+      }
+      if (!passwordsMatch) {
+        newErrors.confirmPassword = "*Passwords do not match";
+      }
+    }
+    
     if (!formData.dob) newErrors.dob = "*Date of Birth is required";
     if (!formData.gender) newErrors.gender = "*Gender is required";
     if (!formData.nationality) newErrors.nationality = "*Nationality is required";
-    if (!phonePattern.test(formData.phone)) newErrors.phone = "*Invalid phone number format 10digits required";
-    if (!formData.street || !formData.city || !formData.state || !formData.zip) newErrors.address = "*Address is required";
+    if (!phonePattern.test(formData.phone)) newErrors.phone = "*Invalid phone number (10 digits required)";
+    if (!formData.street || !formData.city || !formData.state || !formData.zip) {
+      newErrors.address = "*Complete address is required";
+    }
 
-    setErrors(newErrors); // Update errors state with new errors
+    setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  /**
+   * Handle form submission
+   * Validates form and calls parent submit handler if valid
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
     parentHandleSubmit(e, formData);
-  }; // Handle form submission and validation
+  };
 
   return (
     <form onSubmit={handleSubmit} noValidate>
+      {/* First Name and Last Name Row */}
       <div className="flex mb-4">
         <div className="w-1/2 mr-2">
-          <label htmlFor="firstName" className="block text-sm text-sky-300 font-bold mb-2">First Name</label>
+          <label htmlFor="firstName" className="block text-sm text-sky-300 font-bold mb-2">
+            First Name
+          </label>
           <input
             type="text"
             id="firstName"
@@ -106,7 +165,9 @@ const UserForm = ({
           {errors.firstName && <p className="text-red-500 text-xs italic font-bold">{errors.firstName}</p>}
         </div>
         <div className="w-1/2 mr-2">
-          <label htmlFor="lastName" className="block text-sm text-sky-300 font-bold mb-2">Last Name</label>
+          <label htmlFor="lastName" className="block text-sm text-sky-300 font-bold mb-2">
+            Last Name
+          </label>
           <input
             type="text"
             id="lastName"
@@ -120,24 +181,31 @@ const UserForm = ({
           {errors.lastName && <p className="text-red-500 text-xs italic font-bold">{errors.lastName}</p>}
         </div>
       </div>
-      <div className="w-1/2 mr-2">
-          <label htmlFor="firstName" className="block text-sm text-sky-300 font-bold mb-2">User Name</label>
-          <input
-            type="text"
-            id="userName"
-            name="userName"
-            placeholder="User Name"
-            value={formData.userName || ""}
-            onChange={handleChange}
-            disabled={!isEditing}
-            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-          {errors.userName && <p className="text-red-500 text-xs italic font-bold">{errors.userName}</p>}
-        </div>
 
+      {/* Username Field */}
+      <div className="mb-4">
+        <label htmlFor="userName" className="block text-sm text-sky-300 font-bold mb-2">
+          User Name
+        </label>
+        <input
+          type="text"
+          id="userName"
+          name="userName"
+          placeholder="User Name"
+          value={formData.userName || ""}
+          onChange={handleChange}
+          disabled={!isEditing}
+          className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+        />
+        {errors.userName && <p className="text-red-500 text-xs italic font-bold">{errors.userName}</p>}
+      </div>
+
+      {/* Email and Phone Row */}
       <div className="flex mb-4">
         <div className="w-1/2 mr-2">
-          <label htmlFor="email" className="block text-sm text-sky-300 font-bold mb-2">Email</label>
+          <label htmlFor="email" className="block text-sm text-sky-300 font-bold mb-2">
+            Email
+          </label>
           <input
             type="email"
             id="email"
@@ -151,7 +219,9 @@ const UserForm = ({
           {errors.email && <p className="text-red-500 text-xs italic font-bold">{errors.email}</p>}
         </div>
         <div className="w-1/2 mr-2">
-          <label htmlFor="phone" className="block text-sm text-sky-300 font-bold mb-2">Phone</label>
+          <label htmlFor="phone" className="block text-sm text-sky-300 font-bold mb-2">
+            Phone
+          </label>
           <input
             type="tel"
             id="phone"
@@ -166,72 +236,53 @@ const UserForm = ({
         </div>
       </div>
 
+      {/* Password Fields - Only show if includePassword or includeChangePassword is true */}
       {(includePassword || (includeChangePassword && isEditing)) && (
         <>
-          <div className="mb-4 relative">
-            <label htmlFor="password" className="block text-sm text-sky-300 font-bold mb-2">New Password</label>
-            <input
-              type={showPassword ? "text" : "password"}
-              id="password"
-              name="password"
-              placeholder="*******"
+          {/* New Password with Validation Component */}
+          <div className="mb-4">
+            <PasswordInput
               value={formData.password || ""}
-              onChange={handleChange}
-              className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+              onChange={(e) => {
+                const updatedFormData = { ...formData, password: e.target.value };
+                setFormData(updatedFormData);
+                setParentFormData(updatedFormData);
+              }}
+              label="Password"
+              placeholder="Create a strong password"
+              showStrength={true}
+              showRequirements={true}
+              onValidationChange={setIsPasswordValid}
+              disabled={!isEditing}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-2 top-8 text-gray-400 hover:text-orange-500"
-            >
-              {showPassword ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542-7z"></path>
-                </svg>
-              )}
-            </button>
             {errors.password && <p className="text-red-500 text-xs italic font-bold">{errors.password}</p>}
           </div>
-          <div className="mb-4 relative">
-            <label htmlFor="confirmPassword" className="block text-sm text-sky-300 font-bold mb-2">Confirm New Password</label>
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              id="confirmPassword"
-              name="confirmPassword"
-              placeholder="*******"
+
+          {/* Confirm Password with Match Indicator Component */}
+          <div className="mb-4">
+            <ConfirmPasswordInput
               value={formData.confirmPassword || ""}
-              onChange={handleChange}
-              className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+              onChange={(e) => {
+                const updatedFormData = { ...formData, confirmPassword: e.target.value };
+                setFormData(updatedFormData);
+                setParentFormData(updatedFormData);
+              }}
+              originalPassword={formData.password || ""}
+              label="Confirm Password"
+              placeholder="Re-enter password"
+              disabled={!isEditing}
             />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-2 top-8 text-gray-400 hover:text-orange-500"
-            >
-              {showConfirmPassword ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542-7z"></path>
-                </svg>
-              )}
-            </button>
             {errors.confirmPassword && <p className="text-red-500 text-xs italic font-bold">{errors.confirmPassword}</p>}
           </div>
         </>
       )}
 
+      {/* Date of Birth and Gender Row */}
       <div className="flex mb-4">
         <div className="w-1/2 mr-2">
-          <label htmlFor="dob" className="block text-sm text-sky-300 font-bold mb-2">Date of Birth</label>
+          <label htmlFor="dob" className="block text-sm text-sky-300 font-bold mb-2">
+            Date of Birth
+          </label>
           <input
             type="date"
             id="dob"
@@ -245,7 +296,9 @@ const UserForm = ({
           {errors.dob && <p className="text-red-500 text-xs italic font-bold">{errors.dob}</p>}
         </div>
         <div className="w-1/2 mr-2">
-          <label htmlFor="gender" className="block text-sm text-sky-300 font-bold mb-2">Gender</label>
+          <label htmlFor="gender" className="block text-sm text-sky-300 font-bold mb-2">
+            Gender
+          </label>
           <select
             id="gender"
             name="gender"
@@ -263,8 +316,11 @@ const UserForm = ({
         </div>
       </div>
 
+      {/* Nationality Field */}
       <div className="w-full mb-4">
-        <label htmlFor="nationality" className="block text-sm text-sky-300 font-bold mb-2">Nationality</label>
+        <label htmlFor="nationality" className="block text-sm text-sky-300 font-bold mb-2">
+          Nationality
+        </label>
         <select
           id="nationality"
           name="nationality"
@@ -283,8 +339,11 @@ const UserForm = ({
         {errors.nationality && <p className="text-red-500 text-xs italic font-bold">{errors.nationality}</p>}
       </div>
 
+      {/* Address Fields */}
       <div className="flex flex-col mb-4">
-        <label htmlFor="address" className="block text-sm text-sky-300 font-bold mb-2">Address:</label>
+        <label htmlFor="address" className="block text-sm text-sky-300 font-bold mb-2">
+          Address:
+        </label>
         <div className="flex mb-2">
           <input
             type="text"
@@ -294,7 +353,7 @@ const UserForm = ({
             value={formData.street || ""}
             onChange={handleChange}
             disabled={!isEditing}
-            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500 mr-2"
           />
           <input
             type="text"
@@ -306,7 +365,6 @@ const UserForm = ({
             disabled={!isEditing}
             className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
-          {errors.address && <p className="text-red-500 text-xs italic font-bold">{errors.address}</p>}
         </div>
         <div className="flex mb-2">
           <input
@@ -317,7 +375,7 @@ const UserForm = ({
             value={formData.state || ""}
             onChange={handleChange}
             disabled={!isEditing}
-            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500 mr-2"
           />
           <input
             type="text"
@@ -330,8 +388,10 @@ const UserForm = ({
             className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
+        {errors.address && <p className="text-red-500 text-xs italic font-bold">{errors.address}</p>}
       </div>
 
+      {/* Submit and Cancel Buttons - Only show when editing */}
       {isEditing && (
         <div className="text-center mt-4">
           {cancelAction && (
@@ -345,7 +405,8 @@ const UserForm = ({
           )}
           <button
             type="submit"
-            className="py-2 px-4 rounded-lg text-white bg-gradient-to-r from-orange-500 to-red-700 hover:bg-green-600"
+            disabled={(includePassword || includeChangePassword) && (!isPasswordValid || !passwordsMatch)}
+            className="py-2 px-4 rounded-lg text-white bg-gradient-to-r from-orange-500 to-red-700 hover:from-orange-600 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitLabel}
           </button>
