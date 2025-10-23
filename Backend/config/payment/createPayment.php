@@ -39,7 +39,24 @@ $amount = $data['amount'] ?? null;
 $paymentMethod = $data['payment_method'] ?? null;
 $transactionId = $data['transaction_id'] ?? null;
 $paymentDate = $data['payment_date'] ?? null;
-
+//  Convert payment_date from UTC to CDT timezone
+if ($paymentDate) {
+    try {
+        // Step 1: Create DateTime object from incoming UTC string
+        $dateTime = new DateTime($paymentDate, new DateTimeZone('UTC'));
+        
+        // Step 2: Convert to CDT timezone
+        $dateTime->setTimezone(new DateTimeZone('America/Chicago'));
+        
+        // Step 3: Format as MySQL datetime
+        $paymentDate = $dateTime->format('Y-m-d H:i:s');
+        
+        Logger::log('Converted payment_date from UTC to CDT: ' . $paymentDate);
+    } catch (Exception $e) {
+        // Fallback: use current CDT time if conversion fails
+        $paymentDate = date('Y-m-d H:i:s');
+    }
+}
 Logger::log("Parsed: booking_id=$bookingId, user_id=$userId, amount=$amount, method=$paymentMethod, transaction_id=$transactionId");
 
 try {

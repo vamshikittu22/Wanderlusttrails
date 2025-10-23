@@ -25,7 +25,8 @@ const UserForm = ({
   submitLabel = "Submit",
   cancelAction = null,
   includePassword = false,
-  includeChangePassword = false,
+  includeChangePassword = false, 
+  restrictedFields = [],
 }) => {
   // State to hold form data locally
   const [formData, setFormData] = useState(initialFormData);
@@ -109,7 +110,7 @@ const UserForm = ({
     // Required field validations
     if (!formData.firstName) newErrors.firstName = "*First Name is required";
     if (!formData.lastName) newErrors.lastName = "*Last Name is required";
-    if (!formData.userName) newErrors.userName = "*User Name is required";
+    if (!formData.username) newErrors.username = "*User Name is required";
     if (!emailPattern.test(formData.email)) newErrors.email = "*Invalid email format";
     
     // Password validations (only if password fields are shown)
@@ -184,20 +185,20 @@ const UserForm = ({
 
       {/* Username Field */}
       <div className="mb-4">
-        <label htmlFor="userName" className="block text-sm text-sky-300 font-bold mb-2">
+        <label htmlFor="username" className="block text-sm text-sky-300 font-bold mb-2">
           User Name
         </label>
         <input
           type="text"
-          id="userName"
-          name="userName"
+          id="username"
+          name="username"
           placeholder="User Name"
-          value={formData.userName || ""}
+          value={formData.username || ""}
           onChange={handleChange}
-          disabled={!isEditing}
+          disabled={!isEditing ||  restrictedFields.includes('username')}
           className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
         />
-        {errors.userName && <p className="text-red-500 text-xs italic font-bold">{errors.userName}</p>}
+        {errors.username && <p className="text-red-500 text-xs italic font-bold">{errors.username}</p>}
       </div>
 
       {/* Email and Phone Row */}
@@ -289,7 +290,7 @@ const UserForm = ({
             name="dob"
             value={formData.dob || ""}
             onChange={handleChange}
-            disabled={!isEditing}
+            disabled={!isEditing || restrictedFields.includes('dob')}
             max={new Date().toISOString().split("T")[0]}
             className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           />

@@ -25,7 +25,7 @@ export function UserProvider({ children }) {
     const defaultUser = {
         firstname: null,
         lastname: null,
-        userName: null,
+        username: null,
         role: null,
         id: null,
         email: null,
@@ -206,7 +206,7 @@ export function UserProvider({ children }) {
             localStorage.removeItem('user');
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
-            localStorage.removeItem('userName');
+            localStorage.removeItem('username');
 
             toast.error(error.message || 'Failed to log in.');
             throw error;
@@ -228,7 +228,7 @@ export function UserProvider({ children }) {
             localStorage.removeItem('user');
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
-            localStorage.removeItem('userName');
+            localStorage.removeItem('username');
             setUser(null);
             setToken(null);
             setIsAuthenticated(false);

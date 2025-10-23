@@ -21,7 +21,7 @@ class UserModel {
      * Register a new user in the database
      * @return array - Success/failure result with user data
      */
-    public function registerUser($firstName, $lastName, $userName, $email, $password, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip) {
+    public function registerUser($firstName, $lastName, $username, $email, $password, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip) {
         Logger::log("registerUser started for email: $email");
 
         // Validate email format
@@ -34,9 +34,9 @@ class UserModel {
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
         // Insert user
-        $query = "INSERT INTO users (firstName, lastName, userName, email, password, dob, gender, nationality, phone, street, city, state, zip) 
+        $query = "INSERT INTO users (firstName, lastName, username, email, password, dob, gender, nationality, phone, street, city, state, zip) 
                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $result = $this->db->executeQuery($query, "sssssssssssss", $firstName, $lastName, $userName, $email, $hashedPassword, 
+        $result = $this->db->executeQuery($query, "sssssssssssss", $firstName, $lastName, $username, $email, $hashedPassword, 
                                          $dob, $gender, $nationality, $phone, $street, $city, $state, $zip);
         
         Logger::log("registerUser result for email: $email - " . ($result['success'] ? "Success" : "Failed"));

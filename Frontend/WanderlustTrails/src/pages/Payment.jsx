@@ -558,6 +558,9 @@ const createPayment = (paymentData) => {
 
 const completePayment = () => {
   const numericUserId = parseInt(user.id, 10);
+  
+  setTimeLeft(0); // Reset any payment countdown timer
+
   // Update booking status to 'confirmed' after successful payment
   $.ajax({
     url: 'http://localhost/wanderlusttrails/Backend/config/booking/updateBookingStatus.php',
@@ -567,12 +570,20 @@ const completePayment = () => {
     success: (statusRes) => {
       console.log('Status response:', statusRes);
       if (statusRes.success) {
-        toast.success(`Payment of $${totalPrice.toFixed(2)} USD successful!`);
-        setTimeLeft(0); // Reset any payment countdown timer
+          const rate = totalPrice.toFixed(2);
+          //  Show success toast with better configuration
+          toast.success(`Payment of $${totalPrice.toFixed(2)} USD successful!`, {
+                    position: "top-center",
+                    autoClose: 2500,
+                    hideProgressBar: false,
+                    theme: "colored"
+                  });        
+          window.alert(`Payment of $${rate} USD successful! Booking confirmed.`);
+        
         sessionStorage.removeItem('bookingData'); // Clear booking session data
         sessionStorage.removeItem('selectedPackage'); // Clear package selection session data
-
         // Check if user session is still valid
+
         if (!isAuthenticated) {
           console.error('User is no longer authenticated after payment', {
             isAuthenticated,
@@ -584,10 +595,19 @@ const completePayment = () => {
           return;
         }
 
+        toast.info('Redirecting to your dashboard...');
+
         // Redirect user to appropriate dashboard based on role
         const dashboardPath = user.role === 'admin' ? '/AdminDashboard' : '/UserDashboard';
         console.log('Navigating to dashboard:', dashboardPath, { userRole: user.role });
         navigate(dashboardPath);
+
+        // setTimeout(() => {
+        //   const dashboardPath = user.role === 'admin' ? '/AdminDashboard' : '/UserDashboard';
+        //   console.log('Navigating to dashboard:', dashboardPath);
+        //   navigate(dashboardPath);
+        // }, 2000);  // 2 second delay
+
       } else {
         console.log('Status failed:', statusRes.message);
         toast.error('Payment recorded, but status update failed: ' + statusRes.message);
@@ -614,8 +634,6 @@ return (
   <ErrorBoundary navigate={navigate}>
     {/* Main container with min height, background color, and padding */}
     <div className="min-h-screen bg-gray-900 py-8 px-4">
-      {/* Toast notifications container positioned at top-right, auto closes after 3 seconds */}
-      <ToastContainer position="top-right" autoClose={3000} />
       {/* Centered container with max width */}
       <div className="max-w-3xl mx-auto">
         {/* Step indicator bar */}

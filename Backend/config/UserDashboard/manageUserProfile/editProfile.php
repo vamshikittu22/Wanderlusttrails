@@ -29,9 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents("php://input"), true);
     Logger::log("POST Data - userID: " . ($data['userID'] ?? 'none'));
 
-    // Validate that all required fields are present (including userName)
+    // Validate that all required fields are present (including username)
     if (!$data || !isset($data['userID']) || !isset($data['firstName']) || !isset($data['lastName']) || 
-        !isset($data['userName']) || !isset($data['email']) || !isset($data['dob']) || 
+        !isset($data['username']) || !isset($data['email']) || !isset($data['dob']) || 
         !isset($data['gender']) || !isset($data['nationality']) || !isset($data['phone']) || 
         !isset($data['street']) || !isset($data['city']) || !isset($data['state']) || !isset($data['zip'])) {
         Logger::log("Missing required fields");
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userId = trim($data['userID']);
     $firstName = trim($data['firstName']);
     $lastName = trim($data['lastName']);
-    $userName = trim($data['userName']); // Username field
+    $username = trim($data['username']); // Username field
     $email = trim($data['email']);
     $dob = trim($data['dob']);
     $gender = trim($data['gender']);
@@ -58,8 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Create instance of UserProfileModel to handle database operations
     $userProfileModel = new UserProfileModel();
     
-    // Update user profile in database (now includes userName)
-    $result = $userProfileModel->updateProfile($userId, $firstName, $lastName, $userName, $email, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip);
+    // Update user profile in database (now includes username)
+    $result = $userProfileModel->updateProfile($userId, $firstName, $lastName, $username, $email, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip);
 
     Logger::log("editProfile result for userID: $userId - " . ($result['success'] ? "Success: {$result['message']}" : "Failed: {$result['message']}"));
 
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p><strong>Updated Information:</strong></p>
             <ul>
                 <li><strong>Name:</strong> $firstName $lastName</li>
-                <li><strong>Username:</strong> @$userName</li>
+                <li><strong>Username:</strong> @$username</li>
                 <li><strong>Email:</strong> $email</li>
                 <li><strong>Phone:</strong> $phone</li>
                 <li><strong>Date of Birth:</strong> $dob</li>
@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $altBody .= "Your profile has been successfully updated on " . date('F j, Y, g:i a') . ".\n\n";
         $altBody .= "Updated Information:\n";
         $altBody .= "Name: $firstName $lastName\n";
-        $altBody .= "Username: @$userName\n";
+        $altBody .= "Username: @$username\n";
         $altBody .= "Email: $email\n";
         $altBody .= "Phone: $phone\n";
         $altBody .= "Date of Birth: $dob\n";

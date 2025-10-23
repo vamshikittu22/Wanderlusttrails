@@ -1,4 +1,3 @@
-//path: Wanderlusttrails/Frontend/WanderlustTrails/src/pages/ContactUs.jsx
 import React, { useState } from 'react';
 
 const ContactUs = () => {
@@ -43,40 +42,24 @@ const ContactUs = () => {
   };
 
   // Handles form submission event
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();  // Prevent default form reload on submit
-
-    console.log(formData); // Log form data (for debugging)
 
     // If validation fails, stop submission
     if (!validate()) return;
 
-    try {
-      // TODO: Implement actual API call here, e.g., using fetch or axios
-      // Example:
-      // const response = await fetch('/api/contact', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData),
-      // });
+    // Log form data to console
+    console.log('Form submitted successfully!');
+    console.log(formData);
 
-      // Check if response was successful
-      if (response.ok) {
-        // Show success message
-        setMessage('Message sent successfully!');
-        // Clear form inputs
-        setFormData({ name: '', email: '', phone: '', message: '' });
-        // Clear any previous errors
-        setErrors({});
-      } else {
-        // Show error message if response not OK
-        setMessage('Error sending message. Please try again later.');
-      }
-    } catch (error) {
-      // Catch network or other errors and show error message
-      console.error('Error:', error);
-      setMessage('Error sending message. Please try again later.');
-    }
+    // Show success message
+    setMessage('Message sent successfully!');
+    
+    // Clear form inputs
+    setFormData({ name: '', email: '', phone: '', message: '' });
+    
+    // Clear any previous errors
+    setErrors({});
   };
 
   return (

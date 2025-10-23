@@ -29,7 +29,7 @@ class AuthHelper {
 
         // Check if phone or username
         $isPhone = preg_match('/^[0-9]{10}$/', $identifier);
-        $field = $isPhone ? "phone" : "userName";
+        $field = $isPhone ? "phone" : "username";
         
         // Fetch email from database
         $query = "SELECT email FROM users WHERE $field = ?";
@@ -50,7 +50,7 @@ class AuthHelper {
     public function getUserByIdentifier($identifier) {
         $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
         $isPhone = preg_match('/^[0-9]{10}$/', $identifier);
-        $field = $isEmail ? "email" : ($isPhone ? "phone" : "userName");
+        $field = $isEmail ? "email" : ($isPhone ? "phone" : "username");
         
         $query = "SELECT * FROM users WHERE $field = ?";
         $result = $this->db->fetchQuery($query, "s", $identifier);

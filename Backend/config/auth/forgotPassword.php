@@ -46,7 +46,7 @@ $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
 
 if ($isEmail) {
     // Check how many accounts exist with this email
-    $query = "SELECT userName, firstName, lastName FROM users WHERE email = ?";
+    $query = "SELECT username, firstName, lastName FROM users WHERE email = ?";
     $result = $db->fetchQuery($query, "s", $identifier);
     
     if (empty($result)) {
@@ -61,7 +61,7 @@ if ($isEmail) {
         Logger::log("Multiple accounts found for email: $identifier");
         $usernames = array_map(function($user) {
             return [
-                "userName" => $user['userName'],
+                "username" => $user['username'],
                 "displayName" => $user['firstName'] . " " . $user['lastName']
             ];
         }, $result);
