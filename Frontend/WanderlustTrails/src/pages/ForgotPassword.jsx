@@ -208,14 +208,14 @@ const ForgotPassword = () => {
                                         <input
                                             type="radio"
                                             name="username"
-                                            value={account.userName}
-                                            checked={selectedUsername === account.userName}
+                                            value={account.username}
+                                            checked={selectedUsername === account.username}
                                             onChange={(e) => setSelectedUsername(e.target.value)}
                                             className="mr-3"
                                         />
                                         <div>
                                             <div className="font-semibold text-white">{account.displayName}</div>
-                                            <div className="text-sm text-gray-300">@{account.userName}</div>
+                                            <div className="text-sm text-gray-300">@{account.username}</div>
                                         </div>
                                     </label>
                                 ))}

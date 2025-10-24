@@ -6,14 +6,19 @@ import { useUser } from '../context/UserContext';
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
 import CaptchaBox from '../components/CaptchaBox';
+// ✅ Import eye icons for password visibility toggle
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-// Login component
+
 function Login() {
   // State for login form inputs
   const [loginData, setLoginData] = useState({
     identifier: '',
     password: '',
   });
+
+  // ✅ NEW STATE: Track password visibility
+  const [showPassword, setShowPassword] = useState(false);
 
   // State for form validation errors
   const [errors, setErrors] = useState({});
@@ -47,27 +52,31 @@ function Login() {
     setLoginData({ ...loginData, [name]: value });
   };
 
+  // ✅ NEW FUNCTION: Toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   // Memoized handler for CAPTCHA verification with single toast
   const handleCaptchaVerification = useCallback((isVerified) => {
     console.log('[Login] CAPTCHA verification triggered with:', isVerified);
-    if (isVerified === isCaptchaVerified || captchaToastShown.current) return; // Prevent duplicate toasts
+    if (isVerified === isCaptchaVerified || captchaToastShown.current) return;
     captchaToastShown.current = true;
     setIsCaptchaVerified(isVerified);
     toast[isVerified ? 'success' : 'error'](
       isVerified ? 'CAPTCHA verified successfully!' : 'CAPTCHA verification failed.',
       { autoClose: 3000 }
     );
-    // Reset toast flag after a short delay to allow next verification
     setTimeout(() => {
       captchaToastShown.current = false;
-    }, 3100); // Slightly longer than autoClose to ensure reset
-  }, [isCaptchaVerified]); // Dependency on isCaptchaVerified
+    }, 3100);
+  }, [isCaptchaVerified]);
 
   // Memoized handler for login with single toast
   const handleLogin = useCallback(
     (e) => {
       e.preventDefault();
-      if (isLoggingIn) return; // Prevent multiple submissions
+      if (isLoggingIn) return;
       setIsLoggingIn(true);
       setMessage('');
       setErrors({});
@@ -81,13 +90,13 @@ function Login() {
         return;
       }
 
-      // Validate inputs; if invalid, abort
+      // Validate inputs
       if (!validate()) {
         setIsLoggingIn(false);
         return;
       }
 
-      // Check for existing token validity; logout if expired or invalid
+      // Check for existing token validity
       if (token) {
         try {
           const decoded = jwtDecode(token);
@@ -135,16 +144,15 @@ function Login() {
 
               if (!loginToastShown.current) {
                 loginToastShown.current = true;
-                toast.success('Login successful!', { autoClose: 3000 }); // Single toast
+                toast.success('Login successful!', { autoClose: 3000 });
                 setTimeout(() => {
                   loginToastShown.current = false;
-                }, 3100); // Reset after toast closes
+                }, 3100);
               }
 
               localStorage.setItem('userId', id);
               localStorage.setItem('userName', userName);
 
-              // Navigate after a short delay to ensure state updates
               setTimeout(() => {
                 setIsLoggingIn(false);
                 navigate('/');
@@ -177,7 +185,7 @@ function Login() {
         },
       });
     },
-    [isCaptchaVerified, loginData, login, logout, token, navigate, validate, isLoggingIn] // Include isLoggingIn to re-enable button
+    [isCaptchaVerified, loginData, login, logout, token, navigate, isLoggingIn]
   );
 
   // Effect to redirect if already authenticated
@@ -186,7 +194,7 @@ function Login() {
       console.log('[Login] Already authenticated, navigating to /');
       navigate('/');
     }
-  }, [isAuthenticated, user, navigate]); // Dependency array to prevent multiple triggers
+  }, [isAuthenticated, user, navigate]);
 
   return (
     <div className="relative min-h-screen flex">
@@ -201,6 +209,7 @@ function Login() {
 
             {/* Login form */}
             <form onSubmit={handleLogin} noValidate>
+              {/* Username Field */}
               <div className="mb-4">
                 <label htmlFor="identifier" className="block text-sky-300 font-bold mb-2">Username</label>
                 <input
@@ -215,17 +224,33 @@ function Login() {
                 {errors.identifier && <p className="text-red-500 text-xs italic">{errors.identifier}</p>}
               </div>
 
+              {/* ✅ UPDATED: Password Field with Toggle Button */}
               <div className="mb-4">
                 <label htmlFor="password" className="block text-sky-300 font-bold mb-2">Password</label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={loginData.password}
-                  onChange={handleChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={loginData.password}
+                    onChange={handleChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 pr-10 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                  {/* Eye icon button to toggle visibility */}
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800 focus:outline-none"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <FaEyeSlash className="h-5 w-5" />
+                    ) : (
+                      <FaEye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
                 {errors.password && <p className="text-red-500 text-xs italic">{errors.password}</p>}
               </div>
 
@@ -234,7 +259,7 @@ function Login() {
                 <CaptchaBox onVerify={handleCaptchaVerification} />
               </div>
 
-              {/* Submit button disabled until CAPTCHA verified or during login */}
+              {/* Submit button */}
               <div className="text-center">
                 <button
                   type="submit"
