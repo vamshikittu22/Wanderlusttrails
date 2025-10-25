@@ -27,7 +27,8 @@ function About() {
   // ⚠️ IMPORTANT: Add your GitHub token here!
   // Get one from: https://github.com/settings/tokens
   // Select scope: 'repo' (for private repos) or leave empty for public only
-  const GITHUB_TOKEN = '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'; // <-- PUT YOUR TOKEN HERE
+  
+const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN || "";
   
   const githubHeaders = GITHUB_TOKEN 
     ? { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
