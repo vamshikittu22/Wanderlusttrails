@@ -6,7 +6,46 @@ const getAmenitiesString = (amenities) => {
     return Object.entries(amenities)
         .filter(([_, value]) => value)
         .map(([key]) => key.charAt(0).toUpperCase() + key.slice(1))
-        .join(' ') || 'None';
+        .join(', ') || 'None';
+};
+
+// ✅ NEW: Better formatting for pending changes
+const formatPendingChanges = (changes) => {
+    if (!changes || typeof changes !== 'object') return 'None';
+    
+    const formatted = [];
+    
+    // Handle flight_details
+    if (changes.flight_details && typeof changes.flight_details === 'object') {
+        const fd = changes.flight_details;
+        if (fd.from) formatted.push(`From: ${fd.from}`);
+        if (fd.to) formatted.push(`To: ${fd.to}`);
+        if (fd.fromAirport?.name) formatted.push(`Departure: ${fd.fromAirport.name}`);
+        if (fd.toAirport?.name) formatted.push(`Arrival: ${fd.toAirport.name}`);
+        if (fd.roundTrip !== undefined) formatted.push(`Round-Trip: ${fd.roundTrip ? 'Yes' : 'No'}`);
+        if (fd.airline) formatted.push(`Airline: ${fd.airline}`);
+        if (fd.flightClass) formatted.push(`Class: ${fd.flightClass}`);
+        if (fd.flightTime) formatted.push(`Time: ${fd.flightTime}`);
+        if (fd.duration) formatted.push(`Duration: ${fd.duration}`);
+        if (fd.distance) formatted.push(`Distance: ${fd.distance}`);
+    }
+    
+    // Handle hotel_details
+    if (changes.hotel_details && typeof changes.hotel_details === 'object') {
+        const hd = changes.hotel_details;
+        if (hd.hotelStars) formatted.push(`Hotel Stars: ${hd.hotelStars}`);
+        if (hd.amenities) formatted.push(`Amenities: ${getAmenitiesString(hd.amenities)}`);
+        if (hd.car_rental !== undefined) formatted.push(`Car Rental: ${hd.car_rental ? 'Yes' : 'No'}`);
+    }
+    
+    // Handle other fields
+    if (changes.start_date) formatted.push(`Start Date: ${changes.start_date}`);
+    if (changes.end_date) formatted.push(`End Date: ${changes.end_date}`);
+    if (changes.persons) formatted.push(`Travelers: ${changes.persons}`);
+    if (changes.insurance_type) formatted.push(`Insurance: ${changes.insurance_type}`);
+    if (changes.total_price) formatted.push(`Total: $${changes.total_price}`);
+    
+    return formatted.length > 0 ? formatted : ['No changes'];
 };
 
 // Utility function to format various values safely
@@ -48,9 +87,41 @@ const BookingCard = ({
         }
     }
 
+    // ✅ FIX: Parse flight_details if it's a string
+    let flightDetails = {};
+    if (booking.booking_type === 'flight_hotel') {
+        try {
+            flightDetails = typeof booking.flight_details === 'string'
+                ? JSON.parse(booking.flight_details)
+                : booking.flight_details || {};
+        } catch (error) {
+            console.error('Error parsing flight_details:', error);
+            flightDetails = {};
+        }
+    }
+
+    // ✅ FIX: Parse hotel_details if it's a string
+    let hotelDetails = {};
+    if (booking.booking_type === 'flight_hotel') {
+        try {
+            hotelDetails = typeof booking.hotel_details === 'string'
+                ? JSON.parse(booking.hotel_details)
+                : booking.hotel_details || {};
+        } catch (error) {
+            console.error('Error parsing hotel_details:', error);
+            hotelDetails = {};
+        }
+    }
+
+    // ✅ FIX: Determine if round-trip from flight_details
+    const isRoundTrip = flightDetails.roundTrip !== undefined 
+        ? flightDetails.roundTrip 
+        : (booking.end_date && booking.end_date !== booking.start_date);
+
     // Check if booking dates are in the past
     const currentDate = new Date().toISOString().split('T')[0];
-    const isPastDate = (booking.start_date && booking.start_date < currentDate) || (booking.end_date && booking.end_date < currentDate);
+    const isPastDate = (booking.start_date && booking.start_date < currentDate) || 
+                      (booking.end_date && booking.end_date < currentDate);
 
     return (
         <div    
@@ -59,7 +130,6 @@ const BookingCard = ({
                   ? 'bg-blue-100 text-orange-900 border-orange-400' 
                   : 'bg-blue-100 text-green-900 border-green-600'
               }`}
-              
         >
             <div className="flex justify-between items-center mb-4">
                 <h3 className={`text-lg font-bold ${isAdminView ? 'text-orange-600' : 'text-green-800'}`}>
@@ -94,7 +164,7 @@ const BookingCard = ({
                     <>
                         <p><span className="font-semibold">Package ID:</span> {booking.package_id || 'N/A'}</p>
                         <p><span className="font-semibold">Package Name:</span> {booking.package_name || 'N/A'}</p>
-                        <p><span className="font-semibold">Dates:</span> {booking.start_date} to {booking.end_date}</p>
+                        <p><span className="font-semibold">Dates:</span> {booking.start_date} to {booking.end_date || 'N/A'}</p>
                         <p><span className="font-semibold">Persons:</span> {booking.persons}</p>
                         <p><span className="font-semibold">Insurance:</span> {booking.insurance_type}</p>
                     </>
@@ -102,7 +172,7 @@ const BookingCard = ({
                     <>
                         <p><span className="font-semibold">Package ID:</span> {booking.package_id || 'N/A'}</p>
                         <p><span className="font-semibold">Package Name:</span> {booking.package_name || 'N/A'}</p>
-                        <p><span className="font-semibold">Dates:</span> {booking.start_date} to {booking.end_date}</p>
+                        <p><span className="font-semibold">Dates:</span> {booking.start_date} to {booking.end_date || 'N/A'}</p>
                         <p><span className="font-semibold">Persons:</span> {booking.persons}</p>
                         <p><span className="font-semibold">Insurance:</span> {booking.insurance_type}</p>
                         <div>
@@ -120,16 +190,21 @@ const BookingCard = ({
                     </>
                 ) : (
                     <>
-                        <p><span className="font-semibold">Trip:</span> {booking.end_date !== booking.start_date ? 'Round-Trip' : 'One-Way'}</p>
-                        <p><span className="font-semibold">From:</span> {booking.flight_details?.from || 'N/A'}</p>
-                        <p><span className="font-semibold">To:</span> {booking.flight_details?.to || 'N/A'}</p>
-                        <p><span className="font-semibold">Dates:</span> {booking.start_date}{booking.end_date !== booking.start_date ? ` to ${booking.end_date}` : ''}</p>
-                        <p><span className="font-semibold">Airline:</span> {booking.flight_details?.airline || 'Any'}</p>
-                        <p><span className="font-semibold">Class:</span> {booking.flight_details?.class || 'N/A'}</p>
-                        <p><span className="font-semibold">Preferred Time:</span> {booking.flight_details?.preferred_time || 'N/A'}</p>
-                        <p><span className="font-semibold">Hotel Stars:</span> {booking.hotel_details?.star_rating || 'N/A'}</p>
-                        <p><span className="font-semibold">Amenities:</span> {getAmenitiesString(booking.hotel_details?.amenities)}</p>
-                        <p><span className="font-semibold">Car Rental:</span> {booking.hotel_details?.car_rental ? 'Yes' : 'No'}</p>
+                        {/* ✅ FIX: Use isRoundTrip variable */}
+                        <p><span className="font-semibold">Trip:</span> {isRoundTrip ? 'Round-Trip' : 'One-Way'}</p>
+                        <p><span className="font-semibold">From:</span> {flightDetails.from || 'N/A'}</p>
+                        <p><span className="font-semibold">To:</span> {flightDetails.to || 'N/A'}</p>
+                        {/* ✅ FIX: Handle null end_date properly */}
+                        <p>
+                            <span className="font-semibold">Dates:</span> {booking.start_date}
+                            {isRoundTrip && booking.end_date ? ` to ${booking.end_date}` : ''}
+                        </p>
+                        <p><span className="font-semibold">Airline:</span> {flightDetails.airline || 'Any'}</p>
+                        <p><span className="font-semibold">Class:</span> {flightDetails.class || flightDetails.flightClass || 'N/A'}</p>
+                        <p><span className="font-semibold">Preferred Time:</span> {flightDetails.preferred_time || flightDetails.flightTime || 'N/A'}</p>
+                        <p><span className="font-semibold">Hotel Stars:</span> {hotelDetails.star_rating || hotelDetails.hotelStars || 'N/A'}</p>
+                        <p><span className="font-semibold">Amenities:</span> {getAmenitiesString(hotelDetails.amenities)}</p>
+                        <p><span className="font-semibold">Car Rental:</span> {hotelDetails.car_rental ? 'Yes' : 'No'}</p>
                         <p><span className="font-semibold">Persons:</span> {booking.persons}</p>
                         <p><span className="font-semibold">Insurance:</span> {booking.insurance_type}</p>
                     </>
@@ -139,12 +214,13 @@ const BookingCard = ({
                     <span className="font-semibold">Total Price:</span> ${booking.total_price}
                 </p>
 
+                {/* ✅ FIX: Better formatting for pending changes */}
                 {booking.pending_changes && (
-                    <div>
-                        <span className="font-semibold text-yellow-600">Pending Changes:</span>
-                        <ul className="list-disc pl-5">
-                            {Object.entries(booking.pending_changes).map(([key, value]) => (
-                                <li key={key}>{key}: {formatValue(value)}</li>
+                    <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                        <span className="font-semibold text-yellow-800">Pending Changes:</span>
+                        <ul className="list-disc pl-5 mt-2 text-sm">
+                            {formatPendingChanges(booking.pending_changes).map((change, index) => (
+                                <li key={index} className="text-yellow-900">{change}</li>
                             ))}
                         </ul>
                     </div>

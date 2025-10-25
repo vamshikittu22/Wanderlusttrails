@@ -259,8 +259,21 @@ class BookingModel {
                     $newPackageId = $mergedPendingChanges['package_id'] ?? $booking['package_id'];
                     $newInsurance = $mergedPendingChanges['insurance_type'] ?? $booking['insurance_type'];
                     $hasInsurance = isset($mergedPendingChanges['insurance']) ? ($mergedPendingChanges['insurance'] !== '0' ? 1 : 0) : $booking['insurance'];
-    
-                    // Iterate through pending changes and update flight and hotel details
+
+                    // ✅ FIX: Merge top-level objects FIRST (handles roundTrip, airline, etc.)
+                    if (isset($mergedPendingChanges['flight_details']) && is_array($mergedPendingChanges['flight_details'])) {
+                        $newFlightDetails = array_merge($newFlightDetails, $mergedPendingChanges['flight_details']);
+                    }
+
+                    if (isset($mergedPendingChanges['hotel_details']) && is_array($mergedPendingChanges['hotel_details'])) {
+                        $newHotelDetails = array_merge($newHotelDetails, $mergedPendingChanges['hotel_details']);
+                    }
+
+                    if (isset($mergedPendingChanges['itinerary_details']) && is_array($mergedPendingChanges['itinerary_details'])) {
+                        $newItineraryDetails = array_merge($newItineraryDetails, $mergedPendingChanges['itinerary_details']);
+                    }
+
+                    // Iterate through pending changes for dot-notation fields (backward compatibility)
                     foreach ($mergedPendingChanges as $key => $value) { 
                         if (strpos($key, 'flight_details.') === 0) {
                             $flightKey = substr($key, 14);
@@ -274,6 +287,7 @@ class BookingModel {
                             }
                         }
                     }
+
     
                     $newPrice = $mergedPendingChanges['total_price'] ?? $this->calculatePrice(
                         $booking['booking_type'],

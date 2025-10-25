@@ -334,9 +334,12 @@ const UserViewBookings = () => {
                             navigate={navigate}
                             onSubmit={(bookingId, payload) =>
                                 handleEditSubmit(bookingId, payload, () => {
-                                    setIsEditPopupOpen(false);
-                                    setEditBooking(null);
-                                })
+                                    // ✅ FIX: Wait a bit for fetchBookings to complete
+                                    setTimeout(() => {
+                                        setIsEditPopupOpen(false);
+                                        setEditBooking(null);
+                                    }, 500); // 500ms delay to ensure refetch completes
+                                                })
                             }
                             onCancel={() => setIsEditPopupOpen(false)}
                             fullWidth={true}

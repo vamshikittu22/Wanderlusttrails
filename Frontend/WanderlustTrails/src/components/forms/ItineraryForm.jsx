@@ -1,25 +1,47 @@
-// ============================================
-// IMPORTS SECTION
-// ============================================
+// Path: Frontend/WanderlustTrails/src/components/forms/ItineraryForm.jsx
+
 import React, { useState, useEffect } from 'react';
 import mockData from '../../data/mockData.js';
 import FormWrapper from './FormWrapper.jsx';
+import FormInput from './FormInput';
+import FormSelect from './FormSelect';
 import { Link } from 'react-router-dom';
-import { FaBox, FaCalendarAlt, FaUsers, FaShieldAlt, FaCheckCircle, FaHiking, FaLandmark, FaSpa, FaUtensils, FaWater } from 'react-icons/fa';
+import { 
+  FaBox, FaCalendarAlt, FaUsers, FaShieldAlt, FaCheckCircle, 
+  FaHiking, FaLandmark, FaSpa, FaUtensils, FaWater 
+} from 'react-icons/fa';
 
 // Import your existing components
 import Pagination from '../Pagination.jsx';
 import FilterSortBar from '../FilterSortBar.jsx';
 
-
-// ============================================
-// MAIN COMPONENT DEFINITION
-// ============================================
 /**
  * ItineraryForm Component with Tab Filtering and Pagination
  * 
+ * Purpose: Plan custom itineraries by selecting package and activities
  * Uses existing Pagination and FilterSortBar components
  * Activities are organized by categories (tabs) with 6 items per page
+ * 
+ * Features:
+ * - Package selection dropdown
+ * - Activity selection with categories
+ * - Date range (start and end dates)
+ * - Number of travelers
+ * - Optional travel insurance (per person)
+ * - Real-time price calculation
+ * 
+ * PRICING MODEL:
+ * - Package: Per person per day
+ * - Activities: ONE-TIME per person (not daily)
+ * - Insurance: Per person (Basic $30, Premium $50, Elite $75)
+ * 
+ * Props:
+ * @param {Object} initialData - Pre-filled form data for editing
+ * @param {Function} onSubmit - Callback when form submitted
+ * @param {Function} onCancel - Callback when form cancelled
+ * @param {Array} packages - List of available packages
+ * @param {boolean} loading - Loading state for packages
+ * @param {string} error - Error message for packages
  */
 const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, error }) => {
   
@@ -37,8 +59,7 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
   const [endDate, setEndDate] = useState(
     initialData?.end_date instanceof Date
       ? initialData.end_date.toISOString().split('T')[0]
-      : initialData?.end_date || ''
-  );
+      : initialData?.end_date || ''  );
   const [persons, setPersons] = useState(initialData?.persons || 1);
   const [insurance, setInsurance] = useState(initialData?.insurance || 'none');
   const [totalPrice, setTotalPrice] = useState(initialData?.totalPrice || 0);
@@ -47,27 +68,9 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
   // ============================================
   // ACTIVITIES FILTERING AND PAGINATION STATES
   // ============================================
-  /**
-   * Active category - tracks which category tab is selected
-   */
-  const [activeCategory, setActiveCategory] = useState('all');
-  
-  /**
-   * Filtered activities - activities after applying category filter
-   * This is what gets paginated
-   */
   const [filteredActivities, setFilteredActivities] = useState([]);
-  
-  /**
-   * Current page - tracks pagination state
-   */
   const [currentPage, setCurrentPage] = useState(1);
-  
-  /**
-   * Items per page constant
-   */
   const ITEMS_PER_PAGE = 6;
-
 
   // ============================================
   // DATE CALCULATIONS
@@ -78,19 +81,14 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
   const minStartDateString = minStartDate.toISOString().split('T')[0];
   const [minEndDate, setMinEndDate] = useState('');
 
-
   // ============================================
   // AVAILABLE ACTIVITIES DATA
   // ============================================
   const availableActivities = mockData.itinerary.activities;
 
-
   // ============================================
   // CATEGORY CONFIGURATION
   // ============================================
-  /**
-   * Category definitions with icons and colors
-   */
   const categories = [
     { key: 'all', label: 'All Activities', icon: FaCheckCircle, color: 'text-indigo-600' },
     { key: 'adventure', label: 'Adventure', icon: FaHiking, color: 'text-green-600' },
@@ -100,24 +98,15 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     { key: 'water', label: 'Water Sports', icon: FaWater, color: 'text-blue-600' },
   ];
 
-
   // ============================================
   // FILTER AND SORT OPTIONS FOR FilterSortBar
   // ============================================
-  /**
-   * Filter options for categories
-   * Each option filters activities by category
-   */
   const filterOptions = categories.map(cat => ({
     key: cat.key,
     label: cat.label,
     filterFunction: (activity) => cat.key === 'all' || activity.category === cat.key
   }));
 
-  /**
-   * Sort options for activities
-   * Users can sort by name, price, or duration
-   */
   const sortOptions = [
     {
       key: 'name',
@@ -138,64 +127,59 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
       key: 'duration',
       label: 'Duration',
       sortFunction: (a, b) => {
-        // Extract numeric value from duration string (e.g., "2 hours" -> 2)
         const getDurationValue = (dur) => parseInt(dur.match(/\d+/)?.[0] || 0);
         return getDurationValue(a.duration) - getDurationValue(b.duration);
       }
     }
   ];
 
-
   // ============================================
   // PAGINATION CALCULATIONS
   // ============================================
-  /**
-   * Calculate which activities to display on current page
-   */
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const currentActivities = filteredActivities.slice(startIndex, endIndex);
 
-
-  /**
-   * Get count of activities in each category
-   */
-  const getCategoryCount = (categoryKey) => {
-    if (categoryKey === 'all') return availableActivities.length;
-    return availableActivities.filter(act => act.category === categoryKey).length;
-  };
-
-  /**
-   * Get count of SELECTED activities in each category
-   */
   const getSelectedCount = (categoryKey) => {
     if (categoryKey === 'all') return activities.length;
     return activities.filter(act => act.category === categoryKey).length;
   };
 
+  // ============================================
+  // OPTIONS FOR DROPDOWNS
+  // ============================================
+  
+  // Package options from props
+  const packageOptions = packages.map(pkg => ({
+    value: pkg.id,
+    label: `${pkg.name} - $${pkg.price}/day per person`
+  }));
+
+  // Travelers options (1-10)
+  const travelerOptions = Array.from({ length: 10 }, (_, i) => ({
+    value: i + 1,
+    label: `${i + 1} ${i === 0 ? 'Traveler' : 'Travelers'}`
+  }));
+
+  // Insurance options
+  const insuranceOptions = [
+    { value: 'none', label: 'No Insurance' },
+    { value: 'basic', label: 'Basic Coverage ($30/person)' },
+    { value: 'premium', label: 'Premium Coverage ($50/person)' },
+    { value: 'elite', label: 'Elite Coverage ($75/person)' }
+  ];
 
   // ============================================
   // SIDE EFFECTS
   // ============================================
   
-  /**
-   * Initialize filteredActivities with all activities
-   * FilterSortBar will handle the filtering
-   */
   useEffect(() => {
     setFilteredActivities(availableActivities);
   }, []);
 
-  /**
-   * Reset to page 1 when filtered activities change
-   */
   useEffect(() => {
     setCurrentPage(1);
   }, [filteredActivities]);
-
-  useEffect(() => {
-    console.log('ItineraryForm initialData:', initialData);
-  }, [initialData, packages]);
 
   useEffect(() => {
     if (packages.length > 0) {
@@ -203,9 +187,7 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
       
       if (!pkg && packageId) {
         pkg = packages.find((p) => p.id == packageId);
-        if (pkg) {
-          setSelectedPackage(pkg);
-        }
+        if (pkg) setSelectedPackage(pkg);
       }
       
       if (!packageId) {
@@ -227,9 +209,8 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
       if (!endDate || new Date(endDate) < new Date(newMinEndString)) {
         setEndDate(newMinEndString);
       }
-    } 
+    }
   }, [startDate]);
-
 
   // ============================================
   // PRICE CALCULATION FUNCTION
@@ -252,33 +233,17 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     const activitiesCost = activitiesPrice * persons;
     let total = packageCost + activitiesCost;
 
-    let insuranceCost = 0;
-    if (insurance === 'basic') {
-      insuranceCost = 30 * persons;
-    } else if (insurance === 'premium') {
-      insuranceCost = 50 * persons;
-    } else if (insurance === 'elite') {
-      insuranceCost = 75 * persons;
-    }
+    const insuranceRates = { none: 0, basic: 30, premium: 50, elite: 75 };
+    total += insuranceRates[insurance] * persons;
     
-    total += insuranceCost;
     return total.toFixed(2);
   };
 
   useEffect(() => {
     if (selectedPackage) {
-      const price = calculateTotalPrice();
-      setTotalPrice(price);
-    } else {
-      const activitiesPrice = activities.reduce(
-        (sum, activity) => sum + (parseFloat(activity.price) || 0), 
-        0
-      );
-      const total = activitiesPrice * persons;
-      setTotalPrice(total.toFixed(2));
+      setTotalPrice(calculateTotalPrice());
     }
   }, [selectedPackage, activities, persons, insurance, startDate, endDate]);
-
 
   // ============================================
   // EVENT HANDLERS
@@ -297,16 +262,11 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     const isSelected = activities.some((act) => act.id === activity.id);
     
     if (isSelected) {
-      const newActivities = activities.filter((act) => act.id !== activity.id);
-      setActivities(newActivities);
-      console.log('🎯 Activity removed:', activity.name);
+      setActivities(activities.filter((act) => act.id !== activity.id));
     } else {
-      const newActivities = [...activities, activity];
-      setActivities(newActivities);
-      console.log('🎯 Activity added:', activity.name);
+      setActivities([...activities, activity]);
     }
   };
-
 
   // ============================================
   // VALIDATION FUNCTION
@@ -316,34 +276,12 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     if (!packageId) errors.packageId = "Please select a package";
     if (!startDate) errors.startDate = "Start date is required";
     if (!endDate) errors.endDate = "End date is required";
-    if (persons < 1) errors.persons = "Number of travelers must be at least 1";
+    if (persons < 1) errors.persons = "At least 1 traveler required";
     if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
       errors.endDate = "End date must be after start date";
     }
     return errors;
   };
-
-
-  // ============================================
-  // SUMMARY OBJECT
-  // ============================================
-  const summary = {
-    packageName: selectedPackage?.name || 'N/A',
-    location: selectedPackage?.location || 'N/A',
-    activities: activities.map((act) => act.name).join(', ') || 'None',
-    startDate: startDate instanceof Date ? startDate.toISOString().split('T')[0] : startDate || 'N/A',
-    endDate: endDate instanceof Date ? endDate.toISOString().split('T')[0] : endDate || 'N/A',
-    persons: persons,
-    insurance: insurance === 'none' 
-      ? 'No Insurance' 
-      : insurance === 'basic' 
-        ? `Basic Coverage ($${30 * persons})` 
-        : insurance === 'premium' 
-          ? `Premium Coverage ($${50 * persons})` 
-          : `Elite Coverage ($${75 * persons})`,
-    totalPrice: totalPrice,
-  };
-
 
   // ============================================
   // FORM SUBMISSION HANDLER
@@ -359,19 +297,47 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
     
     const formData = {
       package_id: packageId,
-      selectedPackage: selectedPackage,
+      selectedPackage,
       itinerary_details: activities,
       start_date: startDate,
       end_date: endDate,
-      persons: persons,
-      insurance: insurance,
+      persons,
+      insurance,
       total_price: totalPrice,
     };
     
-    console.log('✅ Form Data Submitted:', formData);
     onSubmit(formData);
   };
 
+  // ============================================
+  // HELPER COMPONENT - INSURANCE TOTAL DISPLAY
+  // ============================================
+  const InsuranceTotalDisplay = () => {
+    if (persons <= 1 || insurance === 'none') return null;
+    const rates = { basic: 30, premium: 50, elite: 75 };
+    const total = rates[insurance] * persons;
+    return (
+      <div className="bg-green-50 border-l-4 border-green-400 p-3 rounded">
+        <p className="text-sm text-green-800">
+          💡 <strong>Total Insurance:</strong> ${rates[insurance]} × {persons} = ${total}
+        </p>
+      </div>
+    );
+  };
+
+  // ============================================
+  // SUMMARY OBJECT
+  // ============================================
+  const summary = {
+    packageName: selectedPackage?.name || 'N/A',
+    location: selectedPackage?.location || 'N/A',
+    activities: activities.map((act) => act.name).join(', ') || 'None',
+    startDate,
+    endDate,
+    persons,
+    insurance: insurance === 'none' ? 'No Insurance' : `${insurance} ($${insurance === 'basic' ? 30 : insurance === 'premium' ? 50 : 75} × ${persons})`,
+    totalPrice,
+  };
 
   // ============================================
   // LOADING AND ERROR STATES
@@ -383,7 +349,6 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
   if (error) {
     return <p className="text-red-500 text-center">Error: {error}</p>;
   }
-
 
   // ============================================
   // JSX RETURN - COMPONENT UI RENDERING
@@ -409,33 +374,17 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
         </p>
       </div>
 
-
-      {/* PACKAGE SELECTION */}
+      {/* ✅ PACKAGE SELECTION - USING FormSelect */}
       <div className="mb-6">
-        <label className="flex items-center gap-2 text-indigo-700 font-semibold mb-2">
-          <FaBox className="text-purple-500" />
-          <span>Choose a Package</span>
-        </label>
-        
-        <select
+        <FormSelect
+          label="Choose a Package"
+          icon={FaBox}
           value={packageId}
           onChange={handlePackageChange}
-          className={`w-full p-3 border rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400 ${
-            errors.packageId ? 'border-red-500' : 'border-gray-300'
-          }`}
-        >
-          {packages.map((pkg) => (
-            <option key={pkg.id} value={pkg.id}>
-              {pkg.name} - ${pkg.price}/day per person
-            </option>
-          ))}
-        </select>
-        
-        {errors.packageId && (
-          <p className="text-red-500 text-sm mt-1">{errors.packageId}</p>
-        )}
+          options={packageOptions}
+          error={errors.packageId}
+        />
       </div>
-
 
       {/* SELECTED PACKAGE DETAILS */}
       {selectedPackage && (
@@ -450,10 +399,7 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
         </div>
       )}
 
-
-      {/* ============================================ */}
-      {/* ACTIVITIES SECTION WITH FILTER, SORT & PAGINATION */}
-      {/* ============================================ */}
+      {/* ACTIVITIES SECTION */}
       <div className="mb-6">
         <h3 className="flex items-center gap-2 text-xl font-semibold text-indigo-800 mb-3">
           <FaCheckCircle className="text-green-500" />
@@ -492,9 +438,7 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
           </div>
         )}
 
-        {/* ============================================ */}
-        {/* FILTER AND SORT BAR - Using Your Component */}
-        {/* ============================================ */}
+        {/* FILTER AND SORT BAR */}
         <div className="mb-4 bg-indigo-300 rounded-lg p-4 border border-indigo-200">
           <FilterSortBar
             items={availableActivities}
@@ -504,34 +448,7 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
           />
         </div>
 
-        {/* Category Counts Display
-        <div className="flex flex-wrap gap-2 mb-4">
-          {categories.map((cat) => {
-            const Icon = cat.icon;
-            const count = getCategoryCount(cat.key);
-            const selectedCount = getSelectedCount(cat.key);
-            
-            return (
-              <div
-                key={cat.key}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm"
-              >
-                <Icon className={cat.color} />
-                <span className="font-medium">{cat.label}:</span>
-                <span className="text-gray-600">{count} available</span>
-                {selectedCount > 0 && (
-                  <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
-                    ✓ {selectedCount}
-                  </span>
-                )}
-              </div>
-            );
-          })}
-        </div> */}
-
-        {/* ============================================ */}
         {/* ACTIVITIES GRID */}
-        {/* ============================================ */}
         {currentActivities.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
@@ -548,7 +465,6 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
                     }`}
                     onClick={() => handleActivityToggle(activity)}
                   >
-                    {/* Selected Indicator */}
                     {isSelected && (
                       <div className="flex justify-end mb-2">
                         <span className="bg-indigo-600 text-white text-xs px-2 py-1 rounded-full">
@@ -564,7 +480,6 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
                       ${activity.price} per person (one-time)
                     </p>
                     
-                    {/* Category Badge */}
                     {activity.category && (
                       <p className="text-xs text-gray-500 mt-2 capitalize">
                         📁 {activity.category}
@@ -575,9 +490,7 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
               })}
             </div>
 
-            {/* ============================================ */}
-            {/* PAGINATION - Using Your Component */}
-            {/* ============================================ */}
+            {/* PAGINATION */}
             <Pagination
               totalItems={filteredActivities.length}
               itemsPerPage={ITEMS_PER_PAGE}
@@ -586,7 +499,6 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
             />
           </>
         ) : (
-          
           <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
             <p className="text-gray-500 text-lg">No activities match your current filter.</p>
             <p className="text-gray-400 text-sm mt-2">Try selecting a different category or sort option.</p>
@@ -594,133 +506,81 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
         )}
       </div>
 
-
-      {/* START DATE INPUT */}
-      <div className="mb-6">
-        <label className="flex items-center gap-2 text-indigo-700 font-semibold mb-2">
-          <FaCalendarAlt className="text-green-500" />
-          <span>Start Date</span>
-        </label>
-        
-        <input
+<div className="grid gap-4 mb-6 md:grid-cols-2"> 
+{/* ✅ START DATE - USING FormInput */}
+      <div>
+        <FormInput
+          label="Start Date"
+          icon={FaCalendarAlt}
           type="date"
           value={startDate}
           onChange={(e) => {
             setStartDate(e.target.value);
-            if (errors.startDate) {
-              setErrors({ ...errors, startDate: '' });
-            }
+            if (errors.startDate) setErrors({ ...errors, startDate: '' });
           }}
+          error={errors.startDate}
           min={minStartDateString}
-          className={`w-full p-3 border rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400 ${
-            errors.startDate ? 'border-red-500' : 'border-gray-300'
-          }`}
           required
         />
-        
-        {errors.startDate && (
-          <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>
-        )}
       </div>
 
-
-      {/* END DATE INPUT */}
-      <div className="mb-6">
-        <label className="flex items-center gap-2 text-indigo-700 font-semibold mb-2">
-          <FaCalendarAlt className="text-red-500" />
-          <span>End Date</span>
-        </label>
-        
-        <input
+      {/* ✅ END DATE - USING FormInput */}
+      <div>
+        <FormInput
+          label="End Date"
+          icon={FaCalendarAlt}
           type="date"
           value={endDate}
           onChange={(e) => {
             setEndDate(e.target.value);
-            if (errors.endDate) {
-              setErrors({ ...errors, endDate: '' });
-            }
+            if (errors.endDate) setErrors({ ...errors, endDate: '' });
           }}
+          error={errors.endDate}
           min={minEndDate}
-          className={`w-full p-3 border rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400 ${
-            errors.endDate ? 'border-red-500' : 'border-gray-300'
-          }`}
           required
         />
-        
-        {errors.endDate && (
-          <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>
-        )}
       </div>
-
-
-      {/* NUMBER OF TRAVELERS */}
+</div>
+      
+<div className="grid gap-4 mb-6 md:grid-cols-2"> 
+      {/* ✅ TRAVELERS - USING FormSelect */}
       <div className="mb-6">
-        <label className="flex items-center gap-2 text-indigo-700 font-semibold mb-2">
-          <FaUsers className="text-indigo-500" />
-          <span>Number of Travelers</span>
-        </label>
-        
-        <input
-          type="number"
+        <FormSelect
+          label="Number of Travelers"
+          icon={FaUsers}
           value={persons}
           onChange={(e) => {
             setPersons(Number(e.target.value));
-            if (errors.persons && Number(e.target.value) >= 1) {
-              setErrors({ ...errors, persons: '' });
-            }
+            if (errors.persons) setErrors({ ...errors, persons: '' });
           }}
-          min="1"
-          className={`w-full p-3 border rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400 ${
-            errors.persons ? 'border-red-500' : 'border-gray-300'
-          }`}
-          required
+          options={travelerOptions}
+          error={errors.persons}
         />
-        
-        {errors.persons && (
-          <p className="text-red-500 text-sm mt-1">{errors.persons}</p>
-        )}
       </div>
 
-
-      {/* INSURANCE OPTION */}
+      {/* ✅ INSURANCE - USING FormSelect */}
       <div className="mb-6">
-        <label className="flex items-center gap-2 text-indigo-700 font-semibold mb-2">
-          <FaShieldAlt className="text-green-600" />
-          <span>Insurance Option (Per Person):</span>
-        </label>
-        
-        {persons > 1 && insurance !== 'none' && (
-          <div className="bg-green-50 border-l-4 border-green-400 p-3 mb-3">
-            <p className="text-sm text-green-800">
-              💡 <strong>Total Insurance:</strong> {
-                insurance === 'basic' ? `$30 × ${persons} = $${30 * persons}` :
-                insurance === 'premium' ? `$50 × ${persons} = $${50 * persons}` :
-                `$75 × ${persons} = $${75 * persons}`
-              }
-            </p>
-          </div>
-        )}
-        
-        <select
+        <FormSelect
+          label="Insurance Option (Per Person)"
+          icon={FaShieldAlt}
           value={insurance}
           onChange={(e) => setInsurance(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-400"
-        >
-          <option value="none">No Insurance</option>
-          <option value="basic">Basic Coverage ($30 per person)</option>
-          <option value="premium">Premium Coverage ($50 per person)</option>
-          <option value="elite">Elite Coverage ($75 per person)</option>
-        </select>
-        
-        <p className="mt-2 text-sm text-indigo-600">
-          <Link to="/travelinsurance" className="hover:underline">
-            Learn more about our insurance plans
-          </Link>
-        </p>
+          options={insuranceOptions}
+          helperText={
+            <>
+              <InsuranceTotalDisplay />
+              <p className="text-sm text-indigo-600 mt-2">
+                <Link to="/travelinsurance" className="hover:underline">
+                  Learn more about our insurance plans
+                </Link>
+              </p>
+            </>
+          }
+        />
       </div>
+</div>
     </FormWrapper>
   );
 };
-
 
 export default ItineraryForm;

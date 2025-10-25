@@ -1,11 +1,26 @@
 //path: Frontend/WanderlustTrails/src/components/forms/UserForm.jsx
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { PasswordInput, ConfirmPasswordInput } from '../PasswordValidator'; // Import validators
+import FormInput from './FormInput';
+import FormSelect from './FormSelect';
+import { PasswordInput, ConfirmPasswordInput } from '../PasswordValidator';
+import { FaUser, FaEnvelope, FaPhone, FaCalendarAlt, FaVenusMars, FaGlobe, FaMapMarkerAlt } from 'react-icons/fa';
 
 /**
  * UserForm Component - Reusable form for user registration and profile editing
- * Handles form validation, password strength checking, and submission
+ * 
+ * Purpose: Handles form validation, password strength checking, and submission
+ * Used for: Signup, Profile editing, Admin user management
+ * 
+ * Features:
+ * - Dynamic form fields (password fields conditional)
+ * - Real-time validation
+ * - Password strength indicator
+ * - Country selection from REST API
+ * - Field-level error display
+ * - Restricted fields support (for editing certain fields)
+ * 
  * @param {Object} formData - Initial form data
  * @param {Function} setFormData - Function to update parent form data
  * @param {Function} handleSubmit - Parent submit handler
@@ -15,6 +30,7 @@ import { PasswordInput, ConfirmPasswordInput } from '../PasswordValidator'; // I
  * @param {Function} cancelAction - Optional cancel button handler
  * @param {Boolean} includePassword - Whether to show password fields (for signup)
  * @param {Boolean} includeChangePassword - Whether to show password change fields (for profile)
+ * @param {Array} restrictedFields - Fields that cannot be edited
  */
 const UserForm = ({
   formData: initialFormData,
@@ -28,31 +44,30 @@ const UserForm = ({
   includeChangePassword = false, 
   restrictedFields = [],
 }) => {
-  // State to hold form data locally
+  // ============================================
+  // STATE DECLARATIONS
+  // ============================================
   const [formData, setFormData] = useState(initialFormData);
-  
-  // State to hold validation errors
   const [errors, setErrors] = useState(initialErrors);
-  
-  // State to hold list of countries for nationality dropdown
   const [countries, setCountries] = useState([]);
-  
-  // State to track if password meets all requirements
   const [isPasswordValid, setIsPasswordValid] = useState(false);
-  
+
+  // ============================================
+  // FETCH COUNTRIES ON MOUNT
+  // ============================================
   /**
-   * Fetch countries from REST API on component mount
-   * Used to populate the nationality dropdown
+   * Fetch countries from REST API for nationality dropdown
+   * Sorts alphabetically for better UX
    */
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await axios.get("https://restcountries.com/v2/all?fields=name,alpha2Code", {
-          timeout: 3000
-        });
+        const response = await axios.get(
+          "https://restcountries.com/v2/all?fields=name,alpha2Code", 
+          { timeout: 3000 }
+        );
         
         if (response.data && Array.isArray(response.data)) {
-          // Sort countries alphabetically by name
           const sortedCountries = response.data
             .map(country => ({
               name: country.name,
@@ -60,12 +75,10 @@ const UserForm = ({
             }))
             .sort((a, b) => a.name.localeCompare(b.name));
           setCountries(sortedCountries);
-        } else {
-          throw new Error('Invalid response format');
         }
       } catch (error) {
         console.error("Error fetching countries:", error);
-        setCountries([]); // Set empty array if fetch fails
+        setCountries([]);
       }
     };
 
@@ -73,47 +86,44 @@ const UserForm = ({
   }, []);
 
   /**
-   * Update form data when parent passes new initial data
-   * This ensures form stays in sync with parent component
+   * Sync with parent form data changes
    */
   useEffect(() => {
     setFormData(initialFormData);
   }, [initialFormData]);
 
+  // ============================================
+  // EVENT HANDLERS
+  // ============================================
   /**
    * Handle input changes for all form fields
-   * Updates both local and parent form state
    */
   const handleChange = (e) => {
     const { name, value } = e.target;
     const updatedFormData = { ...formData, [name]: value };
     setFormData(updatedFormData);
-    setParentFormData(updatedFormData); // Keep parent in sync
+    setParentFormData(updatedFormData);
   };
 
   /**
    * Check if passwords match
-   * Used for submit button disable state and validation
    */
   const passwordsMatch = formData.password && formData.confirmPassword && 
                          formData.password === formData.confirmPassword;
 
-  /**
-   * Validate all form fields
-   * Returns true if all validations pass, false otherwise
-   */
+  // ============================================
+  // VALIDATION FUNCTION
+  // ============================================
   const validate = () => {
     const newErrors = {};
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phonePattern = /^[0-9]{10}$/;
 
-    // Required field validations
     if (!formData.firstName) newErrors.firstName = "*First Name is required";
     if (!formData.lastName) newErrors.lastName = "*Last Name is required";
     if (!formData.username) newErrors.username = "*User Name is required";
     if (!emailPattern.test(formData.email)) newErrors.email = "*Invalid email format";
     
-    // Password validations (only if password fields are shown)
     if ((includePassword || includeChangePassword) && formData.password) {
       if (!isPasswordValid) {
         newErrors.password = "*Password does not meet all requirements";
@@ -137,7 +147,6 @@ const UserForm = ({
 
   /**
    * Handle form submission
-   * Validates form and calls parent submit handler if valid
    */
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -145,102 +154,104 @@ const UserForm = ({
     parentHandleSubmit(e, formData);
   };
 
+  // ============================================
+  // DROPDOWN OPTIONS
+  // ============================================
+  const genderOptions = [
+    { value: '', label: 'Select Gender' },
+    { value: 'Male', label: 'Male' },
+    { value: 'Female', label: 'Female' },
+    { value: 'Other', label: 'Other' }
+  ];
+
+  const nationalityOptions = [
+    { value: '', label: 'Select Nationality' },
+    ...countries.map(country => ({
+      value: country.name,
+      label: country.name
+    }))
+  ];
+
+  // ============================================
+  // JSX RETURN
+  // ============================================
   return (
     <form onSubmit={handleSubmit} noValidate>
-      {/* First Name and Last Name Row */}
+      {/* ✅ NAME FIELDS - USING FormInput */}
       <div className="flex mb-4">
         <div className="w-1/2 mr-2">
-          <label htmlFor="firstName" className="block text-sm text-sky-300 font-bold mb-2">
-            First Name
-          </label>
-          <input
-            type="text"
-            id="firstName"
+          <FormInput
+            label="First Name"
+            icon={FaUser}
             name="firstName"
-            placeholder="First Name"
             value={formData.firstName || ""}
             onChange={handleChange}
+            placeholder="First Name"
             disabled={!isEditing}
-            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            error={errors.firstName}
           />
-          {errors.firstName && <p className="text-red-500 text-xs italic font-bold">{errors.firstName}</p>}
         </div>
         <div className="w-1/2 mr-2">
-          <label htmlFor="lastName" className="block text-sm text-sky-300 font-bold mb-2">
-            Last Name
-          </label>
-          <input
-            type="text"
-            id="lastName"
+          <FormInput
+            label="Last Name"
+            icon={FaUser}
             name="lastName"
-            placeholder="Last Name"
             value={formData.lastName || ""}
             onChange={handleChange}
+            placeholder="Last Name"
             disabled={!isEditing}
-            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            error={errors.lastName}
           />
-          {errors.lastName && <p className="text-red-500 text-xs italic font-bold">{errors.lastName}</p>}
         </div>
       </div>
 
-      {/* Username Field */}
+      {/* ✅ USERNAME - USING FormInput */}
       <div className="mb-4">
-        <label htmlFor="username" className="block text-sm text-sky-300 font-bold mb-2">
-          User Name
-        </label>
-        <input
-          type="text"
-          id="username"
+        <FormInput
+          label="User Name"
+          icon={FaUser}
           name="username"
-          placeholder="User Name"
           value={formData.username || ""}
           onChange={handleChange}
-          disabled={!isEditing ||  restrictedFields.includes('username')}
-          className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+          placeholder="User Name"
+          disabled={!isEditing || restrictedFields.includes('username')}
+          error={errors.username}
         />
-        {errors.username && <p className="text-red-500 text-xs italic font-bold">{errors.username}</p>}
       </div>
 
-      {/* Email and Phone Row */}
+      {/* ✅ EMAIL AND PHONE - USING FormInput */}
       <div className="flex mb-4">
         <div className="w-1/2 mr-2">
-          <label htmlFor="email" className="block text-sm text-sky-300 font-bold mb-2">
-            Email
-          </label>
-          <input
+          <FormInput
+            label="Email"
+            icon={FaEnvelope}
             type="email"
-            id="email"
             name="email"
-            placeholder="XXXX@label.com"
             value={formData.email || ""}
             onChange={handleChange}
+            placeholder="XXXX@label.com"
             disabled={!isEditing}
-            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            error={errors.email}
           />
-          {errors.email && <p className="text-red-500 text-xs italic font-bold">{errors.email}</p>}
         </div>
         <div className="w-1/2 mr-2">
-          <label htmlFor="phone" className="block text-sm text-sky-300 font-bold mb-2">
-            Phone
-          </label>
-          <input
+          <FormInput
+            label="Phone"
+            icon={FaPhone}
             type="tel"
-            id="phone"
             name="phone"
-            placeholder="XXXXXXXXXX"
             value={formData.phone || ""}
             onChange={handleChange}
+            placeholder="XXXXXXXXXX"
             disabled={!isEditing}
-            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            error={errors.phone}
           />
-          {errors.phone && <p className="text-red-500 text-xs italic font-bold">{errors.phone}</p>}
         </div>
       </div>
 
-      {/* Password Fields - Only show if includePassword or includeChangePassword is true */}
+      {/* PASSWORD FIELDS - CONDITIONAL */}
       {(includePassword || (includeChangePassword && isEditing)) && (
         <>
-          {/* New Password with Validation Component */}
           <div className="mb-4">
             <PasswordInput
               value={formData.password || ""}
@@ -259,7 +270,6 @@ const UserForm = ({
             {errors.password && <p className="text-red-500 text-xs italic font-bold">{errors.password}</p>}
           </div>
 
-          {/* Confirm Password with Match Indicator Component */}
           <div className="mb-4">
             <ConfirmPasswordInput
               value={formData.confirmPassword || ""}
@@ -278,121 +288,91 @@ const UserForm = ({
         </>
       )}
 
-      {/* Date of Birth and Gender Row */}
+      {/* ✅ DOB AND GENDER */}
       <div className="flex mb-4">
         <div className="w-1/2 mr-2">
-          <label htmlFor="dob" className="block text-sm text-sky-300 font-bold mb-2">
-            Date of Birth
-          </label>
-          <input
+          <FormInput
+            label="Date of Birth"
+            icon={FaCalendarAlt}
             type="date"
-            id="dob"
             name="dob"
             value={formData.dob || ""}
             onChange={handleChange}
-            disabled={!isEditing || restrictedFields.includes('dob')}
             max={new Date().toISOString().split("T")[0]}
-            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            disabled={!isEditing || restrictedFields.includes('dob')}
+            error={errors.dob}
           />
-          {errors.dob && <p className="text-red-500 text-xs italic font-bold">{errors.dob}</p>}
         </div>
         <div className="w-1/2 mr-2">
-          <label htmlFor="gender" className="block text-sm text-sky-300 font-bold mb-2">
-            Gender
-          </label>
-          <select
-            id="gender"
-            name="gender"
+          <FormSelect
+            label="Gender"
+            icon={FaVenusMars}
             value={formData.gender || ""}
             onChange={handleChange}
+            options={genderOptions}
             disabled={!isEditing}
-            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-          >
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-          {errors.gender && <p className="text-red-500 text-xs italic font-bold">{errors.gender}</p>}
+            error={errors.gender}
+          />
         </div>
       </div>
 
-      {/* Nationality Field */}
+      {/* ✅ NATIONALITY - USING FormSelect */}
       <div className="w-full mb-4">
-        <label htmlFor="nationality" className="block text-sm text-sky-300 font-bold mb-2">
-          Nationality
-        </label>
-        <select
-          id="nationality"
-          name="nationality"
+        <FormSelect
+          label="Nationality"
+          icon={FaGlobe}
           value={formData.nationality || ""}
           onChange={handleChange}
+          options={nationalityOptions}
           disabled={!isEditing}
-          className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-        >
-          <option value="">Select Nationality</option>
-          {countries.map((country) => (
-            <option key={country.code} value={country.name}>
-              {country.name}
-            </option>
-          ))}
-        </select>
-        {errors.nationality && <p className="text-red-500 text-xs italic font-bold">{errors.nationality}</p>}
+          error={errors.nationality}
+        />
       </div>
 
-      {/* Address Fields */}
+      {/* ✅ ADDRESS FIELDS - USING FormInput */}
       <div className="flex flex-col mb-4">
-        <label htmlFor="address" className="block text-sm text-sky-300 font-bold mb-2">
-          Address:
+        <label className="block text-sm text-indigo-600 font-bold mb-2 flex items-center gap-2">
+          <FaMapMarkerAlt className="text-blue-300" />
+          <span>Address:</span>
         </label>
-        <div className="flex mb-2">
-          <input
-            type="text"
-            id="street"
+        <div className="flex mb-2 gap-2">
+          <FormInput
             name="street"
-            placeholder="Street Address"
             value={formData.street || ""}
             onChange={handleChange}
+            placeholder="Street Address"
             disabled={!isEditing}
-            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500 mr-2"
           />
-          <input
-            type="text"
-            id="city"
+          <div className="w-4"></div>
+          <FormInput
             name="city"
-            placeholder="City"
             value={formData.city || ""}
             onChange={handleChange}
+            placeholder="City"
             disabled={!isEditing}
-            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
-        <div className="flex mb-2">
-          <input
-            type="text"
-            id="state"
+        <div className="flex mb-2 gap-2">
+          <FormInput
             name="state"
-            placeholder="State/Province"
             value={formData.state || ""}
             onChange={handleChange}
+            placeholder="State/Province"
             disabled={!isEditing}
-            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500 mr-2"
           />
-          <input
-            type="text"
-            id="zip"
+          <div className="w-4"></div>
+          <FormInput
             name="zip"
-            placeholder="Zip/Postal Code"
             value={formData.zip || ""}
             onChange={handleChange}
+            placeholder="Zip/Postal Code"
             disabled={!isEditing}
-            className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
         {errors.address && <p className="text-red-500 text-xs italic font-bold">{errors.address}</p>}
       </div>
 
-      {/* Submit and Cancel Buttons - Only show when editing */}
+      {/* SUBMIT AND CANCEL BUTTONS */}
       {isEditing && (
         <div className="text-center mt-4">
           {cancelAction && (

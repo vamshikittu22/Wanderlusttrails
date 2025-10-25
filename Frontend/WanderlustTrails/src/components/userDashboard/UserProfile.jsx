@@ -331,7 +331,7 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-3xl p-6 bg-gray-700 text-white rounded-lg shadow-md">
+      <div className="w-full max-w-3xl p-6 bg-gray-900 text-white rounded-lg shadow-md">
         <h2 className="text-2xl text-orange-600 font-bold mb-6 text-center">Edit Profile</h2>
 
         {/* Show info box about restricted fields */}

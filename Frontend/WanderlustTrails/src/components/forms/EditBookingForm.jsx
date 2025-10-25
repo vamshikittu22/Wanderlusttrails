@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import BookingDetailsForm from './BookingDetailsForm';
 import FlightAndHotelForm from './FlightAndHotelForm';
@@ -6,12 +5,19 @@ import ItineraryForm from './ItineraryForm';
 
 //edit booking form component
 const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
-  const [isEditMode] = useState(true); //state for edit mode
-  const [packages, setPackages] = useState([]); //state for packages
-  const [loadingPackages, setLoadingPackages] = useState(true); //state for loading packages
-  const [packagesError, setPackagesError] = useState(null); //state for packages error
+  const [isEditMode] = useState(true);
+  const [packages, setPackages] = useState([]);
+  const [loadingPackages, setLoadingPackages] = useState(true);
+  const [packagesError, setPackagesError] = useState(null);
 
-  // Check if the booking type is 'itinerary' and fetch packages if true
+  // ✅ Debug: Log the booking data we receive
+  useEffect(() => {
+    console.log('📦 EditBookingForm received booking:', booking);
+    console.log('📦 Booking type:', booking.booking_type);
+    console.log('📦 Flight details:', booking.flight_details);
+  }, [booking]);
+
+  // Fetch packages for itinerary bookings
   useEffect(() => {
     if (booking.booking_type === 'itinerary') {
       const fetchPackages = async () => {
@@ -33,7 +39,7 @@ const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
     } else {
       setLoadingPackages(false);
     }
-  }, [booking.booking_type]); //fetch packages when booking type is itinerary
+  }, [booking.booking_type]);
 
   const getInitialData = () => {
     if (booking.booking_type === 'package') {
@@ -43,7 +49,7 @@ const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
         persons: booking.persons || 1,
         start_date: booking.start_date ? new Date(booking.start_date) : null,
         end_date: booking.end_date ? new Date(booking.end_date) : null,
-        insurance: booking.insurance_type || 'none', // Use insurance_type
+        insurance: booking.insurance_type || 'none',
         totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
       };
     } else if (booking.booking_type === 'itinerary') {
@@ -68,61 +74,163 @@ const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
         persons: booking.persons || 1,
         start_date: booking.start_date ? new Date(booking.start_date) : null,
         end_date: booking.end_date ? new Date(booking.end_date) : null,
-        insurance: booking.insurance_type || 'none', // Use insurance_type
+        insurance: booking.insurance_type || 'none',
         totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
       };
     } else {
+      // ✅ FLIGHT_HOTEL - FIXED VERSION
       const totalPrice = parseFloat(booking.total_price);
-      return {
-        from: booking.flight_details?.from || '',
-        to: booking.flight_details?.to || '',
+      
+      // Parse flight_details if it's a JSON string
+      let flightDetails = {};
+      try {
+        flightDetails = typeof booking.flight_details === 'string'
+          ? JSON.parse(booking.flight_details)
+          : booking.flight_details || {};
+      } catch (error) {
+        console.error('Error parsing flight_details:', error);
+        flightDetails = {};
+      }
+
+      // Parse hotel_details if it's a JSON string
+      let hotelDetails = {};
+      try {
+        hotelDetails = typeof booking.hotel_details === 'string'
+          ? JSON.parse(booking.hotel_details)
+          : booking.hotel_details || {};
+      } catch (error) {
+        console.error('Error parsing hotel_details:', error);
+        hotelDetails = {};
+      }
+
+      const initialData = {
+        // ✅ Nested structure (what FlightAndHotelForm expects)
+        flight_details: {
+          from: flightDetails.from || '',
+          to: flightDetails.to || '',
+          fromAirport: flightDetails.fromAirport || null, // ✅ CRITICAL: Airport objects
+          toAirport: flightDetails.toAirport || null,     // ✅ CRITICAL: Airport objects
+          roundTrip: flightDetails.roundTrip !== undefined ? flightDetails.roundTrip : true,
+          airline: flightDetails.airline || 'any',
+          flightClass: flightDetails.flightClass || 'economy',
+          flightTime: flightDetails.flightTime || 'any',
+          duration: flightDetails.duration || 'N/A',
+          distance: flightDetails.distance || '0 miles',
+        },
+        hotel_details: {
+          hotelStars: hotelDetails.hotelStars || '3',
+          amenities: {
+            pool: hotelDetails.amenities?.pool || false,
+            wifi: hotelDetails.amenities?.wifi || false,
+          },
+          car_rental: hotelDetails.car_rental || false,
+        },
+        // ✅ Top-level fields (for backward compatibility)
+        from: flightDetails.from || '',
+        to: flightDetails.to || '',
+        start_date: booking.start_date,
+        end_date: booking.end_date,
         startDate: booking.start_date ? new Date(booking.start_date) : null,
         endDate: booking.end_date ? new Date(booking.end_date) : null,
-        airline: booking.flight_details?.airline || 'any',
         persons: booking.persons || 1,
-        flightClass: booking.flight_details?.flightClass || 'economy',
-        hotelStars: booking.hotel_details?.hotelStars || '3',
-        roundTrip: booking.flight_details?.roundTrip !== undefined ? booking.flight_details.roundTrip : true,
-        insurance: booking.insurance_type || 'none', // Use insurance_type
-        carRental: booking.hotel_details?.car_rental || false,
-        flightTime: booking.flight_details?.flightTime || 'any',
+        insurance: booking.insurance_type || 'none',
+        carRental: hotelDetails.car_rental || false,
         amenities: {
-          pool: booking.hotel_details?.amenities?.pool || false,
-          wifi: booking.hotel_details?.amenities?.wifi || false,
+          pool: hotelDetails.amenities?.pool || false,
+          wifi: hotelDetails.amenities?.wifi || false,
         },
         totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
+        total_price: totalPrice,
       };
+
+      console.log('✅ Flight & Hotel initialData prepared:', initialData);
+      return initialData;
     }
   };
     
   const initialData = getInitialData();
-  const handleSubmit = (formData) => {
-    let changes = formData;
   
-    // Transform formData for flight_hotel bookings to match backend expectations
-    if (booking.booking_type === 'flight_hotel') {
-      changes = {
-        flight_details: formData.flight_details,
-        hotel_details: formData.hotel_details,
-        start_date: formData.start_date,
-        end_date: formData.end_date,
-        persons: formData.persons,
-        insurance: formData.insurance !== 'none' ? 1 : 0, // Convert to 0 or 1
-        insurance_type: formData.insurance, // Set insurance_type explicitly
-        total_price: formData.total_price,
-      };
-    }
+const handleSubmit = (formData) => {
+
+  console.log('🔍 RAW formData from form:', {
+    flight_details: formData.flight_details,
+    start_date: formData.start_date,
+    end_date: formData.end_date,
+    roundTrip: formData.flight_details?.roundTrip
+  });
   
-    const payload = {
-      booking_id: booking.id,
-      user_id: user.id,
-      changes,
+  console.log('📝 Edit form data received:', formData);
+  
+  let changes = {};
+
+  if (booking.booking_type === 'flight_hotel') {
+    // ✅ FIX: Properly structure the changes object with actual values
+    changes = {
+      flight_details: {
+        from: formData.flight_details?.from || '',
+        to: formData.flight_details?.to || '',
+        fromAirport: formData.flight_details?.fromAirport || null,
+        toAirport: formData.flight_details?.toAirport || null,
+        roundTrip: formData.flight_details?.roundTrip, // ✅ FIX: Include roundTrip
+        airline: formData.flight_details?.airline || 'any',
+        flightClass: formData.flight_details?.flightClass || 'economy',
+        flightTime: formData.flight_details?.flightTime || 'any',
+        duration: formData.flight_details?.duration || 'N/A',
+        distance: formData.flight_details?.distance || '0 miles',
+        // Also include old field names for backward compatibility
+        class: formData.flight_details?.flightClass || 'economy',
+        preferred_time: formData.flight_details?.flightTime || 'any',
+      },
+      hotel_details: {
+        hotelStars: formData.hotel_details?.hotelStars || '3',
+        star_rating: parseInt(formData.hotel_details?.hotelStars || '3'),
+        amenities: formData.hotel_details?.amenities || { pool: false, wifi: false },
+        car_rental: formData.hotel_details?.car_rental || false,
+        destination: formData.flight_details?.to || '',
+      },
+      start_date: formData.start_date,
+      end_date: formData.end_date, // ✅ FIX: Don't set to null, pass actual value
+      persons: formData.persons,
+      insurance: formData.insurance !== 'none' ? 1 : 0,
+      insurance_type: formData.insurance,
+      total_price: formData.total_price,
     };
-    console.log('Edit Payload:', payload);
-    onSubmit(booking.id, payload);
-    onCancel();
+    
+    console.log('✅ Changes prepared:', changes);
+  } else if (booking.booking_type === 'package') {
+    changes = {
+      package_id: formData.package_id,
+      start_date: formData.start_date,
+      end_date: formData.end_date,
+      persons: formData.persons,
+      insurance: formData.insurance !== 'none' ? 1 : 0,
+      insurance_type: formData.insurance,
+      total_price: formData.total_price,
+    };
+  } else if (booking.booking_type === 'itinerary') {
+    changes = {
+      package_id: formData.package_id,
+      itinerary_details: formData.itinerary_details,
+      start_date: formData.start_date,
+      end_date: formData.end_date,
+      persons: formData.persons,
+      insurance: formData.insurance !== 'none' ? 1 : 0,
+      insurance_type: formData.insurance,
+      total_price: formData.total_price,
+    };
+  }
+
+  const payload = {
+    booking_id: booking.id,
+    user_id: user.id,
+    changes,
   };
- 
+  
+  console.log('📤 Final edit payload:', payload);
+  onSubmit(booking.id, payload);
+  onCancel();
+};
+
 
   const handleItinerarySubmit = (formData) => {
     const changes = {
@@ -131,8 +239,8 @@ const EditBookingForm = ({ booking, user, onSubmit, onCancel }) => {
       start_date: formData.start_date,
       end_date: formData.end_date,
       persons: formData.persons,
-      insurance: formData.insurance !== 'none' ? 1 : 0, // Set to 1 if insurance is selected, 0 otherwise
-      insurance_type: formData.insurance, // Explicitly set insurance_type
+      insurance: formData.insurance !== 'none' ? 1 : 0,
+      insurance_type: formData.insurance,
       total_price: formData.total_price,
     };
     handleSubmit(changes);
