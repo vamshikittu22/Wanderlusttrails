@@ -40,7 +40,7 @@ class TodoClass {
         }
 
         // Prepare the SQL query and parameters
-        $query = "INSERT INTO todos (user_id, task, due_date, created_at) VALUES (?, ?, ?, NOW())";
+        $query = "INSERT INTO todos (user_id, task, due_date) VALUES (?, ?, ?)";
         $types = "iss"; // int, string, string
         $params = [$userId, $task, $dueDate];
 
@@ -85,10 +85,10 @@ class TodoClass {
         }
 
         // Query to fetch todos by user, ordered by creation date descending
-        $query = "SELECT id, user_id, task, due_date, is_completed, reminder_sent, created_at, updated_at 
+        $query = "SELECT id, user_id, task, due_date, iscompleted, reminder_sent, createdAt, updatedAt 
                   FROM todos 
                   WHERE user_id = ? 
-                  ORDER BY created_at DESC";
+                  ORDER BY createdAt DESC";
         $types = "i";
 
         // Fetch todos and return
@@ -140,7 +140,7 @@ class TodoClass {
 
         // Add completion status update if provided
         if ($isCompleted !== null) {
-            $updates[] = "is_completed = ?";
+            $updates[] = "iscompleted = ?";
             $params[] = $isCompleted ? 1 : 0;
             $types .= 'i';
         }
@@ -151,7 +151,7 @@ class TodoClass {
         }
 
         // Prepare update query with updated_at timestamp
-        $query = "UPDATE todos SET " . implode(', ', $updates) . ", updated_at = NOW() WHERE id = ?";
+        $query = "UPDATE todos SET " . implode(', ', $updates) . " WHERE id = ?";
         $types .= 'i'; // Add type for todo ID
         $params[] = $id;
 

@@ -30,7 +30,7 @@ const FormCheckbox = ({
       {Icon && <Icon />}
       
       {/* Label with optional description */}
-      <label className="text-indigo-600 font-semibold flex-1">
+      <label className="text-gray-900 font-semibold flex-1">
         {label}
         {description && <span className="text-sm text-gray-600 ml-1">({description})</span>}
       </label>

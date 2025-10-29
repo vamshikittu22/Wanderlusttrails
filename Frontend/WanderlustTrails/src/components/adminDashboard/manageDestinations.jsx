@@ -77,7 +77,7 @@ const ManageDestinations = () => {
         if (!formData.description.trim()) newErrors.description = 'Description is required.';
         if (!formData.location.trim()) newErrors.location = 'Location is required.';
         if (!formData.price || formData.price <= 0) newErrors.price = 'Price must be a positive number.';
-        if (!isEditing && !formData.image && !formData.image_url) newErrors.image = 'Image is required.';
+        // if (!isEditing && !formData.image && !formData.image_url) newErrors.image = 'Image is required.';
         setErrors(newErrors); // Update errors state with new errors
         return Object.keys(newErrors).length === 0;
     }; 

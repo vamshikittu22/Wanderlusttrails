@@ -307,6 +307,7 @@ const UserForm = ({
           <FormSelect
             label="Gender"
             icon={FaVenusMars}
+            name="gender"
             value={formData.gender || ""}
             onChange={handleChange}
             options={genderOptions}
@@ -321,6 +322,7 @@ const UserForm = ({
         <FormSelect
           label="Nationality"
           icon={FaGlobe}
+          name="nationality"
           value={formData.nationality || ""}
           onChange={handleChange}
           options={nationalityOptions}
@@ -331,7 +333,7 @@ const UserForm = ({
 
       {/* ✅ ADDRESS FIELDS - USING FormInput */}
       <div className="flex flex-col mb-4">
-        <label className="block text-sm text-indigo-600 font-bold mb-2 flex items-center gap-2">
+        <label className="block text-sm text-gray-900 font-bold mb-2 flex items-center gap-2">
           <FaMapMarkerAlt className="text-blue-300" />
           <span>Address:</span>
         </label>

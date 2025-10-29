@@ -79,7 +79,7 @@ try {
         throw new Exception("Database connection failed: " . $conn->connect_error, 500);
     }
     // Prepare SQL to get todo and user info
-    $stmt = $conn->prepare("SELECT t.task, t.due_date, t.is_completed, u.email, u.firstName FROM todos t JOIN users u ON t.user_id = u.id WHERE t.id = ?");
+    $stmt = $conn->prepare("SELECT t.task, t.due_date, t.iscompleted, u.email, u.firstName FROM todos t JOIN users u ON t.user_id = u.id WHERE t.id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $todoResult = $stmt->get_result();
@@ -91,7 +91,7 @@ try {
     $firstName = $todo['firstName'] ?? 'User';
     $task = $todo['task'];
     $dueDate = $todo['due_date'];
-    $isCompleted = $todo['is_completed'] ? 'Yes' : 'No';
+    $isCompleted = $todo['iscompleted'] ? 'Yes' : 'No';
     $stmt->close();
     $conn->close();
 

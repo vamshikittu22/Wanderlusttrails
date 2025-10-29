@@ -47,7 +47,10 @@ if (empty($packageName) || empty($description) || empty($location) || empty($pri
 }
 
 // Handle image upload or accept an existing image URL
-$imageUrl = $_POST['image_url'] ?? '';
+$imageUrl = $_POST['imageurl'] ?? ''; // Get existing image URL if provided
+
+// Set a default image if no image is uploaded
+$defaultImage = 'default.jpg'; // You can change this to your default image name
 
 if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     $image = $_FILES['image'];
@@ -74,10 +77,8 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     }
 } elseif (empty($imageUrl)) {
     // If no image uploaded and no URL provided, return error
-    Logger::log("Validation failed: Image is required");
-    http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Image is required"]);
-    exit;
+    $imageUrl = $defaultImage;
+    Logger::log("No image provided, using default: $imageUrl");
 }
 
 // Create an instance of the PackageModel and insert the package

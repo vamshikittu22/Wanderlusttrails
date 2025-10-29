@@ -113,7 +113,7 @@ const PasswordInput = ({
     return (
         <div className="mb-4">
             {/* Label */}
-            <label className="block text-white font-bold mb-2">
+            <label className="block text-gray-900 font-bold mb-2">
                 {label}
             </label>
 

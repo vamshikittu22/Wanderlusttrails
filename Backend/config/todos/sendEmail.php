@@ -73,7 +73,7 @@ if (isset($data['todo_id'])) {
     $mailResult = sendMail($email, $firstName, $subject, $body, $altBody);
     // If email sent, update reminder_sent flag in DB
     if ($mailResult["success"]) {
-        $updateSql = "UPDATE todos SET reminder_sent = 1 WHERE id = ?";
+        $updateSql = "UPDATE todos SET remindersent = 1 WHERE id = ?";
         $updateStmt = $conn->prepare($updateSql);
         if ($updateStmt) {
             $updateStmt->bind_param("i", $todoId);

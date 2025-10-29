@@ -40,7 +40,7 @@ export function TodoProvider({ children }) {
     const normalizeTodos = (todosData) => {
         return todosData.map(todo => ({
             ...todo,
-            completed: !!todo.is_completed // Convert 0/1 to boolean
+            completed: !!todo.iscompleted // Convert 0/1 to boolean
         }));
     };
 

@@ -86,7 +86,7 @@ const AirportSearchInput = ({
 
   return (
     <div className="relative">
-      <label className="flex items-center gap-2 text-indigo-600 font-semibold mb-2">
+      <label className="flex items-center gap-2 text-gray-900 font-semibold mb-2">
         <Icon className="text-blue-500" />
         <span>{label}</span>
       </label>

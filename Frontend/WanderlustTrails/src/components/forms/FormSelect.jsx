@@ -21,6 +21,7 @@ import React from 'react';
 const FormSelect = ({
   label,
   icon: Icon,
+  name,
   value,
   onChange,
   options,
@@ -31,13 +32,14 @@ const FormSelect = ({
   return (
     <div>
       {/* Label with optional icon */}
-      <label className="flex items-center gap-2 text-indigo-600 font-semibold mb-2">
+      <label className="flex items-center gap-2 text-gray-900 font-semibold mb-2">
         {Icon && <Icon className="text-blue-300"/>}
         <span>{label}</span>
       </label>
       
       {/* Select dropdown */}
       <select
+        name={name}
         value={value}
         onChange={onChange}
         disabled={disabled}

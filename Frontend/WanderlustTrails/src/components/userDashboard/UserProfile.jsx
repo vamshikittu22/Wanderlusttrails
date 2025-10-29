@@ -4,6 +4,9 @@ import React, { useState, useEffect } from "react";
 import $ from "jquery"; 
 import { toast } from "react-toastify";
 import UserForm from "./../forms/UserForm.jsx";
+// Line 4 - Add this import
+import { PasswordInput, ConfirmPasswordInput } from "../PasswordValidator";
+
 
 // UserProfile component: handles displaying and editing user profile info, and changing password with OTP verification
 const UserProfile = () => {
@@ -26,6 +29,9 @@ const UserProfile = () => {
 
   // State to track if OTP has been sent
   const [otpSent, setOtpSent] = useState(false);
+
+  // State to track if new password is valid
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
 
   // State to hold user profile form data
   const [profileData, setProfileData] = useState({
@@ -220,7 +226,7 @@ const UserProfile = () => {
             url: "http://localhost/WanderlustTrails/Backend/config/auth/forgotPassword.php",
             type: "POST",
             contentType: "application/json",
-            data: JSON.stringify({ identifier: user.email }),
+            data: JSON.stringify({ identifier: user.username }),
             dataType: "json",
             success: function (otpResponse) {
               console.log("OTP response:", otpResponse);
@@ -285,7 +291,7 @@ const UserProfile = () => {
       type: "POST",
       contentType: "application/json",
       data: JSON.stringify({
-        identifier: user.email,
+        identifier: user.username,
         otp: passwordData.otp,
         newPassword: passwordData.newPassword,
       }),
@@ -331,7 +337,7 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-3xl p-6 bg-gray-900 text-white rounded-lg shadow-md">
+      <div className="w-full max-w-3xl p-6 bg-gray-600 text-white rounded-lg shadow-md">
         <h2 className="text-2xl text-orange-600 font-bold mb-6 text-center">Edit Profile</h2>
 
         {/* Show info box about restricted fields */}
@@ -417,41 +423,54 @@ const UserProfile = () => {
                     className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
-                <div className="mb-4 relative">
-                  <label htmlFor="newPassword" className="block text-sm text-sky-300 font-bold mb-2">
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    id="newPassword"
-                    name="newPassword"
-                    placeholder="New Password"
+                {/* ✅ NEW: Password Input with Strength Meter */}
+                <div className="mb-4">
+                  <PasswordInput
                     value={passwordData.newPassword}
-                    onChange={handlePasswordChange}
-                    className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    onChange={(e) => {
+                        handlePasswordChange({
+                          target: {
+                            name: 'newPassword',
+                            value: e.target.value
+                          }
+                        });
+                    }}
+                    label="New Password"
+                    placeholder="Create a strong password"
+                    showStrength={true}
+                    showRequirements={true}
+                    onValidationChange={setIsPasswordValid}
+                    disabled={false}
                   />
                 </div>
-                <div className="mb-4 relative">
-                  <label htmlFor="confirmNewPassword" className="block text-sm text-sky-300 font-bold mb-2">
-                    Confirm New Password
-                  </label>
-                  <input
-                    type="password"
-                    id="confirmNewPassword"
-                    name="confirmNewPassword"
-                    placeholder="Confirm New Password"
+
+                {/* ✅ NEW: Confirm Password with Match Indicator */}
+                <div className="mb-4">
+                  <ConfirmPasswordInput
                     value={passwordData.confirmNewPassword}
-                    onChange={handlePasswordChange}
-                    className="mt-1 p-2 block w-full bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    onChange={(e) => {
+                      handlePasswordChange({
+                          target: {
+                            name: 'confirmNewPassword',
+                            value: e.target.value
+                          }
+                        });
+                    }}
+                    originalPassword={passwordData.newPassword}
+                    label="Confirm New Password"
+                    placeholder="Re-enter password"
+                    disabled={false}
                   />
                 </div>
                 <div className="text-center">
                   <button
-                    type="submit"
-                    className="py-2 px-4 rounded-lg text-white bg-gradient-to-r from-orange-500 to-red-700 hover:bg-green-600"
-                  >
-                    Verify OTP & Change Password
+                      type="submit"
+                      disabled={!isPasswordValid || passwordData.newPassword !== passwordData.confirmNewPassword}
+                      className="py-2 px-4 rounded-lg text-white bg-gradient-to-r from-orange-500 to-red-700 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Verify OTP & Change Password
                   </button>
+
                 </div>
               </form>
             )}
