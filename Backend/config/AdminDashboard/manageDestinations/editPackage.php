@@ -66,7 +66,7 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     }
 
     // Generate unique filename to prevent collisions
-    $imageName = time() . '_' . basename($image['name']);
+    $imageName = time() . '_' . $packageName . '.jpg';
     $uploadPath = $uploadDir . $imageName;
 
     // Move uploaded file to destination folder
