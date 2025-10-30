@@ -578,7 +578,7 @@ const completePayment = () => {
                     hideProgressBar: false,
                     theme: "colored"
                   });        
-          window.alert(`Payment of $${rate} USD successful! Booking confirmed.`);
+          // window.alert(`Payment of $${rate} USD successful! Booking confirmed.`);
         
         sessionStorage.removeItem('bookingData'); // Clear booking session data
         sessionStorage.removeItem('selectedPackage'); // Clear package selection session data
@@ -629,6 +629,7 @@ const formatTime = (seconds) => {
   const sec = seconds % 60;
   return `${min}:${sec < 10 ? '0' : ''}${sec}`;
 };
+
 return (
   // Wrap everything in an ErrorBoundary component to catch errors and navigate accordingly
   <ErrorBoundary navigate={navigate}>

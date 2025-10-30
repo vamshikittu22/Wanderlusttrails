@@ -130,11 +130,17 @@ const UserReviews = () => {
                                         );
                                         return match;
                                     });
-                                    console.log(
-                                        `Booking id=${booking.id}: isConfirmed=${isConfirmed}, isReviewed=${isReviewed}, ` +
-                                        `included=${isConfirmed && !isReviewed}`
+
+                                    // Check if booking end date is in the past
+                                    const currentDate = new Date().toISOString().split('T')[0]; // Today's date in YYYY-MM-DD
+                                    const isPastBooking = booking.enddate && booking.enddate < currentDate;
+                                    
+                                    // Debug logging
+                                    console.log(`Booking id:${booking.id} - isConfirmed:${isConfirmed}, isReviewed:${isReviewed}, isPastBooking:${isPastBooking}` +
+                                        ` - included=${isConfirmed && !isReviewed && isPastBooking}`
                                     );
-                                    return isConfirmed && !isReviewed;
+                                    // Include only confirmed, unreviewed, past bookings
+                                    return isConfirmed && !isReviewed && isPastBooking;
                                 });
                                 console.log("All reviews:", fetchedReviews);
                                 console.log("All bookings:", normalizedBookings);

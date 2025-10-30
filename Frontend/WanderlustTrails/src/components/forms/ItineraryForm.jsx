@@ -5,6 +5,7 @@ import mockData from '../../data/mockData.js';
 import FormWrapper from './FormWrapper.jsx';
 import FormInput from './FormInput';
 import FormSelect from './FormSelect';
+import FormDatePicker from './FormDatePicker.jsx';
 import { Link } from 'react-router-dom';
 import { 
   FaBox, FaCalendarAlt, FaUsers, FaShieldAlt, FaCheckCircle, 
@@ -458,6 +459,10 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
                 return (
                   <div
                     key={activity.id}
+                    role="button"
+                    aria-selected={isSelected}
+                    tabIndex={0}
+                    data-testid={`activity-card-${activity.id}`}
                     className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
                       isSelected
                         ? 'border-indigo-600 bg-indigo-50 shadow-md'
@@ -507,40 +512,51 @@ const ItineraryForm = ({ initialData, onSubmit, onCancel, packages, loading, err
       </div>
 
 <div className="grid gap-4 mb-6 md:grid-cols-2"> 
-{/* ✅ START DATE - USING FormInput */}
-      <div>
-        <FormInput
-          label="Start Date"
-          icon={FaCalendarAlt}
-          type="date"
-          value={startDate}
-          onChange={(e) => {
-            setStartDate(e.target.value);
-            if (errors.startDate) setErrors({ ...errors, startDate: '' });
-          }}
-          error={errors.startDate}
-          min={minStartDateString}
-          required
-        />
-      </div>
+  {/* ✅ START DATE - USING FormDatePicker */}
+  <div>
+    <FormDatePicker
+      label="Start Date"
+      icon={FaCalendarAlt}
+      value={startDate ? new Date(startDate) : null}
+      onChange={(date) => {
+        if (date) {
+          setStartDate(date.toISOString().split('T')[0]);
+        } else {
+          setStartDate('');
+        }
+        if (errors.startDate) {
+          setErrors({ ...errors, startDate: '' });
+        }
+      }}
+      minDate={new Date(minStartDateString)}
+      error={errors.startDate}
+      placeholder="Select start date"
+    />
+  </div>
 
-      {/* ✅ END DATE - USING FormInput */}
-      <div>
-        <FormInput
-          label="End Date"
-          icon={FaCalendarAlt}
-          type="date"
-          value={endDate}
-          onChange={(e) => {
-            setEndDate(e.target.value);
-            if (errors.endDate) setErrors({ ...errors, endDate: '' });
-          }}
-          error={errors.endDate}
-          min={minEndDate}
-          required
-        />
-      </div>
+  {/* ✅ END DATE - USING FormDatePicker */}
+  <div>
+    <FormDatePicker
+      label="End Date"
+      icon={FaCalendarAlt}
+      value={endDate ? new Date(endDate) : null}
+      onChange={(date) => {
+        if (date) {
+          setEndDate(date.toISOString().split('T')[0]);
+        } else {
+          setEndDate('');
+        }
+        if (errors.endDate) {
+          setErrors({ ...errors, endDate: '' });
+        }
+      }}
+      minDate={minEndDate ? new Date(minEndDate) : new Date()}
+      error={errors.endDate}
+      placeholder="Select end date"
+    />
+  </div>
 </div>
+
       
 <div className="grid gap-4 mb-6 md:grid-cols-2"> 
       {/* ✅ TRAVELERS - USING FormSelect */}
