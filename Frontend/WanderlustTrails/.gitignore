@@ -25,5 +25,10 @@ dist-ssr
 *.sln
 *.sw?
 tokens.txt
-Backend/config/mail_config.php
-Backend/config/logs/debug.log
+/Backend/config/mail_config.php
+\Backend\config\mail_config.php
+/Backend/config/logs/debug.log
+\Backend\config\logs\debug.log  
+
+/Backend/config/auth/.env
+\Backend\config\auth\.env

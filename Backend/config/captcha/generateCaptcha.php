@@ -34,7 +34,7 @@ $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 for ($i = 0; $i < 6; $i++) {
     $captcha .= $chars[mt_rand(0, strlen($chars) - 1)];
 }
-$_SESSION['captcha'] = $captcha; // Stored for reference, though verification is frontend-only
+$_SESSION['captcha'] = $captcha; // Stored for reference, verification is frontend-only
 Logger::log('Generate - Generated CAPTCHA: ' . $captcha);
 
 // Return the CAPTCHA as JSON

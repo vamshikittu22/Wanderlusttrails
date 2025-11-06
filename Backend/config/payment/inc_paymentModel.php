@@ -10,10 +10,12 @@ class PaymentClass {
         $this->db = new DatabaseClass(); // Initialize the database connection
     }
 
-    // Function to create a payment record
+    // createPayment method for new payment records
     public function createPayment($bookingId, $userId, $amount, $paymentMethod, $transactionId, $paymentDate = null) {
-        // Validate inputs
+        // Valid actions
         $validMethods = ['credit_card', 'debit_card', 'paypal', 'bank_transfer'];
+        
+            // Validate inputs
         if (!$bookingId || !$userId || !$amount || !$paymentMethod || !in_array($paymentMethod, $validMethods)) {
             Logger::log("Validation failed: Missing or invalid fields");
             throw new Exception("Missing or invalid fields", 400);
@@ -24,11 +26,13 @@ class PaymentClass {
             throw new Exception("Amount must be a positive number", 400);
         }
 
+        // Check for unique transaction ID
         if ($this->db->recordExists('payments', 'transaction_id', $transactionId, 's')) {
             Logger::log("Validation failed: Transaction ID already exists");
             throw new Exception("Transaction ID already exists", 400); // Use 400 for client-side validation error
         }
 
+        // Validate payment date format if provided
         if ($paymentDate) {
             $date = DateTime::createFromFormat('Y-m-d H:i:s', $paymentDate);
             if (!$date || $date->format('Y-m-d H:i:s') !== $paymentDate) {
@@ -40,11 +44,13 @@ class PaymentClass {
         // Verify booking exists and user matches
         $bookingQuery = "SELECT user_id FROM bookings WHERE id = ?"; //query to check if booking exists
         $bookingData = $this->db->fetchQuery($bookingQuery, "i", $bookingId); //fetch the booking data
+
+        // Check if booking exists and user ID matches
         if (empty($bookingData)) {
             Logger::log("Validation failed: Booking not found");
             throw new Exception("Booking not found", 400);
         }
-        if ($bookingData[0]['user_id'] != $userId) {
+        if ($bookingData[0]['user_id'] != $userId) { 
             Logger::log("Validation failed: User ID does not match booking");
             throw new Exception("User ID does not match booking", 403);
         }
@@ -54,6 +60,7 @@ class PaymentClass {
         $status = 'completed'; //default status is completed
         $types = "iidssss"; //types of the parameters to be inserted
         $params = [$bookingId, $userId, $amount, $paymentMethod, $transactionId, $status, $paymentDate ?: date('Y-m-d H:i:s')]; //parameters to be inserted
+
         $this->db->beginTransaction(); //start transaction
         try {
             $result = $this->db->executeQuery($query, $types, ...$params); //execute the query
@@ -80,11 +87,14 @@ class PaymentClass {
     // Function to update payment status
     public function updatePaymentStatus($transactionId, $paymentStatus) {
         $validStatuses = ['pending', 'completed', 'failed']; //valid payment statuses
+
+        // Validate inputs
         if (!$transactionId || !$paymentStatus || !in_array($paymentStatus, $validStatuses)) {
             Logger::log("Validation failed: Missing or invalid fields");
             throw new Exception("Missing or invalid fields", 400);
         }
 
+        // Check if transaction ID exists
         if (!$this->db->recordExists('payments', 'transaction_id', $transactionId, 's')) {
             Logger::log("Validation failed: Transaction ID not found");
             throw new Exception("Transaction ID not found", 404);
@@ -92,10 +102,13 @@ class PaymentClass {
 
         $currentStatusQuery = "SELECT payment_status FROM payments WHERE transaction_id = ?"; //query to get current payment status
         $currentStatusData = $this->db->fetchQuery($currentStatusQuery, "s", $transactionId); //fetch current payment status
+            // If status is unchanged, return success
         if (!empty($currentStatusData) && $currentStatusData[0]['payment_status'] === $paymentStatus) {
             Logger::log("Status unchanged: $paymentStatus");
             return ["success" => true, "message" => "Status unchanged"];
         }
+
+        $bookingId = $currentData[0]['booking_id']; // Get booking ID for status update
 
         $query = "UPDATE payments SET payment_status = ?, updated_at = NOW() WHERE transaction_id = ?"; //query to update payment status
         $types = "ss"; //types of the parameters to be updated

@@ -54,7 +54,7 @@ if (empty($userId) || !is_numeric($userId)) {
 
 // Sanitize user_id to prevent SQL injection
 $userId = (int)$userId;
-Logger::log("Deleting user_id: $userId");
+Logger::log("Sanitized user_id: $userId");
 
 // Instantiate user operations model and delete user
 $userOpsModel = new UserOpsModel();

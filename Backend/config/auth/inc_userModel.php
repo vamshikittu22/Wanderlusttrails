@@ -34,10 +34,10 @@ class UserModel {
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
         // Insert user
-        $query = "INSERT INTO users (firstName, lastName, username, email, password, dob, gender, nationality, phone, street, city, state, zip) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $result = $this->db->executeQuery($query, "sssssssssssss", $firstName, $lastName, $username, $email, $hashedPassword, 
-                                         $dob, $gender, $nationality, $phone, $street, $city, $state, $zip);
+        $query = "INSERT INTO 
+                        users (firstName, lastName, userName, email, password, dob, gender, nationality, phone, street, city, state, zip) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $result = $this->db->executeQuery($query, "sssssssssssss", $firstName, $lastName, $username, $email, $hashedPassword, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip);
         
         Logger::log("registerUser result for email: $email - " . ($result['success'] ? "Success" : "Failed"));
         return $result;

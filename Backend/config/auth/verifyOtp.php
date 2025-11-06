@@ -73,7 +73,12 @@ if (strlen($newPassword) < 8) {
 
 // Verify OTP
 $db = new DatabaseClass();
-$query = "SELECT otp, expires_at FROM otps WHERE identifier = ? AND otp = ?";
+$query = "SELECT 
+            otp, expires_at 
+            FROM otps 
+            WHERE identifier = ? 
+            AND otp = ?";
+
 $result = $db->fetchQuery($query, "ss", $identifier, $otp);
 
 if (empty($result)) {
@@ -118,12 +123,17 @@ $isPhone = preg_match('/^[0-9]{10}$/', $identifier);
 $field = $isEmail ? "email" : ($isPhone ? "phone" : "userName");
 
 // Update password
-$updateQuery = "UPDATE users SET password = ? WHERE $field = ?";
+$updateQuery = "UPDATE 
+                    users 
+                    SET password = ? 
+                    WHERE $field = ?";
 $updateResult = $db->executeQuery($updateQuery, "ss", $hashedPassword, $identifier);
 
 if ($updateResult['success']) {
     // Delete used OTP
-    $db->executeQuery("DELETE FROM otps WHERE identifier = ?", "s", $identifier);
+    $db->executeQuery("DELETE FROM 
+                        otps WHERE identifier = ?",
+                        "s", $identifier);
     
     Logger::log("Password reset successfully for identifier: $identifier");
 

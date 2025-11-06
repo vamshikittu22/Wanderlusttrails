@@ -35,7 +35,7 @@ class BookingModel {
             $base_price = 100;
             $flight_cost = 50;
             $hotel_per_night = 30;
-            $class_multipliers = ['economy' => 1, 'premium_economy' => 1.5, 'business' => 2.5, 'first' => 4];
+            $class_multipliers = ['economy' => 1, 'premium_economy' => 1.25, 'business' => 1.65, 'first' => 2.2];
             $star_multipliers = ['3' => 1, '4' => 1.5, '5' => 2];
             $insurance_costs = ['basic' => 30, 'premium' => 50, 'elite' => 75];
     
@@ -168,8 +168,10 @@ class BookingModel {
         if ($total_price <= 0) {
             return ["success" => false, "message" => "Invalid total price"];
         }
-    //Prepare the booking data for insertion
-        $query = "INSERT INTO bookings (user_id, booking_type, package_id, package_name, flight_details, hotel_details, itinerary_details, start_date, end_date, persons, total_price, status, insurance, insurance_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; // Insert booking query
+        //Prepare the booking data for insertion
+        $query = "INSERT INTO 
+                        bookings (user_id, booking_type, package_id, package_name, flight_details, hotel_details, itinerary_details, start_date, end_date, persons, total_price, status, insurance, insurance_type) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; // Insert booking query
         $types = "isissssssdisis"; // Updated types for insurance (i) and insurance_type (s)
         $params = [
             $data['user_id'],
@@ -237,7 +239,10 @@ class BookingModel {
             }
     
             if ($status === 'confirmed') {
-                $query = "SELECT booking_type, persons, start_date, end_date, total_price, pending_changes, flight_details, hotel_details, itinerary_details, package_id, insurance, insurance_type FROM bookings WHERE id = ? FOR UPDATE";     // Query to fetch booking details for confirmation
+                $query = "SELECT 
+                    booking_type, persons, start_date, end_date, total_price, pending_changes, flight_details, hotel_details, itinerary_details, package_id, insurance, insurance_type 
+                    FROM bookings 
+                    WHERE id = ? FOR UPDATE";     // Query to fetch booking details for confirmation
                 $result = $this->db->fetchQuery($query, "i", $bookingId); // Execute the query
                 if (empty($result)) {
                     $this->db->rollback(); // Rollback the transaction if booking not found
@@ -250,7 +255,8 @@ class BookingModel {
                 if (!empty($inputPendingChanges) || !empty($dbPendingChanges)) {
                     $mergedPendingChanges = array_merge($dbPendingChanges, $inputPendingChanges); // Merge pending changes
     
-                    $newPersons = $mergedPendingChanges['persons'] ?? $booking['persons'];
+                    // Prepare new values based on merged pending changes or existing booking details
+                    $newPersons = $mergedPendingChanges['persons'] ?? $booking['persons']; 
                     $newStartDate = $mergedPendingChanges['start_date'] ?? $booking['start_date'];
                     $newEndDate = $mergedPendingChanges['end_date'] ?? $booking['end_date'];
                     $newFlightDetails = $booking['flight_details'] ? json_decode($booking['flight_details'], true) : [];
@@ -261,6 +267,8 @@ class BookingModel {
                     $hasInsurance = isset($mergedPendingChanges['insurance']) ? ($mergedPendingChanges['insurance'] !== '0' ? 1 : 0) : $booking['insurance'];
 
                     // ✅ FIX: Merge top-level objects FIRST (handles roundTrip, airline, etc.)
+
+                    
                     if (isset($mergedPendingChanges['flight_details']) && is_array($mergedPendingChanges['flight_details'])) {
                         $newFlightDetails = array_merge($newFlightDetails, $mergedPendingChanges['flight_details']);
                     }
@@ -397,10 +405,15 @@ class BookingModel {
 
         $result = $this->validator->validateUserExists($userId); // Validate user_id
         if (!$result['success']) return $result;
-//Prepare the query to fetch user bookings
-        $query = "SELECT id, booking_type, package_id, package_name, flight_details, hotel_details, itinerary_details, start_date, end_date, persons, total_price, status, created_at, pending_changes, insurance, insurance_type FROM bookings WHERE user_id = ?"; // Query to fetch user bookings
+
+        //Prepare the query to fetch user bookings
+        $query = "SELECT 
+                        id, booking_type, package_id, package_name, flight_details, hotel_details, itinerary_details, start_date, end_date, persons, total_price, status, created_at, pending_changes, insurance, insurance_type 
+                    FROM bookings 
+                    WHERE user_id = ?"; // Query to fetch user bookings
+
         $bookings = $this->db->fetchQuery($query, "i", $userId); // Execute the query
-// DECODE JSON fields for each booking
+        // DECODE JSON fields for each booking
         foreach ($bookings as &$booking) {
             $booking['flight_details'] = $booking['flight_details'] ? json_decode($booking['flight_details'], true) : null;
             $booking['hotel_details'] = $booking['hotel_details'] ? json_decode($booking['hotel_details'], true) : null;
@@ -410,13 +423,15 @@ class BookingModel {
 
         return ["success" => true, "data" => $bookings];
     }
-// Get all bookings for admin view
+    // Get all bookings for admin view
     public function getAllBookings() {
         //Prepare the query to fetch all bookings with user details
-        $query = "SELECT b.id, b.user_id, u.firstName, u.lastName, u.role, b.booking_type, b.package_id, b.package_name, b.flight_details, b.hotel_details, b.itinerary_details, b.start_date, b.end_date, b.persons, b.total_price, b.status, b.created_at, b.pending_changes, b.insurance, b.insurance_type 
+        $query = "SELECT 
+                        b.id, b.user_id, u.firstName, u.lastName, u.role, b.booking_type, b.package_id, b.package_name, b.flight_details, b.hotel_details, b.itinerary_details, b.start_date, b.end_date, b.persons, b.total_price, b.status, b.created_at, b.pending_changes, b.insurance, b.insurance_type 
                   FROM bookings b 
                   JOIN users u ON b.user_id = u.id  
                   ORDER BY b.id ASC"; // Query to fetch all bookings with user details
+
         $bookings = $this->db->fetchQuery($query, ""); // Execute the query to fetch all bookings
 
         // Decode JSON fields for each booking
@@ -429,7 +444,7 @@ class BookingModel {
 
         return ["success" => true, "data" => $bookings];
     }
-// Edit an existing booking
+    // Edit an existing booking
     public function editBooking($bookingId, $userId, $changes) {
         $result = $this->validator->validateNumeric($bookingId, 'booking_id'); // Validate booking_id
         if (!$result['success']) return $result;
@@ -447,14 +462,19 @@ class BookingModel {
             $changes['package_name'] = $package['name']; // Add package name to changes
         }
             //Prepare the query to update booking with pending changes
-        $query = "UPDATE bookings SET pending_changes = ?, status = 'pending' 
-                  WHERE id = ? AND user_id = ? AND status != 'canceled'"; // Prepare the query to update booking with pending changes
+        $query = "UPDATE 
+                    bookings 
+                  SET pending_changes = ?, 
+                  status = 'pending' 
+                  WHERE id = ? 
+                  AND user_id = ? 
+                  AND status != 'canceled'"; // Prepare the query to update booking with pending changes
         $result = $this->db->executeQuery($query, "sii", json_encode($changes), $bookingId, $userId); // Execute the query to update booking
         return $result['success'] && $result['affected_rows'] > 0 
             ? ["success" => true, "message" => "Edit request submitted and awaiting admin confirmation"]
             : ["success" => false, "message" => "Booking not found or cannot be edited"];
     }
-// Cancel an existing booking
+    // Cancel an existing booking
     public function cancelBooking($bookingId, $userId) {
         $result = $this->validator->validateNumeric($bookingId, 'booking_id');
         if (!$result['success']) return $result;
@@ -462,16 +482,37 @@ class BookingModel {
         $result = $this->validator->validateUserExists($userId);
         if (!$result['success']) return $result;
 
-        $result = $this->validator->validateBookingExists($bookingId, $userId);
-        if (!$result['success']) return $result;
-  // Prepare the query to cancel booking
-        $query = "UPDATE bookings SET status = 'canceled' WHERE id = ? AND user_id = ? AND status != 'canceled'"; // Prepare the query to cancel booking 
+        // $result = $this->validator->validateBookingExists($bookingId, $userId);
+        // if (!$result['success']) return $result;
+
+        // ✅ CRITICAL: Check if booking exists first (with correct field names)
+        $checkQuery = "SELECT id, status FROM bookings WHERE id = ? AND user_id = ?";
+        $checkResult = $this->db->fetchQuery($checkQuery, "ii", $bookingId, $userId);
+        
+        if (empty($checkResult)) {
+            return ["success" => false, "message" => "Booking not found"];
+        }
+
+        $booking = $checkResult[0];
+        
+        // ✅ Check current status
+        if ($booking['status'] === 'cancelled' || $booking['status'] === 'canceled') {
+            return ["success" => false, "message" => "Booking already cancelled"];
+        }
+
+        // Prepare the query to cancel booking
+        $query = "UPDATE 
+                    bookings 
+                  SET status = 'canceled', updated_at = NOW()
+                  WHERE id = ? 
+                  AND user_id = ? "; // Prepare the query to cancel booking 
+                  
         $result = $this->db->executeQuery($query, "ii", $bookingId, $userId); // Execute the query to cancel booking
         return $result['success'] && $result['affected_rows'] > 0 
-            ? ["success" => true, "message" => "Booking canceled successfully"] 
-            : ["success" => false, "message" => "Booking not found or already canceled"];
+            ? ["success" => true, "message" => "Booking cancelled successfully"] 
+            : ["success" => false, "message" => "Failed to cancel booking"];
     }
-// Get booking details by booking ID
+    // Get booking details by booking ID
     public function getBookingById($booking_id) {
         $query = "SELECT * FROM bookings WHERE id = ?"; // Prepare the query to fetch booking details by ID
         $result = $this->db->fetchQuery($query, "i", $booking_id); // Execute the query to fetch booking details

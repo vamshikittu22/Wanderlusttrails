@@ -46,7 +46,10 @@ $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
 
 if ($isEmail) {
     // Check how many accounts exist with this email
-    $query = "SELECT username, firstName, lastName FROM users WHERE email = ?";
+    $query = "SELECT 
+                username, firstName, lastName 
+                FROM users 
+                WHERE email = ?";
     $result = $db->fetchQuery($query, "s", $identifier);
     
     if (empty($result)) {
@@ -101,13 +104,19 @@ Logger::log("OTP generated for $identifier: $otp");
 file_put_contents(__DIR__ . "/../logs/otp.log", "OTP for $identifier: $otp (valid for 10 minutes)\n", FILE_APPEND);
 
 // Delete old OTPs
-$db->executeQuery("DELETE FROM otps WHERE identifier = ?", "s", $identifier);
+$db->executeQuery("DELETE FROM 
+                        otps 
+                        WHERE identifier = ?",
+                        "s", $identifier);
 
 // Store new OTP
 $createdAt = date('Y-m-d H:i:s');
 $expiresAt = date('Y-m-d H:i:s', strtotime('+10 minutes'));
-$insertResult = $db->executeQuery("INSERT INTO otps (identifier, otp, created_at, expires_at) VALUES (?, ?, ?, ?)", 
-                                   "ssss", $identifier, $otp, $createdAt, $expiresAt);
+$insertResult = $db->executeQuery(
+                        "INSERT INTO 
+                        otps (identifier, otp, created_at, expires_at) 
+                        VALUES (?, ?, ?, ?)",
+                        "ssss", $identifier, $otp, $createdAt, $expiresAt);
 
 if (!$insertResult['success']) {
     Logger::log("Failed to store OTP");

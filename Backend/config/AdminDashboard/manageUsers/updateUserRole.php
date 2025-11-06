@@ -68,7 +68,6 @@ if (!in_array($role, $validRoles)) {
     exit;
 }
 
-Logger::log("Updating role for user_id: $userId to $role");
 
 // Instantiate UserOpsModel and attempt role update
 $userOpsModel = new UserOpsModel();

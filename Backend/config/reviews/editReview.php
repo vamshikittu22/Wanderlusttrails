@@ -72,7 +72,7 @@ $rating = $data['rating'] ?? '';
 $title = $data['title'] ?? '';
 $review = $data['review'] ?? '';
 
-// Log received data with truncated title and review for brevity
+// Log received data with truncated title and review 
 Logger::log("Received data - userId: $userId, reviewId: $reviewId, rating: $rating, title: " . substr($title, 0, 50) . ", review: " . substr($review, 0, 100));
 
 // Instantiate validation class to validate inputs
@@ -94,6 +94,7 @@ $numericValidations = [
     $validator->validateNumeric($reviewId, 'Review ID'),
     $validator->validateRating($rating)
 ];
+// Check each numeric validation
 foreach ($numericValidations as $validation) {
     if (!$validation['success']) {
         Logger::log("Validation failed: {$validation['message']}");

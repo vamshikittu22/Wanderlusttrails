@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $rawInput = file_get_contents("php://input"); // Get the raw input from the request body
 $data = json_decode($rawInput, true); // Decode the JSON input
 
-if (!$data) {
+if (!$data) { // Validate JSON decoding success
     Logger::log("Invalid JSON input: " . ($rawInput ?: 'empty'));
     http_response_code(400);
     echo json_encode(["success" => false, "message" => "Invalid or missing JSON data"]);
@@ -73,6 +73,7 @@ $numericValidations = [
     $validator->validateNumeric($bookingId, 'Booking ID'), // Ensure bookingId is numeric and positive
     $validator->validateRating($rating) // Ensure rating is between 1 and 5
 ];
+// Check each numeric validation
 foreach ($numericValidations as $validation) {
     if (!$validation['success']) {
         Logger::log("Validation failed: {$validation['message']}");

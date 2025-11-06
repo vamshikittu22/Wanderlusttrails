@@ -7,7 +7,8 @@ require_once __DIR__ . "/../inc_logger.php";
 require_once '../../vendor/autoload.php';
 use Firebase\JWT\JWT;
 
-$key = 'Wanderlusttrails_SecretKey_Vamshi_Krishna_Pullaiahgari'; // Secret key for JWT
+$key = 'Wanderlusttrails_SecretKey_Vamshi_Krishna_Pullaiahgari';
+ // Secret key for JWT
 
 // Function to generate a JWT token for a given user ID
 function generateJWT($userId) {

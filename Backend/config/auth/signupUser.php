@@ -27,15 +27,14 @@ require_once __DIR__ . "/../inc_validationClass.php";
 require_once __DIR__ . "../../incMailerHelper.php";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // ✅ LOG: Raw input
+    // Raw input
     $rawInput = file_get_contents("php://input");
     Logger::log("Raw POST input length: " . strlen($rawInput) . " bytes");
-    Logger::log("Raw POST input (first 200 chars): " . substr($rawInput, 0, 200));
     
     // Get the data sent with the POST request
     $data = json_decode($rawInput, true);
     
-    // ✅ LOG: JSON decode status
+    // JSON decode status
     if ($data === null) {
         $jsonError = json_last_error_msg();
         Logger::log("❌ JSON DECODE FAILED: $jsonError");
@@ -66,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Check if password and confirmPassword match
     if ($data['password'] !== $data['confirmPassword']) {
-        Logger::log("❌ Password mismatch for email: " . $data['email']);
+        Logger::log("❌ Password mismatch for username: " . $data['username']);
         http_response_code(400);
         echo json_encode(["success" => false, "message" => "Password and confirm password do not match"]);
         exit;

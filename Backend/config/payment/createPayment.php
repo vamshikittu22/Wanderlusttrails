@@ -32,13 +32,18 @@ if (!$data) {
     echo json_encode(["success" => false, "message" => "Invalid JSON data"]);
     exit;
 }
-//store the required fields in variables
-$bookingId = $data['booking_id'] ?? null;
-$userId = $data['user_id'] ?? null;
-$amount = $data['amount'] ?? null;
-$paymentMethod = $data['payment_method'] ?? null;
-$transactionId = $data['transaction_id'] ?? null;
-$paymentDate = $data['payment_date'] ?? null;
+// Core payment identification fields
+$bookingId = isset($data['booking_id']) ? (int)$data['booking_id'] : null;     // Which booking is being paid for
+$userId = isset($data['user_id']) ? (int)$data['user_id'] : null;             // Who is making the payment
+
+// Financial transaction details
+$amount = isset($data['amount']) ? (float)$data['amount'] : null;              // Payment amount (must be positive)
+$paymentMethod = isset($data['payment_method']) ? trim($data['payment_method']) : null; // Payment method (validated later)
+$transactionId = isset($data['transaction_id']) ? trim($data['transaction_id']) : null; // Unique transaction ID from payment gateway
+$paymentDate = isset($data['payment_date']) ? trim($data['payment_date']) : null;       // Timestamp from payment processor
+
+Logger::log("PAYMENT-EXTRACT: Extracted fields - booking_id: $bookingId, user_id: $userId, amount: $amount, method: $paymentMethod");
+
 //  Convert payment_date from UTC to CDT timezone
 if ($paymentDate) {
     try {
@@ -54,6 +59,7 @@ if ($paymentDate) {
         Logger::log('Converted payment_date from UTC to CDT: ' . $paymentDate);
     } catch (Exception $e) {
         // Fallback: use current CDT time if conversion fails
+        Logger::log('Failed to convert payment_date, using current CDT time. Error: ' . $e->getMessage());
         $paymentDate = date('Y-m-d H:i:s');
     }
 }

@@ -10,10 +10,10 @@ require_once __DIR__ . "/../inc_logger.php";
  * Extracted from inc_userModel.php to reduce duplication
  */
 class AuthHelper {
-    private $db;
+    private $db; // DatabaseClass instance
 
     public function __construct() {
-        $this->db = new DatabaseClass();
+        $this->db = new DatabaseClass(); // Initialize database connection
     }
 
     /**

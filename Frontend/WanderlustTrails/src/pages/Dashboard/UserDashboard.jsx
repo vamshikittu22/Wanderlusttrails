@@ -6,6 +6,7 @@ import UserViewBookings from "./../../components/userDashboard/userViewBookings.
 import UserReviews from "./../../components/userDashboard/UserReviews.jsx";
 import Sidebar from "./../../components/SideBar.jsx"; // Sidebar component for navigation
 import MainContent from "./MainContent.jsx"; // Main content wrapper
+import UserStatisticsDashboard from "../../components/userDashboard/UserStatisticsDashboard.jsx";
 
 // UserDashboard component handles rendering of user-specific sections and navigation
 const UserDashboard = () => {
@@ -43,6 +44,8 @@ const UserDashboard = () => {
                 return <UserViewBookings />;
             case "reviews":
                 return <UserReviews />;
+            case "statistics":
+                return <UserStatisticsDashboard user={user} />;
             default:
                 return <UserProfile />;
         }
@@ -53,6 +56,7 @@ const UserDashboard = () => {
         { key: "profile", label: "Profile" },
         { key: "bookings", label: "Bookings" },
         { key: "reviews", label: "Reviews" },
+        { key: "statistics", label: "Statistics" },
     ];
 
     return (

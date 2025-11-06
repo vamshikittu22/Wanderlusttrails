@@ -107,7 +107,7 @@ if (!$userValidation['success']) {
     exit;
 }
 
-// Optionally, validate admin role if comments require admin permissions (currently commented out)
+// Optionally, validate admin role if comments require admin permissions
 // $adminValidation = $validator->validateAdminRole($userId);
 // if (!$adminValidation['success']) {
 //     Logger::log("Validation failed: {$adminValidation['message']}");

@@ -59,8 +59,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $db = new DatabaseClass(); // Create database connection instance
 
     // Prepare a query to fetch user by username
-    $query = "SELECT id, firstname, lastname, userName, email, phone, password, role, dob, gender, nationality, street, city, state, zip 
-              FROM users WHERE userName = ?";
+    $query = "SELECT id, firstname, lastname, userName, email, phone, password, role, dob, gender, nationality, street, city, state, zip    
+                FROM users 
+                WHERE userName = ?";
 
     // Execute the query with the username
     $result = $db->fetchQuery($query, "s", $identifier);

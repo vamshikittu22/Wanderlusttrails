@@ -148,10 +148,6 @@ if (isset($data['booking_id'])) {
     exit;
 }
 
-// Add more mailing features here (e.g., password change, login notification)
-// Example:
-// if (isset($data['password_change'])) { ... build subject/body ... sendMail(...) ... }
-
 // If no valid mailing action specified, return error
 http_response_code(400);
 echo json_encode(['success' => false, 'message' => 'No valid mailing action specified.']);

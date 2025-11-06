@@ -1,10 +1,19 @@
 <?php
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+include_once __DIR__ . '/inc_logger.php';
 
 
+// Path to Composer's autoloader
+$autoloadPath = __DIR__ . '/../../vendor/autoload.php';
 
-require_once __DIR__ . '../../vendor/autoload.php';
+// Verify autoloader exists
+if (!file_exists($autoloadPath)) {
+    error_log('[incMailerHelper.php] Composer autoloader not found at: ' . $autoloadPath);
+    throw new Exception('Composer autoloader not found. Run: composer install');
+}
+
+require_once $autoloadPath;
 
 /**
  * Send an email using PHPMailer.
@@ -45,8 +54,10 @@ function sendMail($to, $name, $subject, $body, $altBody = '') {
 
         $mail->send();
         return ["success" => true, "message" => "Email sent successfully."];
+        Logger::log("Email sent successfully to: $to");
     } catch (Exception $e) {
         error_log('[incMailerHelper.php] Mailer Error: ' . $mail->ErrorInfo);
+        Logger::log("Email failed to: $to, Error: " . $mail->ErrorInfo);
         return ["success" => false, "message" => $mail->ErrorInfo];
     }
 }

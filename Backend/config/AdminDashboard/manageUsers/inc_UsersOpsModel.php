@@ -19,7 +19,9 @@ class UserOpsModel {
     // Method to fetch all users with their id, first name, last name, email, and role
     public function getUsers() {
         Logger::log("getUsers started");
-        $query = "SELECT id, firstName, lastName, email, role FROM users"; // SQL query to select all users
+        $query = "SELECT 
+                    id, firstName, lastName, email, role 
+                  FROM users"; // SQL query to select all users
         $types = ""; // No parameters needed for this query
         $users = $this->db->fetchQuery($query, $types); // Execute the query
 
@@ -42,7 +44,9 @@ class UserOpsModel {
         }
 
         // Prepare SQL to update the role for a specific user
-        $query = "UPDATE users SET role = ? WHERE id = ?";
+        $query = "UPDATE users 
+                    SET role = ? 
+                    WHERE id = ?";
         $types = "si"; // role is string, id is integer
         $result = $this->db->executeQuery($query, $types, $role, $userId); // Execute query with params
 

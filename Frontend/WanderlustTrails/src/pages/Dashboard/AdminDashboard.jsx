@@ -8,6 +8,7 @@ import ManageUsers from "../../components/adminDashboard/manageUsers";
 import ManageBookings from "../../components/adminDashboard/manageBookings";
 import Sidebar from "./../../components/SideBar.jsx"; // Adjust path as needed
 import MainContent from "./MainContent.jsx"; // Adjust path as needed
+import AdminStatisticsDashboard from "../../components/adminDashboard/AdminStatisticsDashboard.jsx";
 
 // AdminDashboard component - main admin panel with sidebar and main content
 const AdminDashboard = () => {
@@ -48,6 +49,8 @@ const AdminDashboard = () => {
                 return <ManageUsers />;
             case "bookings":
                 return <ManageBookings />;
+            case "statistics":
+                return <AdminStatisticsDashboard />;
             default:
                 return <ManageDestinations />;
         }
@@ -58,6 +61,7 @@ const AdminDashboard = () => {
         { key: "destinations", label: "Destinations" },
         { key: "users", label: "Users" },
         { key: "bookings", label: "Bookings" },
+        { key: "statistics", label: "Statistics" },
     ];
 
     return (

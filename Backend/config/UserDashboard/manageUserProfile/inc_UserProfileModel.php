@@ -22,8 +22,6 @@ class UserProfileModel {
 
     /**
      * View user profile by user ID
-     * @param int $userId - The ID of the user whose profile to fetch
-     * @return array - Success/failure result with user data
      */
     public function viewProfile($userId) {
         Logger::log("viewProfile started for userId: $userId");
@@ -55,20 +53,6 @@ class UserProfileModel {
 
     /**
      * Update user profile information
-     * @param int $userId - The ID of the user to update
-     * @param string $firstName - User's first name
-     * @param string $lastName - User's last name
-     * @param string $username - User's username
-     * @param string $email - User's email address
-     * @param string $dob - Date of birth
-     * @param string $gender - User's gender
-     * @param string $nationality - User's nationality
-     * @param string $phone - Phone number
-     * @param string $street - Street address
-     * @param string $city - City
-     * @param string $state - State/Province
-     * @param string $zip - Zip/Postal code
-     * @return array - Success/failure result
      */
     public function updateProfile($userId, $firstName, $lastName, $username, $email, $dob, $gender, $nationality, $phone, $street, $city, $state, $zip) {
         Logger::log("updateProfile started for userId: $userId");

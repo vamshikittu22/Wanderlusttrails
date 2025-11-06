@@ -24,7 +24,8 @@ class ReviewModel {
         Logger::log("writeReview called - userId: $userId, bookingId: $bookingId, rating: $rating, title: " . substr($title, 0, 50));
 
         // SQL insert query with placeholders for prepared statement
-        $query = "INSERT INTO reviews (userId, bookingId, rating, title, review) VALUES (?, ?, ?, ?, ?)";
+        $query = "INSERT INTO reviews (userId, bookingId, rating, title, review) 
+                    VALUES (?, ?, ?, ?, ?)";
 
         // Types for parameters: integer, integer, integer, string, string
         $types = "iiiss";
@@ -50,7 +51,10 @@ class ReviewModel {
         Logger::log("editReview called - userId: $userId, reviewId: $reviewId, rating: $rating, title: " . substr($title, 0, 50));
 
         // SQL update query to update rating, title, review, and updated timestamp
-        $query = "UPDATE reviews SET rating = ?, title = ?, review = ?, createdAt = NOW() WHERE id = ? AND userId = ?";
+        $query = "UPDATE reviews 
+                    SET rating = ?, title = ?, review = ?, createdAt = NOW() 
+                    WHERE id = ? 
+                    AND userId = ?";
 
         // Types for parameters: integer, string, string, integer, integer
         $types = "issii";
@@ -77,11 +81,13 @@ class ReviewModel {
 
         // Prepare insert query depending on whether it's a top-level comment or a reply
         if ($parentId === null) {
-            $query = "INSERT INTO comments (review_id, user_id, comment) VALUES (?, ?, ?)";
+            $query = "INSERT INTO comments (review_id, user_id, comment) 
+                        VALUES (?, ?, ?)";
             $types = "iis";
             $params = [$reviewId, $userId, $comment];
         } else {
-            $query = "INSERT INTO comments (review_id, user_id, comment, parent_id) VALUES (?, ?, ?, ?)";
+            $query = "INSERT INTO comments (review_id, user_id, comment, parent_id) 
+                        VALUES (?, ?, ?, ?)";
             $types = "iisi";
             $params = [$reviewId, $userId, $comment, $parentId];
         }
@@ -101,9 +107,9 @@ class ReviewModel {
             $commentId = $result['insert_id'];
 
             $query = "SELECT c.id, c.user_id, c.comment, c.created_at, u.firstName, u.lastName 
-                      FROM comments c 
-                      JOIN users u ON c.user_id = u.id 
-                      WHERE c.id = ?";
+                        FROM comments c 
+                        JOIN users u ON c.user_id = u.id 
+                        WHERE c.id = ?";
 
             $newComment = $this->db->fetchQuery($query, "i", $commentId);
             Logger::log("New comment fetched: " . json_encode($newComment));
@@ -125,11 +131,11 @@ class ReviewModel {
         Logger::log("getComments called - reviewId: $reviewId");
 
         // Query to get all comments for the review with user info
-        $query = "SELECT c.id, c.user_id, c.comment, c.parent_id, c.created_at, 
-                         u.firstName, u.lastName 
-                  FROM comments c 
-                  JOIN users u ON c.user_id = u.id 
-                  WHERE c.review_id = ?";
+        $query = 
+            "SELECT c.id, c.user_id, c.comment, c.parent_id, c.created_at, u.firstName, u.lastName 
+                    FROM comments c 
+                    JOIN users u ON c.user_id = u.id 
+                    WHERE c.review_id = ?";
 
         // Fetch comments for the review
         $comments = $this->db->fetchQuery($query, "i", $reviewId);

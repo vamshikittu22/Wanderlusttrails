@@ -48,16 +48,80 @@ const ErrorBoundary = ({ children, navigate }) => {
   return children;
 };
 
+// ✅ Custom hook for clean booking data loading
+const useBookingData = () => {
+  const [bookingInfo, setBookingInfo] = useState({
+    totalPrice: 0,
+    bookingId: null,
+    details: null,
+    isPackage: false,
+    bookingType: null,
+    referrerPage: null
+  });
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const loadData = () => {
+      try {
+        const data = JSON.parse(sessionStorage.getItem('bookingData') || '{}');
+        
+        if (data.booking_id && data.total_price > 0) {
+
+// ✅ Determine booking type and referrer page
+          let bookingType = data.booking_type;
+          let referrerPage = '/';
+
+          console.log('Determining booking type from data:', data);
+          // ✅ Smart booking type detection
+          if (bookingType === 'package') {
+            bookingType = 'package';
+            referrerPage = '/TravelPackages';
+            console.log('Detected package booking');
+          } else if ( bookingType === 'flight_hotel') {
+            referrerPage = '/FlightAndHotel';
+            console.log('Detected flight and hotel booking');
+          } else if ( bookingType === 'itinerary') {
+            referrerPage = '/CustomizedItinerary';
+            console.log('Detected customised itinerary booking');
+          }          
+
+          setBookingInfo({
+            totalPrice: parseFloat(data.total_price),
+            bookingId: data.booking_id,
+            details: {
+              package_name: data.package_name || 'Travel Booking',
+              persons: data.persons || 1,
+              start_date: data.start_date,
+              end_date: data.end_date
+            },
+            isPackage: !!data.package_id,
+            bookingType: bookingType,      // ✅ SET THE TYPE
+            referrerPage: referrerPage     // ✅ SET THE REFERRER
+          });
+          setIsLoaded(true);
+        }
+      } catch (error) {
+        console.error('Booking data loading error:', error);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  return { bookingInfo, isLoaded };
+};
+
 function Payment() {
   // Destructure user info and authentication state from context
   const { user, isAuthenticated } = useUser();
   const navigate = useNavigate();  // Hook for navigation
   const location = useLocation();  // Hook for current location
-  // State variables for managing payment and booking data
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [bookingId, setBookingId] = useState(null);
-  const [bookingDetails, setBookingDetails] = useState(null);
-  const [isPackage, setIsPackage] = useState(false);
+ 
+  // ✅ Using custom hook for booking data
+  const { bookingInfo, isLoaded } = useBookingData();
+  const { totalPrice, bookingId, details: bookingDetails, isPackage } = bookingInfo;
+  
+
   const [paymentMethod, setPaymentMethod] = useState('credit_card');  // Default payment method
   // Form fields for different payment types
   const [formData, setFormData] = useState({
@@ -75,208 +139,127 @@ function Payment() {
   const [isLoading, setIsLoading] = useState(false);  // Loading state for async operations
   const [termsAccepted, setTermsAccepted] = useState(false);  // Terms and conditions checkbox
   const [transactionId, setTransactionId] = useState(uuidv4());  // Unique transaction ID for payment
-  const [timeLeft, setTimeLeft] = useState(180); // Countdown timer in seconds (3 minutes)
+  const [timeLeft, setTimeLeft] = useState(90); // Countdown timer in seconds (90 seconds)
   const [isMounted, setIsMounted] = useState(false);  // Track if component is mounted to avoid state updates on unmounted components
   const [retryCount, setRetryCount] = useState(0);  // Retry count for failed attempts
   const MAX_RETRIES = 3;  // Max allowed retries for payment attempts
+ 
 
-  // Determine the referring page to redirect after payment or errors
-  const referrer = location.state?.from || (bookingDetails?.package_id ? '/TravelPackages' : '/ItineraryBuilder');
+  // ✅ Updated referrer logic to use bookingInfo
+  const referrer = location.state?.from || (bookingInfo?.referrerPage) || '/';
 
-  useEffect(() => {
-    setIsMounted(true); // Mark component as mounted
+useEffect(() => {
+  setIsMounted(true);
 
-    // If user not authenticated or missing user ID, redirect to login after short delay
-    if (!isAuthenticated || !user?.id) {
-      setTimeout(() => {
-        if (isMounted) {
-          toast.error('Please log in to proceed with payment.');
-          navigate('/Login');
-        }
-      }, 100);
+  // Check authentication first
+  if (!isAuthenticated || !user?.id) {
+    setTimeout(() => {
+      if (isMounted) {
+        toast.error('Please log in to proceed with payment.');
+        navigate('/Login');
+      }
+    }, 100);
+    return;
+  }
+
+  // ✅ CRITICAL: Don't wait indefinitely - validate after reasonable time
+  const validateBooking = () => {
+    // ✅ Check if we have valid booking data
+    if (!bookingId || !totalPrice || totalPrice <= 0) {
+      toast.error('No valid booking found. Please complete booking first.');
+      navigate('/');
       return;
     }
 
-    // Load booking data from sessionStorage to initialize payment info
-    try {
-      const bookingDataRaw = sessionStorage.getItem('bookingData');
-      const selectedPackageRaw = sessionStorage.getItem('selectedPackage');
-
-      console.log('Raw session data:', { bookingDataRaw, selectedPackageRaw });
-
-      let bookingData = null;
-      let selectedPackage = null;
-
-      // Parse stored JSON strings if available
-      if (bookingDataRaw) {
-        bookingData = JSON.parse(bookingDataRaw);
-      } else {
-        console.warn('No bookingData found in sessionStorage');
-      }
-
-      if (selectedPackageRaw) {
-        selectedPackage = JSON.parse(selectedPackageRaw);
-      } else {
-        console.warn('No selectedPackage found in sessionStorage');
-      }
-
-      console.log('Parsed session data:', { bookingData, selectedPackage });
-
-      if (bookingData) {
-        const price = parseFloat(bookingData.total_price) || 0;
-        console.log('Booking total_price:', bookingData.total_price, 'Parsed price:', price);
-
-        // Validate price is a positive number
-        if (price <= 0 || isNaN(price)) {
-          setTimeout(() => {
-            if (isMounted) {
-              toast.error('Invalid booking amount. Please select a valid booking.');
-              navigate(referrer); // Redirect back to referring page
-            }
-          }, 100);
-          return;
+    // ✅ Start timer only when we have valid data
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          if (!isLoading) failPayment();
+          return 0;
         }
+        return prev - 1;
+      });
+    }, 1000);
 
-        setTotalPrice(price);
-        setBookingId(bookingData.booking_id || null);
-
-        // If booking has flight details, treat as flight booking
-        if (bookingData.flight_details) {
-          console.log('Flight booking detected');
-          setBookingDetails({
-            from: bookingData.flight_details?.from || 'N/A',
-            to: bookingData.flight_details?.to || 'N/A',
-            start_date: bookingData.start_date || bookingData.startDate,
-            end_date: bookingData.end_date || bookingData.endDate,
-            persons: bookingData.persons || 1,
-          });
-          setIsPackage(false);
-        }
-        // Else if booking has package_id, treat as package booking
-        else if (bookingData.package_id) {
-          console.log('Package booking detected');
-          const start = new Date(bookingData.start_date || bookingData.startDate);
-          const end = new Date(bookingData.end_date || bookingData.endDate);
-          // Calculate number of days between start and end
-          const durationDays = isNaN(start) || isNaN(end)
-            ? 'N/A'
-            : Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
-          setBookingDetails({
-            package_id: bookingData.package_id,
-            package_name: selectedPackage?.name || bookingData.package_name || 'N/A',
-            destination: selectedPackage?.location || 'N/A',
-            duration: durationDays === 'N/A' ? 'N/A' : `${durationDays} day${durationDays > 1 ? 's' : ''}`,
-            persons: bookingData.persons || 1,
-          });
-          setIsPackage(true);
-
-          // If booking_id is missing, create new booking in backend
-          if (!bookingData.booking_id) {
-            createBooking(bookingData, selectedPackage);
-          }
-        } else {
-          // Invalid booking data (neither flight nor package)
-          setTimeout(() => {
-            if (isMounted) {
-              toast.error('Invalid booking data.');
-              navigate(referrer);
-            }
-          }, 100);
-          return;
-        }
-      } else {
-        // No booking data found at all
-        setTimeout(() => {
-          if (isMounted) {
-            toast.error('No booking data found.');
-            navigate(referrer);
-          }
-        }, 100);
-        return;
-      }
-
-      // Start countdown timer: decrement every second, fail payment if time runs out
-      const timer = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            // Only fail payment if not currently processing
-            if (!isLoading) {
-              failPayment();
-            }
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      // Cleanup timer and mark unmounted on component cleanup
-      return () => {
-        clearInterval(timer);
-        setIsMounted(false);
-      };
-    } catch (error) {
-      // Catch any parsing or unexpected errors
-      console.error('Error in useEffect:', error);
-      setTimeout(() => {
-        if (isMounted) {
-          toast.error('An error occurred while loading payment data.');
-          navigate(referrer);
-        }
-      }, 100);
-    }
-  }, [navigate, isMounted, isLoading]);  // Run on mount and when dependencies change
-
-  // Function to create a booking record on the backend if missing
-  const createBooking = (bookingData, selectedPackage) => {
-    // Parse user ID to int for backend
-    const numericUserId = parseInt(user?.id, 10);
-    if (isNaN(numericUserId)) {
-      console.error('Invalid user_id for booking:', user?.id);
-      toast.error('Invalid user ID. Please log in again.');
-      navigate('/Login');
-      return;
-    }
-
-    // Prepare booking payload for API request
-    const bookingPayload = {
-      user_id: numericUserId,
-      package_id: bookingData.package_id,
-      persons: bookingData.persons || 1,
-      start_date: bookingData.start_date || bookingData.startDate,
-      end_date: bookingData.end_date || bookingData.endDate,
-      total_price: bookingData.total_price || 0,
-      status: 'pending',
+    return () => {
+      clearInterval(timer);
+      setIsMounted(false);
     };
+  };
 
-    console.log('Creating booking with payload:', bookingPayload);
+  // ✅ If hook loaded but no data, redirect immediately
+  if (isLoaded && (!bookingId || !totalPrice || totalPrice <= 0)) {
+    toast.error('No booking found. Please complete booking first.');
+    navigate('/');
+    return;
+  }
 
-    // AJAX POST request to backend to create booking
+  // ✅ If hook is loaded with valid data, start validation
+  if (isLoaded && bookingId && totalPrice > 0) {
+    return validateBooking();
+  }
+
+  // ✅ TIMEOUT: If hook takes too long to load, assume no data
+  const loadingTimeout = setTimeout(() => {
+    if (!isLoaded) {
+      toast.error('Failed to load booking data. Please try again.');
+      navigate('/');
+    }
+  }, 2000); // 2 second timeout
+
+  return () => {
+    clearTimeout(loadingTimeout);
+    setIsMounted(false);
+  };
+}, [navigate, isMounted, isLoading, isLoaded, bookingId, totalPrice]);
+
+
+  // Function to cancel booking after payment failure or timeout
+  const cancelBookingAfterFailure = (reason = 'Payment failed') => {
+    if (!bookingId || !user?.id) {
+      console.log('Cannot cancel booking: missing booking ID or user ID');
+      return;
+    }
+
+    // ✅ ADD THIS DEBUG BLOCK
+  console.log('=== CANCEL BOOKING DEBUG ===');
+  console.log('Booking ID to cancel:', bookingId);
+  console.log('User ID to cancel:', user.id, 'Type:', typeof user.id);
+  console.log('Parsed User ID:', parseInt(user.id, 10));
+  
+  // ✅ Check what's in sessionStorage
+  const sessionData = JSON.parse(sessionStorage.getItem('bookingData') || '{}');
+  console.log('Session booking data:', sessionData);
+  console.log('Session booking_id:', sessionData.booking_id);
+  console.log('Session user_id:', sessionData.user_id || sessionData.userid);
+  
+    console.log(`Canceling booking ${bookingId} due to: ${reason}`);
+    
+    // AJAX POST request to cancel the booking
     $.ajax({
-      url: 'http://localhost/wanderlusttrails/Backend/config/booking/createBooking.php',
+      url: 'http://localhost/wanderlusttrails/Backend/config/booking/cancelBooking.php',
       method: 'POST',
       contentType: 'application/json',
-      data: JSON.stringify(bookingPayload),
-      success: (response) => {
-        console.log('Create booking response:', response);
-        if (response.success && response.booking_id) {
-          // Update local bookingId and session storage with new booking_id
-          setBookingId(response.booking_id);
-          sessionStorage.setItem('bookingData', JSON.stringify({
-            ...bookingData,
-            booking_id: response.booking_id,
-          }));
+      data: JSON.stringify({
+        booking_id: bookingId,
+        user_id: parseInt(user.id, 10)
+      }),
+      success: (cancelResponse) => {
+        console.log('Booking auto-cancellation response:', cancelResponse);
+        if (cancelResponse.success) {
+          console.log(`Booking ${bookingId} successfully canceled after payment failure`);
+          // Don't show additional toast here, parent function will handle user feedback
         } else {
-          toast.error('Failed to create booking: ' + (response.message || 'Unknown error'));
-          navigate(referrer);
+          console.error('Failed to cancel booking:', cancelResponse.message);
+          // Only log error, don't interrupt user experience with additional error
         }
       },
       error: (xhr, status, error) => {
-        // Handle AJAX errors
-        console.error('Error creating booking:', error, xhr.responseText);
-        toast.error('Error creating booking: ' + xhr.responseText);
-        navigate(referrer);
-      },
+        console.error('Error canceling booking after payment failure:', error, xhr.responseText);
+        // Only log error, don't interrupt user experience with additional error
+      }
     });
   };
 
@@ -297,18 +280,24 @@ function Payment() {
       success: (response) => {
         console.log('Fail response:', response);
         if (isMounted) {
-          toast.error('Payment timed out after 3 minutes.');
+          // Cancel booking after payment timeout
+          cancelBookingAfterFailure('Payment timed out after 3 minutes');
+          
+          toast.error('Payment timed out after 3 minutes. Booking has been canceled.');
           navigate(referrer);
         }
       },
       error: (xhr, status, error) => {
         console.error('Failed to update status:', error, xhr.responseText);
         if (isMounted) {
+          // ✅ ADDED: Cancel booking even if payment status update fails
+          cancelBookingAfterFailure('Payment timeout error');
+          
           // If 404, treat as payment timeout; else show error
           if (xhr.status === 404) {
-            toast.error('Payment timed out after 3 minutes.');
+            toast.error('Payment timed out after 3 minutes. Booking has been canceled.');
           } else {
-            toast.error('Error timing out payment: ' + xhr.responseText);
+            toast.error('Error timing out payment. Booking has been canceled.');
           }
           navigate(referrer);
         }
@@ -476,13 +465,22 @@ const handleSubmit = (e) => {
               if (updateResponse.success) {
                 completePayment(); // Proceed to finalize the payment
               } else {
-                toast.error('Failed to update payment status: ' + updateResponse.message);
+                // ✅ ADDED: Cancel booking if payment status update fails
+                console.log('Payment status update failed:', updateResponse.message);
+                cancelBookingAfterFailure('Payment status update failed');
+                
+                toast.error('Failed to update payment status: ' + updateResponse.message + '. Booking has been canceled.');
+                navigate(referrer);
                 setIsLoading(false);
               }
             },
             error: (xhr, status, error) => {
+              // ✅ ADDED: Cancel booking if payment status update has error
               console.error('Error updating payment status:', error, xhr.responseText);
-              toast.error('Error updating payment status: ' + xhr.responseText);
+              cancelBookingAfterFailure('Payment status update error');
+              
+              toast.error('Error updating payment status. Booking has been canceled.');
+              navigate(referrer);
               setIsLoading(false);
             },
           });
@@ -519,7 +517,12 @@ const createPayment = (paymentData) => {
         if (response.message && response.message.includes('Transaction ID already exists')) {
           if (retryCount >= MAX_RETRIES) {
             console.error('Max retries reached for transaction ID regeneration');
-            toast.error('Unable to process payment: Transaction ID conflict. Please try again later.');
+            
+            // ✅ ADDED: Cancel booking after max retries exceeded
+            cancelBookingAfterFailure('Max payment retries exceeded');
+            
+            toast.error('Unable to process payment: Transaction ID conflict. Booking has been canceled.');
+            navigate(referrer);
             setIsLoading(false);
             return;
           }
@@ -528,14 +531,20 @@ const createPayment = (paymentData) => {
           setRetryCount(prev => prev + 1); // Increment retry count
           handleSubmit({ preventDefault: () => {} }); // Retry submission recursively without event
         } else {
+          // ✅ ENHANCED: Cancel booking when payment creation fails
           console.log('Payment failed:', response.message);
-          toast.error('Payment failed: ' + response.message);
+          cancelBookingAfterFailure('Payment creation failed: ' + response.message);
+          
+          toast.error('Payment failed: ' + response.message + '. Booking has been canceled.');
+          navigate(referrer);
           setIsLoading(false);
         }
       }
     },
     error: (xhr, status, error) => {
       console.error('Error creating payment:', error, xhr.responseText);
+      
+      // ✅ ADDED: Cancel booking when payment creation has AJAX error
       let errorMessage = 'Payment failed: ';
       // Customize error message based on status code
       if (xhr.status === 400) {
@@ -547,7 +556,12 @@ const createPayment = (paymentData) => {
       } else {
         errorMessage += 'Internal server error. Please try again later.';
       }
-      toast.error(errorMessage);
+      
+      // Cancel booking after any payment error
+      cancelBookingAfterFailure('Payment AJAX error: ' + error);
+      
+      toast.error(errorMessage + ' Booking has been canceled.');
+      navigate(referrer);
       setIsLoading(false);
     },
     complete: () => {
@@ -556,513 +570,516 @@ const createPayment = (paymentData) => {
   });
 };
 
-const completePayment = () => {
-  const numericUserId = parseInt(user.id, 10);
-  
-  setTimeLeft(0); // Reset any payment countdown timer
+  const completePayment = () => {
+    const numericUserId = parseInt(user.id, 10);
+    
+    setTimeLeft(0); // Reset any payment countdown timer
 
-  // Update booking status to 'confirmed' after successful payment
-  $.ajax({
-    url: 'http://localhost/wanderlusttrails/Backend/config/booking/updateBookingStatus.php',
-    method: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify({ booking_id: bookingId, user_id: numericUserId, status: 'confirmed' }),
-    success: (statusRes) => {
-      console.log('Status response:', statusRes);
-      if (statusRes.success) {
-          const rate = totalPrice.toFixed(2);
-          //  Show success toast with better configuration
-          toast.success(`Payment of $${totalPrice.toFixed(2)} USD successful!`, {
-                    position: "top-center",
-                    autoClose: 2500,
-                    hideProgressBar: false,
-                    theme: "colored"
-                  });        
-          // window.alert(`Payment of $${rate} USD successful! Booking confirmed.`);
-        
-        sessionStorage.removeItem('bookingData'); // Clear booking session data
-        sessionStorage.removeItem('selectedPackage'); // Clear package selection session data
-        // Check if user session is still valid
+    // Update booking status to 'confirmed' after successful payment
+    $.ajax({
+      url: 'http://localhost/wanderlusttrails/Backend/config/booking/updateBookingStatus.php',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ booking_id: bookingId, user_id: numericUserId, status: 'confirmed' }),
+      success: (statusRes) => {
+        console.log('Status response:', statusRes);
+        if (statusRes.success) {
+            const rate = totalPrice.toFixed(2);
+            //  Show success toast with better configuration
+            toast.success(`Payment of $${totalPrice.toFixed(2)} USD successful!`, {
+                      position: "top-center",
+                      autoClose: 2500,
+                      hideProgressBar: false,
+                      theme: "colored"
+                    });        
+            // window.alert(`Payment of $${rate} USD successful! Booking confirmed.`);
+          
+          sessionStorage.removeItem('bookingData'); // Clear booking session data
+          sessionStorage.removeItem('selectedPackage'); // Clear package selection session data
+          // Check if user session is still valid
 
-        if (!isAuthenticated) {
-          console.error('User is no longer authenticated after payment', {
-            isAuthenticated,
-            token: localStorage.getItem('token'),
-            user: localStorage.getItem('user'),
-          });
-          toast.error('Session expired. Please log in again.');
-          navigate('/Login'); // Redirect to login
-          return;
+          if (!isAuthenticated) {
+            console.error('User is no longer authenticated after payment', {
+              isAuthenticated,
+              token: localStorage.getItem('token'),
+              user: localStorage.getItem('user'),
+            });
+            toast.error('Session expired. Please log in again.');
+            navigate('/Login'); // Redirect to login
+            return;
+          }
+
+          toast.info('Redirecting to your dashboard...');
+
+          // Redirect user to appropriate dashboard based on role
+          const dashboardPath = user.role === 'admin' ? '/AdminDashboard' : '/UserDashboard';
+          console.log('Navigating to dashboard:', dashboardPath, { userRole: user.role });
+          navigate(dashboardPath);
+
+          // setTimeout(() => {
+          //   const dashboardPath = user.role === 'admin' ? '/AdminDashboard' : '/UserDashboard';
+          //   console.log('Navigating to dashboard:', dashboardPath);
+          //   navigate(dashboardPath);
+          // }, 2000);  // 2 second delay
+
+        } else {
+          console.log('Status failed:', statusRes.message);
+          toast.error('Payment recorded, but status update failed: ' + statusRes.message);
         }
+      },
+      error: (xhr, status, error) => {
+        console.error('Status error:', error, xhr.responseText);
+        toast.error('Status update failed: ' + xhr.responseText);
+      },
+      complete: () => {
+        setIsLoading(false);
+      },
+    });
+  };
 
-        toast.info('Redirecting to your dashboard...');
+  const formatTime = (seconds) => {
+    // Convert seconds to MM:SS format for display
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+  };
 
-        // Redirect user to appropriate dashboard based on role
-        const dashboardPath = user.role === 'admin' ? '/AdminDashboard' : '/UserDashboard';
-        console.log('Navigating to dashboard:', dashboardPath, { userRole: user.role });
-        navigate(dashboardPath);
-
-        // setTimeout(() => {
-        //   const dashboardPath = user.role === 'admin' ? '/AdminDashboard' : '/UserDashboard';
-        //   console.log('Navigating to dashboard:', dashboardPath);
-        //   navigate(dashboardPath);
-        // }, 2000);  // 2 second delay
-
-      } else {
-        console.log('Status failed:', statusRes.message);
-        toast.error('Payment recorded, but status update failed: ' + statusRes.message);
-      }
-    },
-    error: (xhr, status, error) => {
-      console.error('Status error:', error, xhr.responseText);
-      toast.error('Status update failed: ' + xhr.responseText);
-    },
-    complete: () => {
-      setIsLoading(false);
-    },
-  });
-};
-
-const formatTime = (seconds) => {
-  // Convert seconds to MM:SS format for display
-  const min = Math.floor(seconds / 60);
-  const sec = seconds % 60;
-  return `${min}:${sec < 10 ? '0' : ''}${sec}`;
-};
-
-return (
-  // Wrap everything in an ErrorBoundary component to catch errors and navigate accordingly
-  <ErrorBoundary navigate={navigate}>
-    {/* Main container with min height, background color, and padding */}
-    <div className="min-h-screen bg-gray-900 py-8 px-4">
-      {/* Centered container with max width */}
-      <div className="max-w-3xl mx-auto">
-        {/* Step indicator bar */}
-        <div className="flex justify-center mb-6">
-          <div className="flex items-center space-x-3">
-            {/* Step 1 circle and label */}
-            <span className="w-6 h-6 bg-gray-700 text-gray-400 rounded-full flex items-center justify-center">1</span>
-            <span className="text-gray-400">Details</span>
-            {/* Connecting bar between steps */}
-            <div className="w-8 h-1 bg-gray-700"></div>
-            {/* Step 2 circle and label (current step) */}
-            <span className="w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center">2</span>
-            <span className="text-gray-300">Payment</span>
+  return (
+    // Wrap everything in an ErrorBoundary component to catch errors and navigate accordingly
+    <ErrorBoundary navigate={navigate}>
+      {/* Main container with min height, background color, and padding */}
+      <div className="min-h-screen bg-gray-900 py-8 px-4">
+        {/* Centered container with max width */}
+        <div className="max-w-3xl mx-auto">
+          {/* Step indicator bar */}
+          <div className="flex justify-center mb-6">
+            <div className="flex items-center space-x-3">
+              {/* Step 1 circle and label */}
+              <span className="w-6 h-6 bg-gray-700 text-gray-400 rounded-full flex items-center justify-center">1</span>
+              <span className="text-gray-400">Details</span>
+              {/* Connecting bar between steps */}
+              <div className="w-8 h-1 bg-gray-700"></div>
+              {/* Step 2 circle and label (current step) */}
+              <span className="w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center">2</span>
+              <span className="text-gray-300">Payment</span>
+            </div>
           </div>
-        </div>
 
-        {/* Page title */}
-        <h2 className="text-2xl font-bold text-indigo-300 mb-6 text-center">Pay Now</h2>
+          {/* Page title */}
+          <h2 className="text-2xl font-bold text-indigo-300 mb-6 text-center">Pay Now</h2>
 
-        {/* Payment form container with white background, rounded corners, padding, and max width */}
-        <div className="bg-white rounded-lg p-6 max-w-md mx-auto">
-          {/* Display countdown timer in red text */}
-          <p className="text-red-600 text-sm mb-4">Time left: {formatTime(timeLeft)}</p>
+          {/* Payment form container with white background, rounded corners, padding, and max width */}
+          <div className="bg-white rounded-lg p-6 max-w-md mx-auto">
+            {/* Display countdown timer in red text */}
+            <p className="text-red-600 text-sm mb-4">Time left: {formatTime(timeLeft)}</p>
 
-          {/* Display booking summary if bookingDetails exist */}
-          {bookingDetails && (
-            <div className="mb-4 p-3 bg-gray-100 rounded">
-              <h3 className="text-lg font-semibold text-gray-800">Summary</h3>
-              {/* Show package details if isPackage is true */}
-              {isPackage ? (
+            {/* Display booking summary if bookingDetails exist */}
+            {bookingDetails && (
+              <div className="mb-4 p-3 bg-gray-100 rounded">
+                <h3 className="text-lg font-semibold text-gray-800">Summary</h3>
+                {/* Show package details if isPackage is true */}
+                {isPackage ? (
+                  <>
+                    <p className="text-gray-600">Package: {bookingDetails.package_name || 'N/A'}</p>
+                    <p className="text-gray-600">Destination: {bookingDetails.destination || 'N/A'}</p>
+                    <p className="text-gray-600">Duration: {bookingDetails.duration || 'N/A'}</p>
+                  </>
+                ) : (
+                  <>
+                    {/* Show travel dates and locations if not a package */}
+                    <p className="text-gray-600">From: {bookingDetails.from || 'N/A'}</p>
+                    <p className="text-gray-600">To: {bookingDetails.to || 'N/A'}</p>
+                    <p className="text-gray-600">
+                      Dates:{' '}
+                      {bookingDetails.start_date
+                        ? new Date(bookingDetails.start_date).toLocaleDateString()
+                        : 'N/A'}{' '}
+                      {bookingDetails.end_date
+                        ? `- ${new Date(bookingDetails.end_date).toLocaleDateString()}`
+                        : ''}
+                    </p>
+                  </>
+                )}
+                {/* Number of persons */}
+                <p className="text-gray-600">Persons: {bookingDetails.persons || 'N/A'}</p>
+                {/* Total price displayed in blue */}
+                <p className="text-lg text-blue-600">Total: ${totalPrice.toFixed(2)} USD</p>
+              </div>
+            )}
+
+            {/* Payment form */}
+            <form onSubmit={handleSubmit} className="space-y-3">
+              {/* Payment method selection */}
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">
+                  Select Payment Method
+                </label>
+                {/* Buttons for different payment methods arranged in grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Credit Card payment button */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('credit_card')}
+                    className={`flex items-center p-3 border rounded-lg transition-all duration-200 ${
+                      paymentMethod === 'credit_card'
+                        ? 'border-indigo-600 bg-indigo-50'
+                        : 'border-gray-300 hover:border-indigo-300'
+                    }`}
+                    aria-label="Select Credit Card payment method"
+                  >
+                    {/* Credit card icon */}
+                    <FaCreditCard className={`mr-2 ${paymentMethod === 'credit_card' ? 'text-indigo-600' : 'text-gray-600'}`} />
+                    {/* Label */}
+                    <span className={paymentMethod === 'credit_card' ? 'text-indigo-600 font-medium' : 'text-gray-600'}>
+                      Credit Card
+                    </span>
+                  </button>
+
+                  {/* Debit Card payment button */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('debit_card')}
+                    className={`flex items-center p-3 border rounded-lg transition-all duration-200 ${
+                      paymentMethod === 'debit_card'
+                        ? 'border-indigo-600 bg-indigo-50'
+                        : 'border-gray-300 hover:border-indigo-300'
+                    }`}
+                    aria-label="Select Debit Card payment method"
+                  >
+                    <FaCreditCard className={`mr-2 ${paymentMethod === 'debit_card' ? 'text-indigo-600' : 'text-gray-600'}`} />
+                    <span className={paymentMethod === 'debit_card' ? 'text-indigo-600 font-medium' : 'text-gray-600'}>
+                      Debit Card
+                    </span>
+                  </button>
+
+                  {/* PayPal payment button */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('paypal')}
+                    className={`flex items-center p-3 border rounded-lg transition-all duration-200 ${
+                      paymentMethod === 'paypal'
+                        ? 'border-indigo-600 bg-indigo-50'
+                        : 'border-gray-300 hover:border-indigo-300'
+                    }`}
+                    aria-label="Select PayPal payment method"
+                  >
+                    <FaPaypal className={`mr-2 ${paymentMethod === 'paypal' ? 'text-indigo-600' : 'text-gray-600'}`} />
+                    <span className={paymentMethod === 'paypal' ? 'text-indigo-600 font-medium' : 'text-gray-600'}>
+                      PayPal
+                    </span>
+                  </button>
+
+                  {/* Bank Transfer payment button */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('bank_transfer')}
+                    className={`flex items-center p-3 border rounded-lg transition-all duration-200 ${
+                      paymentMethod === 'bank_transfer'
+                        ? 'border-indigo-600 bg-indigo-50'
+                        : 'border-gray-300 hover:border-indigo-300'
+                    }`}
+                    aria-label="Select Bank Transfer payment method"
+                  >
+                    <FaUniversity className={`mr-2 ${paymentMethod === 'bank_transfer' ? 'text-indigo-600' : 'text-gray-600'}`} />
+                    <span className={paymentMethod === 'bank_transfer' ? 'text-indigo-600 font-medium' : 'text-gray-600'}>
+                      Bank Transfer
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Credit Card or Debit Card payment form fields */}
+              {['credit_card', 'debit_card'].includes(paymentMethod) && (
                 <>
-                  <p className="text-gray-600">Package: {bookingDetails.package_name || 'N/A'}</p>
-                  <p className="text-gray-600">Destination: {bookingDetails.destination || 'N/A'}</p>
-                  <p className="text-gray-600">Duration: {bookingDetails.duration || 'N/A'}</p>
-                </>
-              ) : (
-                <>
-                  {/* Show travel dates and locations if not a package */}
-                  <p className="text-gray-600">From: {bookingDetails.from || 'N/A'}</p>
-                  <p className="text-gray-600">To: {bookingDetails.to || 'N/A'}</p>
-                  <p className="text-gray-600">
-                    Dates:{' '}
-                    {bookingDetails.start_date
-                      ? new Date(bookingDetails.start_date).toLocaleDateString()
-                      : 'N/A'}{' '}
-                    {bookingDetails.end_date
-                      ? `- ${new Date(bookingDetails.end_date).toLocaleDateString()}`
-                      : ''}
-                  </p>
+                  {/* Name on Card input */}
+                  <div>
+                    <label className="block text-gray-700 font-medium" htmlFor="name-on-card">
+                      Name on Card
+                    </label>
+                    <input
+                      id="name-on-card"
+                      type="text"
+                      name="nameOnCard"
+                      value={formData.nameOnCard}
+                      onChange={handleChange}
+                      className="w-full p-2 border rounded text-gray-600"
+                      placeholder="John Doe"
+                      aria-label="Name on card"
+                      aria-describedby={errors.nameOnCard ? "name-on-card-error" : undefined}
+                    />
+                    {/* Show validation error if exists */}
+                    {errors.nameOnCard && (
+                      <p id="name-on-card-error" className="text-red-500 text-sm">{errors.nameOnCard}</p>
+                    )}
+                  </div>
+
+                  {/* Card Number input */}
+                  <div>
+                    <label className="block text-gray-700 font-medium" htmlFor="card-number">
+                      Card Number
+                    </label>
+                    <input
+                      id="card-number"
+                      type="text"
+                      name="cardNumber"
+                      value={formData.cardNumber}
+                      onChange={handleChange}
+                      maxLength="19"
+                      className="w-full p-2 border rounded text-gray-600"
+                      placeholder="1234 1234 1234 1234"
+                      aria-label="Card number"
+                      aria-describedby={errors.cardNumber ? "card-number-error" : undefined}
+                    />
+                    {errors.cardNumber && (
+                      <p id="card-number-error" className="text-red-500 text-sm">{errors.cardNumber}</p>
+                    )}
+                  </div>
+
+                  {/* Expiry date and CVV fields in a flex container */}
+                  <div className="flex gap-3">
+                    {/* Expiry Date input */}
+                    <div className="w-1/2">
+                      <label className="block text-gray-700 font-medium" htmlFor="expiry-date">
+                        Expiry
+                      </label>
+                      <input
+                        id="expiry-date"
+                        type="text"
+                        name="expiryDate"
+                        value={formData.expiryDate}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded text-gray-600"
+                        placeholder="MM/YY"
+                        aria-label="Expiry date"
+                        aria-describedby={errors.expiryDate ? "expiry-date-error" : undefined}
+                      />
+                      {errors.expiryDate && (
+                        <p id="expiry-date-error" className="text-red-500 text-sm">{errors.expiryDate}</p>
+                      )}
+                    </div>
+
+                    {/* CVV input */}
+                    <div className="w-1/2">
+                      <label className="block text-gray-700 font-medium" htmlFor="cvv">
+                        CVV
+                      </label>
+                      <input
+                        id="cvv"
+                        type="password"
+                        name="cvv"
+                        value={formData.cvv}
+                        onChange={handleChange}
+                        maxLength="3"
+                        className="w-full p-2 border rounded text-gray-600"
+                        placeholder="123"
+                        aria-label="CVV"
+                        aria-describedby={errors.cvv ? "cvv-error" : undefined}
+                      />
+                      {errors.cvv && (
+                        <p id="cvv-error" className="text-red-500 text-sm">{errors.cvv}</p>
+                      )}
+                    </div>
+                  </div>
                 </>
               )}
-              {/* Number of persons */}
-              <p className="text-gray-600">Persons: {bookingDetails.persons || 'N/A'}</p>
-              {/* Total price displayed in blue */}
-              <p className="text-lg text-blue-600">Total: ${totalPrice.toFixed(2)} USD</p>
-            </div>
-          )}
 
-          {/* Payment form */}
-          <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Payment method selection */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Select Payment Method
-              </label>
-              {/* Buttons for different payment methods arranged in grid */}
-              <div className="grid grid-cols-2 gap-3">
-                {/* Credit Card payment button */}
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('credit_card')}
-                  className={`flex items-center p-3 border rounded-lg transition-all duration-200 ${
-                    paymentMethod === 'credit_card'
-                      ? 'border-indigo-600 bg-indigo-50'
-                      : 'border-gray-300 hover:border-indigo-300'
-                  }`}
-                  aria-label="Select Credit Card payment method"
-                >
-                  {/* Credit card icon */}
-                  <FaCreditCard className={`mr-2 ${paymentMethod === 'credit_card' ? 'text-indigo-600' : 'text-gray-600'}`} />
-                  {/* Label */}
-                  <span className={paymentMethod === 'credit_card' ? 'text-indigo-600 font-medium' : 'text-gray-600'}>
-                    Credit Card
-                  </span>
-                </button>
-
-                {/* Debit Card payment button */}
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('debit_card')}
-                  className={`flex items-center p-3 border rounded-lg transition-all duration-200 ${
-                    paymentMethod === 'debit_card'
-                      ? 'border-indigo-600 bg-indigo-50'
-                      : 'border-gray-300 hover:border-indigo-300'
-                  }`}
-                  aria-label="Select Debit Card payment method"
-                >
-                  <FaCreditCard className={`mr-2 ${paymentMethod === 'debit_card' ? 'text-indigo-600' : 'text-gray-600'}`} />
-                  <span className={paymentMethod === 'debit_card' ? 'text-indigo-600 font-medium' : 'text-gray-600'}>
-                    Debit Card
-                  </span>
-                </button>
-
-                {/* PayPal payment button */}
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('paypal')}
-                  className={`flex items-center p-3 border rounded-lg transition-all duration-200 ${
-                    paymentMethod === 'paypal'
-                      ? 'border-indigo-600 bg-indigo-50'
-                      : 'border-gray-300 hover:border-indigo-300'
-                  }`}
-                  aria-label="Select PayPal payment method"
-                >
-                  <FaPaypal className={`mr-2 ${paymentMethod === 'paypal' ? 'text-indigo-600' : 'text-gray-600'}`} />
-                  <span className={paymentMethod === 'paypal' ? 'text-indigo-600 font-medium' : 'text-gray-600'}>
-                    PayPal
-                  </span>
-                </button>
-
-                {/* Bank Transfer payment button */}
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('bank_transfer')}
-                  className={`flex items-center p-3 border rounded-lg transition-all duration-200 ${
-                    paymentMethod === 'bank_transfer'
-                      ? 'border-indigo-600 bg-indigo-50'
-                      : 'border-gray-300 hover:border-indigo-300'
-                  }`}
-                  aria-label="Select Bank Transfer payment method"
-                >
-                  <FaUniversity className={`mr-2 ${paymentMethod === 'bank_transfer' ? 'text-indigo-600' : 'text-gray-600'}`} />
-                  <span className={paymentMethod === 'bank_transfer' ? 'text-indigo-600 font-medium' : 'text-gray-600'}>
-                    Bank Transfer
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* Credit Card or Debit Card payment form fields */}
-            {['credit_card', 'debit_card'].includes(paymentMethod) && (
-              <>
-                {/* Name on Card input */}
+              {/* PayPal email input if PayPal is selected */}
+              {paymentMethod === 'paypal' && (
                 <div>
-                  <label className="block text-gray-700 font-medium" htmlFor="name-on-card">
-                    Name on Card
+                  <label className="block text-gray-700 font-medium" htmlFor="paypal-email">
+                    PayPal Email
                   </label>
                   <input
-                    id="name-on-card"
-                    type="text"
-                    name="nameOnCard"
-                    value={formData.nameOnCard}
+                    id="paypal-email"
+                    type="email"
+                    name="paypalEmail"
+                    value={formData.paypalEmail}
                     onChange={handleChange}
                     className="w-full p-2 border rounded text-gray-600"
-                    placeholder="John Doe"
-                    aria-label="Name on card"
-                    aria-describedby={errors.nameOnCard ? "name-on-card-error" : undefined}
+                    placeholder="user@example.com"
+                    aria-label="PayPal email"
+                    aria-describedby={errors.paypalEmail ? "paypal-email-error" : undefined}
                   />
-                  {/* Show validation error if exists */}
-                  {errors.nameOnCard && (
-                    <p id="name-on-card-error" className="text-red-500 text-sm">{errors.nameOnCard}</p>
+                  {errors.paypalEmail && (
+                    <p id="paypal-email-error" className="text-red-500 text-sm">{errors.paypalEmail}</p>
                   )}
-                </div>
-
-                {/* Card Number input */}
-                <div>
-                  <label className="block text-gray-700 font-medium" htmlFor="card-number">
-                    Card Number
-                  </label>
-                  <input
-                    id="card-number"
-                    type="text"
-                    name="cardNumber"
-                    value={formData.cardNumber}
-                    onChange={handleChange}
-                    maxLength="19"
-                    className="w-full p-2 border rounded text-gray-600"
-                    placeholder="1234 1234 1234 1234"
-                    aria-label="Card number"
-                    aria-describedby={errors.cardNumber ? "card-number-error" : undefined}
-                  />
-                  {errors.cardNumber && (
-                    <p id="card-number-error" className="text-red-500 text-sm">{errors.cardNumber}</p>
-                  )}
-                </div>
-
-                {/* Expiry date and CVV fields in a flex container */}
-                <div className="flex gap-3">
-                  {/* Expiry Date input */}
-                  <div className="w-1/2">
-                    <label className="block text-gray-700 font-medium" htmlFor="expiry-date">
-                      Expiry
-                    </label>
-                    <input
-                      id="expiry-date"
-                      type="text"
-                      name="expiryDate"
-                      value={formData.expiryDate}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded text-gray-600"
-                      placeholder="MM/YY"
-                      aria-label="Expiry date"
-                      aria-describedby={errors.expiryDate ? "expiry-date-error" : undefined}
-                    />
-                    {errors.expiryDate && (
-                      <p id="expiry-date-error" className="text-red-500 text-sm">{errors.expiryDate}</p>
-                    )}
-                  </div>
-
-                  {/* CVV input */}
-                  <div className="w-1/2">
-                    <label className="block text-gray-700 font-medium" htmlFor="cvv">
-                      CVV
-                    </label>
-                    <input
-                      id="cvv"
-                      type="password"
-                      name="cvv"
-                      value={formData.cvv}
-                      onChange={handleChange}
-                      maxLength="3"
-                      className="w-full p-2 border rounded text-gray-600"
-                      placeholder="123"
-                      aria-label="CVV"
-                      aria-describedby={errors.cvv ? "cvv-error" : undefined}
-                    />
-                    {errors.cvv && (
-                      <p id="cvv-error" className="text-red-500 text-sm">{errors.cvv}</p>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* PayPal email input if PayPal is selected */}
-            {paymentMethod === 'paypal' && (
-              <div>
-                <label className="block text-gray-700 font-medium" htmlFor="paypal-email">
-                  PayPal Email
-                </label>
-                <input
-                  id="paypal-email"
-                  type="email"
-                  name="paypalEmail"
-                  value={formData.paypalEmail}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded text-gray-600"
-                  placeholder="user@example.com"
-                  aria-label="PayPal email"
-                  aria-describedby={errors.paypalEmail ? "paypal-email-error" : undefined}
-                />
-                {errors.paypalEmail && (
-                  <p id="paypal-email-error" className="text-red-500 text-sm">{errors.paypalEmail}</p>
-                )}
-                {/* Inform user about redirect to PayPal */}
-                <p className="text-gray-600 text-sm mt-1">
-                  You’ll be redirected to PayPal to complete payment.
-                </p>
-              </div>
-            )}
-
-            {/* Bank Transfer fields if bank_transfer selected */}
-            {paymentMethod === 'bank_transfer' && (
-              <div className="space-y-3">
-                {/* Account Holder Name input */}
-                <div>
-                  <label className="block text-gray-700 font-medium" htmlFor="account-holder-name">
-                    Account Holder Name
-                  </label>
-                  <input
-                    id="account-holder-name"
-                    type="text"
-                    name="accountHolderName"
-                    value={formData.accountHolderName}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded text-gray-600"
-                    placeholder="John Doe"
-                    aria-label="Account holder name"
-                    aria-describedby={errors.accountHolderName ? "account-holder-name-error" : undefined}
-                  />
-                  {errors.accountHolderName && (
-                    <p id="account-holder-name-error" className="text-red-500 text-sm">{errors.accountHolderName}</p>
-                  )}
-                </div>
-
-                {/* Bank Name input */}
-                <div>
-                  <label className="block text-gray-700 font-medium" htmlFor="bank-name">
-                    Bank Name
-                  </label>
-                  <input
-                    id="bank-name"
-                    type="text"
-                    name="bankName"
-                    value={formData.bankName}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded text-gray-600"
-                    placeholder="Bank of America"
-                    aria-label="Bank name"
-                    aria-describedby={errors.bankName ? "bank-name-error" : undefined}
-                  />
-                  {errors.bankName && (
-                    <p id="bank-name-error" className="text-red-500 text-sm">{errors.bankName}</p>
-                  )}
-                </div>
-
-                {/* Account Number input */}
-                <div>
-                  <label className="block text-gray-700 font-medium" htmlFor="account-number">
-                    Account Number
-                  </label>
-                  <input
-                    id="account-number"
-                    type="text"
-                    name="accountNumber"
-                    value={formData.accountNumber}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded text-gray-600"
-                    placeholder="1234567890"
-                    aria-label="Account number"
-                    aria-describedby={errors.accountNumber ? "account-number-error" : undefined}
-                  />
-                  {errors.accountNumber && (
-                    <p id="account-number-error" className="text-red-500 text-sm">{errors.accountNumber}</p>
-                  )}
-                </div>
-
-                {/* Routing Number input */}
-                <div>
-                  <label className="block text-gray-700 font-medium" htmlFor="routing-number">
-                    Routing Number
-                  </label>
-                  <input
-                    id="routing-number"
-                    type="text"
-                    name="routingNumber"
-                    value={formData.routingNumber}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded text-gray-600"
-                    placeholder="123456789"
-                    maxLength="9"
-                    aria-label="Routing number"
-                    aria-describedby={errors.routingNumber ? "routing-number-error" : undefined}
-                  />
-                  {errors.routingNumber && (
-                    <p id="routing-number-error" className="text-red-500 text-sm">{errors.routingNumber}</p>
-                  )}
-                </div>
-
-                {/* Bank info and payment details */}
-                <div className="text-gray-600 text-sm">
-                  <p><strong>Bank:</strong> Wanderlust Bank</p>
-                  <p><strong>Account:</strong> 1234-5678-9012-3456</p>
-                  <p><strong>SWIFT:</strong> WLBKUS33XXX</p>
-                  <p className="mt-2">
-                    Payments take 1-3 days. Use Transaction ID: {transactionId.slice(0, 8)}.
+                  {/* Inform user about redirect to PayPal */}
+                  <p className="text-gray-600 text-sm mt-1">
+                    You&apos;ll be redirected to PayPal to complete payment.
                   </p>
                 </div>
+              )}
+
+              {/* Bank Transfer fields if bank_transfer selected */}
+              {paymentMethod === 'bank_transfer' && (
+                <div className="space-y-3">
+                  {/* Account Holder Name input */}
+                  <div>
+                    <label className="block text-gray-700 font-medium" htmlFor="account-holder-name">
+                      Account Holder Name
+                    </label>
+                    <input
+                      id="account-holder-name"
+                      type="text"
+                      name="accountHolderName"
+                      value={formData.accountHolderName}
+                      onChange={handleChange}
+                      className="w-full p-2 border rounded text-gray-600"
+                      placeholder="John Doe"
+                      aria-label="Account holder name"
+                      aria-describedby={errors.accountHolderName ? "account-holder-name-error" : undefined}
+                    />
+                    {errors.accountHolderName && (
+                      <p id="account-holder-name-error" className="text-red-500 text-sm">{errors.accountHolderName}</p>
+                    )}
+                  </div>
+
+                  {/* Bank Name input */}
+                  <div>
+                    <label className="block text-gray-700 font-medium" htmlFor="bank-name">
+                      Bank Name
+                    </label>
+                    <input
+                      id="bank-name"
+                      type="text"
+                      name="bankName"
+                      value={formData.bankName}
+                      onChange={handleChange}
+                      className="w-full p-2 border rounded text-gray-600"
+                      placeholder="Bank of America"
+                      aria-label="Bank name"
+                      aria-describedby={errors.bankName ? "bank-name-error" : undefined}
+                    />
+                    {errors.bankName && (
+                      <p id="bank-name-error" className="text-red-500 text-sm">{errors.bankName}</p>
+                    )}
+                  </div>
+
+                  {/* Account Number input */}
+                  <div>
+                    <label className="block text-gray-700 font-medium" htmlFor="account-number">
+                      Account Number
+                    </label>
+                    <input
+                      id="account-number"
+                      type="text"
+                      name="accountNumber"
+                      value={formData.accountNumber}
+                      onChange={handleChange}
+                      className="w-full p-2 border rounded text-gray-600"
+                      placeholder="1234567890"
+                      aria-label="Account number"
+                      aria-describedby={errors.accountNumber ? "account-number-error" : undefined}
+                    />
+                    {errors.accountNumber && (
+                      <p id="account-number-error" className="text-red-500 text-sm">{errors.accountNumber}</p>
+                    )}
+                  </div>
+
+                  {/* Routing Number input */}
+                  <div>
+                    <label className="block text-gray-700 font-medium" htmlFor="routing-number">
+                      Routing Number
+                    </label>
+                    <input
+                      id="routing-number"
+                      type="text"
+                      name="routingNumber"
+                      value={formData.routingNumber}
+                      onChange={handleChange}
+                      className="w-full p-2 border rounded text-gray-600"
+                      placeholder="123456789"
+                      maxLength="9"
+                      aria-label="Routing number"
+                      aria-describedby={errors.routingNumber ? "routing-number-error" : undefined}
+                    />
+                    {errors.routingNumber && (
+                      <p id="routing-number-error" className="text-red-500 text-sm">{errors.routingNumber}</p>
+                    )}
+                  </div>
+
+                  {/* Bank info and payment details */}
+                  <div className="text-gray-600 text-sm">
+                    <p><strong>Bank:</strong> Wanderlust Bank</p>
+                    <p><strong>Account:</strong> 1234-5678-9012-3456</p>
+                    <p><strong>SWIFT:</strong> WLBKUS33XXX</p>
+                    <p className="mt-2">
+                      Payments take 1-3 days. Use Transaction ID: {transactionId.slice(0, 8)}.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Terms and conditions checkbox */}
+              <div>
+                <label className="flex items-center text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mr-2"
+                    aria-label="Accept terms and conditions"
+                  />
+                  I agree to the <a href="/terms" className="text-blue-600 ml-1">terms</a>
+                </label>
+                {/* Show error if terms not accepted */}
+                {errors.terms && <p className="text-red-500 text-sm">{errors.terms}</p>}
               </div>
-            )}
 
-            {/* Terms and conditions checkbox */}
-            <div>
-              <label className="flex items-center text-gray-700">
-                <input
-                  type="checkbox"
-                  checked={termsAccepted}
-                  onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mr-2"
-                  aria-label="Accept terms and conditions"
-                />
-                I agree to the <a href="/terms" className="text-blue-600 ml-1">terms</a>
-              </label>
-              {/* Show error if terms not accepted */}
-              {errors.terms && <p className="text-red-500 text-sm">{errors.terms}</p>}
-            </div>
+              {/* Confirm payment section */}
+              <div className="bg-gray-100 p-4 rounded mt-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Confirm Payment</h3>
+                <p className="text-gray-600">
+                  Pay <strong>${totalPrice.toFixed(2)} USD</strong> via{' '}
+                  <strong>{paymentMethod.replace('_', ' ')}</strong>
+                  {/* Show masked card number if credit/debit card */}
+                  {['credit_card', 'debit_card'].includes(paymentMethod) && formData.cardNumber && (
+                    <span> (Card: {maskCardNumber(formData.cardNumber)})</span>
+                  )}
+                  {/* Show PayPal email if PayPal */}
+                  {paymentMethod === 'paypal' && formData.paypalEmail && (
+                    <span> ({formData.paypalEmail})</span>
+                  )}
+                  {/* Show Bank name if bank transfer */}
+                  {paymentMethod === 'bank_transfer' && formData.bankName && (
+                    <span> (Bank: {formData.bankName})</span>
+                  )}
+                </p>
+                {/* Current date and time displayed */}
+                <p className="text-gray-600 text-sm mt-1">
+                  Payment Date: {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}
+                </p>
+                {/* Submit and Go Back buttons side-by-side */}
+                <div className="flex gap-3 mt-3">
+                  {/* Submit button disabled if loading, shows spinner */}
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className={`flex-1 bg-indigo-600 text-white py-2 rounded flex items-center justify-center ${
+                      isLoading ? 'opacity-50' : 'hover:bg-indigo-700'
+                    }`}
+                  >
+                    {isLoading ? <FaSpinner className="animate-spin mr-2" /> : 'Pay Now'}
+                  </button>
 
-            {/* Confirm payment section */}
-            <div className="bg-gray-100 p-4 rounded mt-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Confirm Payment</h3>
-              <p className="text-gray-600">
-                Pay <strong>${totalPrice.toFixed(2)} USD</strong> via{' '}
-                <strong>{paymentMethod.replace('_', ' ')}</strong>
-                {/* Show masked card number if credit/debit card */}
-                {['credit_card', 'debit_card'].includes(paymentMethod) && formData.cardNumber && (
-                  <span> (Card: {maskCardNumber(formData.cardNumber)})</span>
-                )}
-                {/* Show PayPal email if PayPal */}
-                {paymentMethod === 'paypal' && formData.paypalEmail && (
-                  <span> ({formData.paypalEmail})</span>
-                )}
-                {/* Show Bank name if bank transfer */}
-                {paymentMethod === 'bank_transfer' && formData.bankName && (
-                  <span> (Bank: {formData.bankName})</span>
-                )}
-              </p>
-              {/* Current date and time displayed */}
-              <p className="text-gray-600 text-sm mt-1">
-                Payment Date: {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}
-              </p>
-              {/* Submit and Go Back buttons side-by-side */}
-              <div className="flex gap-3 mt-3">
-                {/* Submit button disabled if loading, shows spinner */}
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className={`flex-1 bg-indigo-600 text-white py-2 rounded flex items-center justify-center ${
-                    isLoading ? 'opacity-50' : 'hover:bg-indigo-700'
-                  }`}
-                >
-                  {isLoading ? <FaSpinner className="animate-spin mr-2" /> : 'Pay Now'}
-                </button>
-
-                {/* Go Back button navigates to referrer page */}
-                <button
-                  type="button"
-                  onClick={() => navigate(referrer)}
-                  className="flex-1 bg-gray-600 text-white py-2 rounded hover:bg-gray-700"
-                >
-                  Go Back
-                </button>
+                  {/* Go Back button navigates to referrer page */}
+                  <button
+                    type="button"
+                    onClick={() => navigate(referrer)}
+                    className="flex-1 bg-gray-600 text-white py-2 rounded hover:bg-gray-700"
+                  >
+                    Go Back
+                  </button>
+                </div>
               </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
-  </ErrorBoundary>
-);
+
+      {/* Toast notification container */}
+      <ToastContainer />
+    </ErrorBoundary>
+  );
 }
 export default Payment;

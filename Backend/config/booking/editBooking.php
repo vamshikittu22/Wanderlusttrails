@@ -11,13 +11,14 @@ require_once __DIR__ . "/inc_bookingModel.php";
 
 Logger::log("editBooking API Started - Method: {$_SERVER['REQUEST_METHOD']}");
 
+// Handle CORS preflight request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     Logger::log("Handling OPTIONS request for editBooking");
     http_response_code(200);
     echo json_encode(["message" => "OPTIONS request successful"]);
     exit;
 }
-
+// Ensure the request method is POST for actual booking editing
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Logger::log("Invalid Method: {$_SERVER['REQUEST_METHOD']}");
     http_response_code(405);
@@ -37,6 +38,7 @@ if (!$result['success']) {
     echo json_encode($result);
     exit;
 }
+
 
 if (empty($data['changes'])) {
     Logger::log("Changes cannot be empty");
@@ -62,18 +64,6 @@ if (!$result['success']) {
     echo json_encode($result);
     exit;   
 }
-
-// Validate insurance fields if present in changes
-// if (isset($data['changes']['insurance'])) {
-//     $insurance = (int)$data['changes']['insurance'];
-//     if ($insurance !== 0 && $insurance !== 1) {
-//         Logger::log("Invalid insurance value in changes: $insurance");
-//         http_response_code(400);
-//         echo json_encode(["success" => false, "message" => "Invalid insurance value in changes"]);
-//         exit;
-//     }
-// }
-
 
 // Validate insurance_type if present in changes
 if (isset($data['changes']['insurance_type'])) {

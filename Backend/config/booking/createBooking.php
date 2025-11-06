@@ -34,7 +34,7 @@ if (!$data) {
     exit;
 }
 
-Logger::log("POST Data: " . json_encode($data));
+Logger::log("POST Data: " . json_encode($data)); //log
 
 $validator = new ValidationClass(); // Create an instance of the ValidationClass for input validation
 
@@ -106,6 +106,7 @@ try {
     http_response_code($result['success'] ? 201 : 500);
     echo json_encode($result); 
 } catch (Exception $e) {
+    // Log the exception and return a server error response
     Logger::log("Exception: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(["success" => false, "message" => "Server error: " . $e->getMessage()]);

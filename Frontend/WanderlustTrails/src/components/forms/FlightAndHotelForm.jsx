@@ -184,7 +184,7 @@ useEffect(() => {
     const basePrice = 100;
     const dist = distance();
     const distanceCost = dist * 0.10;
-    const classMultipliers = { economy: 1, premium_economy: 1.5, business: 2.5, first: 4 };
+    const classMultipliers = { economy: 1, premium_economy: 1.25, business: 1.65, first: 2.2 };
     const nights = roundTrip && startDate && endDate
       ? Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) : 1;
     

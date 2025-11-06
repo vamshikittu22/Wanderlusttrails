@@ -1,6 +1,7 @@
 <?php
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+include_once __DIR__ . '/../../utils/Logger.php';
 
 // Set CORS headers to allow requests from http://localhost:5173
 header("Access-Control-Allow-Origin: http://localhost:5173");
@@ -39,13 +40,13 @@ if ($conn->connect_error) {
 }
 
 // Log successful DB connection for debugging
-error_log('[sendBookingReminder.php] Database connection established');
+Logger::log("Database connection established successfully");
 
 // Read JSON POST data from request body
 $data = json_decode(file_get_contents('php://input'), true);
 
 // Log received data for debugging
-error_log('[sendBookingReminder.php] Received data: ' . print_r($data, true));
+Logger::log('[sendBookingReminder.php] Received data: ' . print_r($data, true));
 
 // Extract booking_id from the decoded JSON, cast to int; fallback to null if missing
 $bookingId = isset($data['booking_id']) ? (int)$data['booking_id'] : null;
@@ -53,6 +54,7 @@ $bookingId = isset($data['booking_id']) ? (int)$data['booking_id'] : null;
 // Validate that booking_id is provided, otherwise respond with 400 error
 if (!$bookingId) {
     http_response_code(400);
+    Logger::log('[sendBookingReminder.php] Booking ID is required');
     echo json_encode(['success' => false, 'message' => 'Booking ID is required']);
     exit;
 }
@@ -62,6 +64,7 @@ $userId = isset($data['user_id']) ? (int)$data['user_id'] : null;
 $userFullName = $data['userFullName'] ?? 'Guest';
 $startDate = $data['start_date'] ?? '';
 $endDate = $data['end_date'] ?? '';
+Logger::log("Preparing to send reminder for booking_id: $bookingId, user_id: $userId");
 
 // Prepare SQL to get booking details and associated user's email and name
 $sql = "SELECT b.*, u.email, u.firstName, u.lastName 
@@ -83,6 +86,7 @@ $stmt->execute();
 
 // Get the result set from the executed query
 $result = $stmt->get_result();
+Logger::log('Fetched booking details for booking_id: ' . $bookingId);
 
 // Check if booking exists; if not, respond with 404
 if ($result->num_rows === 0) {
@@ -93,6 +97,7 @@ if ($result->num_rows === 0) {
 
 // Fetch booking record data
 $booking = $result->fetch_assoc();
+Logger::log('Booking data: ' . print_r($booking, true));
 
 // Extract email, booking details, and user name from result
 $email = $booking['email'];
@@ -107,13 +112,17 @@ $stmt->close();
 
 // Create a new PHPMailer instance
 $mail = new PHPMailer(true);
-
+Logger::log('Preparing to send email to ' . $email);
 try {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
-    $mail->Username = 'wanderlusttrailsproject@gmail.com';
-    $mail->Password = 'rlpw frou gnni ftmv';
+    
+    //get mail & password from mail_config.php
+    $mailConfig = require __DIR__ . '/mail_config.php';
+    $mail->Username = $mailConfig['MAIL_USERNAME'];
+    $mail->Password = $mailConfig['MAIL_PASSWORD'];
+
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
 
@@ -139,13 +148,13 @@ try {
     $mail->AltBody = "Booking Reminder for #$bookingId\n\nDear {$name},\n\nThis is a reminder for your upcoming booking:\nBooking Type: {$bookingType}\nStart Date: {$startDate}\nEnd Date: {$endDate}\nTotal Price: $" . number_format($totalPrice, 2) . "\n\nPlease ensure you are prepared for your trip. Contact us if you need to make changes.\n\nBest regards,\nWanderlustTrails Team";
 
     $mail->send();
-    error_log('[sendBookingReminder.php] Email sent successfully');
+    Logger::log('[sendBookingReminder.php] Email sent successfully');
 
     $update_sql = "UPDATE bookings SET reminder_sent = 1 WHERE id = ?";
     $update_stmt = $conn->prepare($update_sql);
 
     if (!$update_stmt) {
-        error_log('[sendBookingReminder.php] Failed to prepare update SQL statement: ' . $conn->error);
+        Logger::log('[sendBookingReminder.php] Failed to prepare update SQL statement: ' . $conn->error);
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Failed to update reminder status: ' . $conn->error]);
         exit;
@@ -154,12 +163,12 @@ try {
     $update_stmt->bind_param("i", $bookingId);
     $update_stmt->execute();
     $update_stmt->close();
-    error_log('[sendBookingReminder.php] Reminder sent and updated for booking_id: ' . $bookingId);
+    Logger::log('[sendBookingReminder.php] Reminder sent and updated for booking_id: ' . $bookingId);
 
     http_response_code(200);
     echo json_encode(['success' => true, 'message' => 'Reminder sent successfully']);
 } catch (Exception $e) {
-    error_log('[sendBookingReminder.php] Email could not be sent. Mailer Error: ' . $mail->ErrorInfo);
+    Logger::log('[sendBookingReminder.php] Email could not be sent. Mailer Error: ' . $mail->ErrorInfo);
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => "Email could not be sent. Mailer Error: {$mail->ErrorInfo}"]);
 }

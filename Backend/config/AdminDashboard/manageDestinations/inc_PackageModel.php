@@ -27,7 +27,7 @@ class PackageModel {
         // Prepare and execute insert SQL query
         $query = "INSERT INTO packages (name, description, location, price, image_url) VALUES (?, ?, ?, ?, ?)";
         $types = "sssds"; // s=string, d=double (float), s=string
-        $result = $this->db->executeQuery($query, $types, $packageName, $description, $location, $price, $imageUrl);
+        $result = $this->db->executeQuery($query, $types, $packageName, $description, $location, $price, $imageUrl); 
 
         if ($result['success']) {
             Logger::log("insertPackage succeeded");
@@ -66,7 +66,7 @@ class PackageModel {
 
         // Prepare and execute update SQL query
         $query = "UPDATE packages SET name = ?, description = ?, location = ?, price = ?, image_url = ? WHERE id = ?";
-        $types = "sssdsd"; // s=string, s=string, s=string, d=double, s=string, d=int
+        $types = "sssdsi"; // s=string, s=string, s=string, d=double, s=string, i=int
         $result = $this->db->executeQuery($query, $types, $packageName, $description, $location, $price, $imageUrl, $id);
 
         if ($result['success']) {
