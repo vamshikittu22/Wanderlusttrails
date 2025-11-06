@@ -12,6 +12,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+    $autoloadPath = __DIR__ . '/../../vendor/autoload.php';
+    
+    if (!file_exists($autoloadPath) || !is_readable($autoloadPath)) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Composer autoloader not found'
+        ]);
+        exit;
+    }
+    
+    require_once $autoloadPath;
+
+
 // Load database config and mail helper
 $includePath = __DIR__ . "/../../db/inc_dbconfig.php";
 if (!file_exists($includePath) || !is_readable($includePath)) {
@@ -73,7 +87,7 @@ if (isset($data['todo_id'])) {
     $mailResult = sendMail($email, $firstName, $subject, $body, $altBody);
     // If email sent, update reminder_sent flag in DB
     if ($mailResult["success"]) {
-        $updateSql = "UPDATE todos SET remindersent = 1 WHERE id = ?";
+        $updateSql = "UPDATE todos SET reminder_sent = 1 WHERE id = ?";
         $updateStmt = $conn->prepare($updateSql);
         if ($updateStmt) {
             $updateStmt->bind_param("i", $todoId);

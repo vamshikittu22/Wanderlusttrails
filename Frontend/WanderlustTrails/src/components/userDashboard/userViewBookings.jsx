@@ -232,12 +232,14 @@ const UserViewBookings = () => {
         }
 
         const payload = {
-            booking_id: Number(bookingId),
+            bookingid: Number(bookingId),
             user_id: Number(user.id),
             userFullName: user.fullName || 'Guest',
             start_date: currentBooking.start_date,
             end_date: currentBooking.end_date
         };
+
+            console.log("Debug Send Reminder Initiated", bookingId, payload);
 
         $.ajax({
             url: 'http://localhost/WanderlustTrails/Backend/config/booking/sendBookingReminder.php',
@@ -245,24 +247,61 @@ const UserViewBookings = () => {
             contentType: 'application/json',
             data: JSON.stringify(payload),
             dataType: 'json',
+            timeout: 10000, // 10 seconds timeout
             success: function (response) {
-                if (response.success) {
-                    toast.success('Reminder sent successfully!');
-                } else {
-                    toast.error(response.message || 'Failed to send reminder');
-                }
-            },
-            error: function (xhr) {
-                let errorMessage = `Error sending reminder: ${xhr.status} ${xhr.statusText}`;
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    errorMessage += ` - ${response.message || 'Server error'}`;
-                } catch (e) {
-                    errorMessage += ' - Unable to parse server response';
-                }
-                toast.error(errorMessage);
+                            console.log("✅ Server response received:", response);
+
+                if (response && response.success) {
+                toast.success("✅ Reminder sent successfully!");
+            } else if (response && response.message) {
+                console.error("❌ Server returned error:", response.message);
+                toast.error(response.message);
+            } else {
+                toast.error("Unknown server response");
             }
-        });
+            },
+            error: function(xhr, status, error) {
+            console.error("❌ AJAX Error:", { 
+                status: xhr.status, 
+                statusText: xhr.statusText,
+                error: error,
+                responseText: xhr.responseText 
+            });
+
+            let errorMessage = "";
+
+            // Handle different HTTP status codes
+            switch(xhr.status) {
+                case 400:
+                    errorMessage = "Bad Request: ";
+                    break;
+                case 404:
+                    errorMessage = "Not Found: ";
+                    break;
+                case 500:
+                    errorMessage = "Server Error: ";
+                    break;
+                default:
+                    errorMessage = `HTTP ${xhr.status}: `;
+            }
+
+            // Try to parse JSON error response
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.message) {
+                    errorMessage += response.message;
+                } else {
+                    errorMessage += "Unknown error";
+                }
+            } catch (parseError) {
+                // If JSON parsing fails, use status text
+                errorMessage += xhr.statusText || "Unable to parse server response";
+            }
+
+            console.error("❌ Final error message:", errorMessage);
+            toast.error(errorMessage);
+        }
+    });
     };
 
     // Close view popup

@@ -1,7 +1,7 @@
 <?php
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-include_once __DIR__ . '/../../utils/Logger.php';
+include_once __DIR__ . '/../inc_logger.php';
 
 // Set CORS headers to allow requests from http://localhost:5173
 header("Access-Control-Allow-Origin: http://localhost:5173");
@@ -48,16 +48,20 @@ $data = json_decode(file_get_contents('php://input'), true);
 // Log received data for debugging
 Logger::log('[sendBookingReminder.php] Received data: ' . print_r($data, true));
 
-// Extract booking_id from the decoded JSON, cast to int; fallback to null if missing
-$bookingId = isset($data['booking_id']) ? (int)$data['booking_id'] : null;
+// Extract and validate bookingid
+    $bookingId = isset($data['bookingid']) ? intval($data['bookingid']) : null;
 
-// Validate that booking_id is provided, otherwise respond with 400 error
-if (!$bookingId) {
-    http_response_code(400);
-    Logger::log('[sendBookingReminder.php] Booking ID is required');
-    echo json_encode(['success' => false, 'message' => 'Booking ID is required']);
-    exit;
-}
+    // ✅ Better validation with debug logging
+    if (!$bookingId || $bookingId <= 0) {
+        http_response_code(400);
+        Logger::log("sendBookingReminder.php - Booking ID validation failed. Received: " . var_export($bookingId, true));
+        echo json_encode([
+            "success" => false, 
+            "message" => "Booking ID is required and must be a positive integer",
+            "debug" => "bookingId=" . var_export($bookingId, true)
+        ]);
+        exit;
+    }
 
 // Extract optional fields
 $userId = isset($data['user_id']) ? (int)$data['user_id'] : null;
@@ -119,7 +123,7 @@ try {
     $mail->SMTPAuth = true;
     
     //get mail & password from mail_config.php
-    $mailConfig = require __DIR__ . '/mail_config.php';
+    $mailConfig = require __DIR__ . '/../mail_config.php';
     $mail->Username = $mailConfig['MAIL_USERNAME'];
     $mail->Password = $mailConfig['MAIL_PASSWORD'];
 

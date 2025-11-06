@@ -5,7 +5,7 @@ include_once __DIR__ . '/inc_logger.php';
 
 
 // Path to Composer's autoloader
-$autoloadPath = __DIR__ . '/../../vendor/autoload.php';
+$autoloadPath = __DIR__ . '/../vendor/autoload.php';
 
 // Verify autoloader exists
 if (!file_exists($autoloadPath)) {
@@ -53,11 +53,21 @@ function sendMail($to, $name, $subject, $body, $altBody = '') {
         $mail->AltBody = $altBody ?: strip_tags($body);
 
         $mail->send();
-        return ["success" => true, "message" => "Email sent successfully."];
+
+
+        return [
+            "success" => true, 
+            "message" => "Email sent successfully."
+        ];
         Logger::log("Email sent successfully to: $to");
+
     } catch (Exception $e) {
-        error_log('[incMailerHelper.php] Mailer Error: ' . $mail->ErrorInfo);
-        Logger::log("Email failed to: $to, Error: " . $mail->ErrorInfo);
-        return ["success" => false, "message" => $mail->ErrorInfo];
+        $errorMessage = $mail->ErrorInfo ?? $e->getMessage();
+        error_log('[incMailerHelper.php] ❌ Email failed: ' . $errorMessage);
+        Logger::log('[incMailerHelper.php] ❌ Email failed to: ' . $to . ', Error: ' . $errorMessage);
+        return [
+            "success" => false, 
+            "message" => "Email could not be sent. Mailer Error: {$errorMessage}"
+        ];
     }
 }

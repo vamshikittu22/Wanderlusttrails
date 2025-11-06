@@ -40,7 +40,15 @@ export function TodoProvider({ children }) {
     const normalizeTodos = (todosData) => {
         return todosData.map(todo => ({
             ...todo,
-            completed: !!todo.iscompleted // Convert 0/1 to boolean
+            // ✅ Handle both naming conventions for completed status
+        completed: !!(todo.is_completed || todo.iscompleted),
+        is_completed: todo.is_completed ?? todo.iscompleted ?? 0,
+        
+        // ✅ Handle both naming conventions for reminder_sent
+        reminder_sent: todo.reminder_sent ?? todo.remindersent ?? 0,
+        
+        // ✅ Ensure user_id is consistently named
+        user_id: todo.user_id ?? todo.userid
         }));
     };
 
@@ -131,6 +139,7 @@ const addTodo = async (todo) => {
         if (response.success) {
             // Extract the todo ID from various possible response formats
             const todoId = response.todo?.id || response.todo_id;
+            console.log('Success! Created todo with ID:', todoId);
             
             // Validate that we got an ID
             if (!todoId) {
@@ -276,6 +285,14 @@ const addTodo = async (todo) => {
             const response = await todoAPI.sendEmailReminder(todoId);
             if (response.success) {
                 console.log('[TodoContext] Email reminder sent for todo_id:', todoId);
+                // ✅ Update local state to mark reminder as sent
+            setTodos((prev) =>
+                prev.map((todo) =>
+                    todo.id === todoId 
+                        ? { ...todo, reminder_sent: 1 } 
+                        : todo
+                )
+            );
                 toast.success('Email reminder sent!');
                 return response;
             } else {
@@ -307,10 +324,17 @@ const addTodo = async (todo) => {
         tomorrow.setDate(today.getDate() + 1);
         const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
+        console.log('[TodoContext] Checking due dates - Today:', todayStr, 'Tomorrow:', tomorrowStr);
+
+
         // Filter todos that are due today or tomorrow and haven't been reminded yet
-        const todosToRemind = todos.filter(todo =>
-            (todo.due_date === todayStr || todo.due_date === tomorrowStr) && todo.reminder_sent === 0
-        );
+         const todosToRemind = todos.filter(todo => {
+        const isDueToday = todo.due_date === todayStr;
+        const isDueTomorrow = todo.due_date === tomorrowStr;
+        const notReminded = (todo.reminder_sent === 0 || todo.reminder_sent === '0' || !todo.reminder_sent);
+        
+        return (isDueToday || isDueTomorrow) && notReminded;
+    });
 
         // If no todos need reminders, exit early
         if (todosToRemind.length === 0) {
@@ -325,6 +349,7 @@ const addTodo = async (todo) => {
             await Promise.all(todosToRemind.map(todo => sendEmailReminder(todo.id)));
             console.log('[TodoContext] All reminders sent successfully');
             toast.success('All reminders sent!');
+            fetchTodos(); // Refresh todos to update reminder_sent flags
         } catch (error) {
             console.error('[TodoContext] Error sending some reminders:', error);
             toast.error('Some reminders failed to send.');
